@@ -149,7 +149,7 @@ function get_nseindia_URL(nRec)
 
 
 async function axiosNiftyData(iREC) {
-  // first get the url string to fetch data
+  // first get the url string to get data
   let myUrl = get_nseindia_URL(iREC);
   console.log(myUrl);
   try {
@@ -157,11 +157,26 @@ async function axiosNiftyData(iREC) {
     let niftyres = await axios.get(myUrl);
     console.log("git nse data from site using AXIOS")
     return {sts: true, data: niftyres.data};
-  } catch (err) {
-    console.log("Unbale to fetch NSATE data using AXIOS");
+  } catch (error) {
+    console.log("Unbale to get NSATE data using AXIOS");
+    if (error.response) {
+      console.log(error.response.data.message);
+  }
     // console.log(err)
     return {sts: false, data: []};
   }
+}
+
+
+async function fetch_axiosNiftyData(iREC) {
+  // first get the url string to get data
+  let myUrl = get_nseindia_URL(iREC);
+  console.log(myUrl);
+  let settings = { method: "Get" };
+
+res = await fetch(myUrl);
+console.log(res);
+return {sts: true, data: json};
 }
 
 async function fetchNiftyData(iREC) {
@@ -262,8 +277,8 @@ async function processConnection(i) {
         let latestData = await read_nse_data(nameRec);
         if (latestData)
             myData = {stockName: connectionArray[i].stockName, stockData: latestData.niftyData, dispString: latestData.dispString, underlyingValue: latestData.underlyingValue }
-        console.log("Fetched dtata")
-        console.log(myData);
+        console.log("got dtata")
+        // console.log(myData);
       } 
     }
 
@@ -370,7 +385,7 @@ cron.schedule('*/1 * * * * *', () => {
   if (++readNseTimer >= READNSEINTERVAL) {
     readNseTimer = 0;
     console.log("======== nse stock update start");
-    // if NSE is working then fetch data
+    // if NSE is working then get data
     if (nseWorkingTime()) {
       readalldata();
     }

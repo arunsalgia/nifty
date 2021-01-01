@@ -116,6 +116,7 @@ export default function SignIn() {
     } catch (err) {
       // setOpen(true)
       setErrorMessage("Invalid Username / Password");
+      console.log(err);
     }
   };
 

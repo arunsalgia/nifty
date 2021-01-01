@@ -153,6 +153,7 @@ async function axiosNiftyData(iREC) {
   let myUrl = get_nseindia_URL(iREC);
   console.log(myUrl);
   try {
+    console.log(`AXIOS call ${myUrl}`)
     let niftyres = await axios.get(myUrl);
     console.log("git nse data from site using AXIOS")
     return {sts: true, data: niftyres.data};

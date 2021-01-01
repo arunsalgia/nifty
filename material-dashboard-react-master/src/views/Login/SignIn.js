@@ -97,7 +97,7 @@ export default function SignIn() {
       response = await axios.get(`/user/login/${userName}/${password}`); 
       setErrorMessage("");
       if (response.status === 200) {
-        // console.log(response.data);
+        console.log(response.data);
         // SAMPLE OUTPUT
         // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
         // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}

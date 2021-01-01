@@ -72,8 +72,8 @@ export function validateEmail(sss) {
 export function specialSetPos() {
   //console.log(`in SSP: ${localStorage.getItem("joinGroupCode")}`)
   let retval = 0;
-  if (localStorage.getItem("joinGroupCode").length > 0)
-    retval = 105;
-  //console.log(`in SSP: ${retval}`)
+  // if (localStorage.getItem("joinGroupCode").length > 0)
+  //   retval = 105;
+  // //console.log(`in SSP: ${retval}`)
   return retval;
 }

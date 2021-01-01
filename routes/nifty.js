@@ -159,7 +159,7 @@ async function axiosNiftyData(iREC) {
     return {sts: true, data: niftyres.data};
   } catch (err) {
     console.log("Unbale to fetch NSATE data using AXIOS");
-    console.log(err)
+    // console.log(err)
     return {sts: false, data: []};
   }
 }

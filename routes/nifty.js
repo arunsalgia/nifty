@@ -154,8 +154,10 @@ async function axiosNiftyData(iREC) {
   console.log(myUrl);
   try {
     let niftyres = await axios.get(myUrl);
+    console.log("git nse data from site using AXIOS")
     return {sts: true, data: niftyres.data};
   } catch (err) {
+    console.log("Unbale to fetch NSATE data using AXIOS");
     console.log(err)
     return {sts: false, data: []};
   }
@@ -255,9 +257,11 @@ async function processConnection(i) {
     if (!myData) {
       let nameRec = await NiftyNames.findOne({niftyName: connectionArray[i].stockName, enable: true});
       if (nameRec) {
+        console.log("Got nifty rec. Calling NSE DATA");
         let latestData = await read_nse_data(nameRec);
         if (latestData)
             myData = {stockName: connectionArray[i].stockName, stockData: latestData.niftyData, dispString: latestData.dispString, underlyingValue: latestData.underlyingValue }
+        console.log("Fetched dtata")
         console.log(myData);
       } 
     }

@@ -158,9 +158,11 @@ async function axiosNiftyData(iREC) {
     console.log("git nse data from site using AXIOS")
     return {sts: true, data: niftyres.data};
   } catch (error) {
-    console.log("Unbale to get NSATE data using AXIOS");
-    if (error.response) {
-      console.log(error.response.data.message);
+    console.log(error);
+    // console.log("Unbale to get NSATE data using AXIOS");
+    // if (error.response) {
+    // else
+    //   console.log("NO response")
   }
     // console.log(err)
     return {sts: false, data: []};

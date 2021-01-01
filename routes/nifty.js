@@ -164,9 +164,8 @@ async function axiosNiftyData(iREC) {
     // else
     //   console.log("NO response")
   }
-    // console.log(err)
-    return {sts: false, data: []};
-  }
+  // console.log(err)
+  return {sts: false, data: []};
 }
 
 

@@ -104,9 +104,6 @@ export default function SignIn() {
         window.localStorage.setItem("uid", response.data.uid)
         window.localStorage.setItem("displayName", response.data.displayName);
         window.localStorage.setItem("userName", response.data.userName);
-        // window.localStorage.setItem("groupName", response.data.groupName);
-        // window.localStorage.setItem("tournament", response.data.tournament);
-        // window.localStorage.setItem("admin", response.data.admin)
         // setUser({ uid: myUID, admin: response.data.admin });
         // cdRefresh(true);
         let newPos = specialSetPos();
@@ -114,7 +111,6 @@ export default function SignIn() {
         setTab(newPos);
       }
     } catch (err) {
-      // setOpen(true)
       setErrorMessage("Invalid Username / Password");
       console.log(err);
     }

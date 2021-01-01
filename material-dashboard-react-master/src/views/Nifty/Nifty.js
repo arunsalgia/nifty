@@ -306,19 +306,23 @@ useEffect(() => {
 
     sockConn.on("connect", function() {
       sockConn.emit("page", sendMessage);
+
       sockConn.on("NSEDATA", (mynsedata) => {
+        console.log("In NSEDATA");
         setNiftyDataArray(mynsedata);
         setmasterData(mynsedata);
         // setDisplayString(response.data.dispString);
       });
 
       sockConn.on("NSEDISPLAYSTRING", (dispStr) => {
+        console.log("In DISPLAY STRING");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
         setDisplayString(dispStr);
       });
 
       sockConn.on("NSEUNDERLYINGVALUE", (ulvalue) => {
+        console.log("In uderlying value");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
         setUnderlyingValue(ulvalue);

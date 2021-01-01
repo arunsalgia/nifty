@@ -8,9 +8,12 @@ fetch = require('node-fetch');
 _ = require("lodash");
 cron = require('node-cron');
 nodemailer = require('nodemailer');
+axios = require('axios');
+const { promisify } = require('util')
+sleep = promisify(setTimeout)
 app = express();
 
-PORT = process.env.PORT || 4000;
+PORT = process.env.PORT || 1961;
 http = require('http');
 httpServer = http.createServer(app);
 io = require('socket.io')(httpServer, {
@@ -30,28 +33,23 @@ io = require('socket.io')(httpServer, {
 router = express.Router();
 indexRouter = require('./routes/index');
 usersRouter = require('./routes/user');
-auctionRouter = require('./routes/auction');
-playersRouter = require('./routes/player');
-groupRouter = require('./routes/group');
-teamRouter = require('./routes/team');
-statRouter = require('./routes/playerstat');
-matchRouter = require('./routes/match');
-tournamentRouter = require('./routes/tournament');
-walletRouter = require('./routes/wallet');
-prizeRouter = require('./routes/prize');
+niftyRouter = require('./routes/nifty');
+
+nseRetry=5    // retry count 
+nseSleep=1000 // sleep for 1 second and try to fetch data from NSE if error while getching
 
 // maintaing list of all active client connection
 connectionArray  = [];
 masterConnectionArray  = [];
 clientData = [];
-CLIENTUPDATEINTERVAL=10;
+nseData = [];
+
+READNSEINTERVAL=900;    // 900 seconds in 15 minues
+readNseTimer = 0;
+
+CLIENTUPDATEINTERVAL=60; //
 clientUpdateCount=0;
-CRICUPDATEINTERVAL = 15;    // in seconds. Interval after seconds fetch cricket match data from cricapi
-cricTimer = 0;
-// maintain list of runnning matches
-runningMatchArray = [];
-clentData = [];
-auctioData = [];
+
 
 io.on('connect', socket => {
   app.set("socket",socket);
@@ -59,10 +57,12 @@ io.on('connect', socket => {
     console.log("page message from "+socket.id);
     console.log(pageMessage);
     var myClient = _.find(masterConnectionArray, x => x.socketId === socket.id);
-    if (pageMessage.page.toUpperCase().includes("DASH")) {
-      myClient.page = "DASH";
-      myClient.gid = parseInt(pageMessage.gid);
+    if (pageMessage.page.toUpperCase().includes("NSEDATA")) {
+      myClient.page = "NSEDATA";
       myClient.uid = parseInt(pageMessage.uid);
+      myClient.stockName = pageMessage.stockName;
+      myClient.expiryDate = pageMessage.expiryDate;
+      myClient.margin = parseInt(pageMessage.margin)
       myClient.firstTime = true;
       clientUpdateCount = CLIENTUPDATEINTERVAL+1;
     } else if (pageMessage.page.toUpperCase().includes("STAT")) {
@@ -83,7 +83,7 @@ io.on('connect', socket => {
 
 io.sockets.on('connection', function(socket){
   // console.log("Connected Socket = " + socket.id)
-  masterConnectionArray.push({socketId: socket.id, page: "", gid: 0, uid: 0});
+  masterConnectionArray.push({socketId: socket.id, page: "", uid: 0});
   socket.on('disconnect', function(){
     _.remove(masterConnectionArray, {socketId: socket.id});
     
@@ -112,20 +112,14 @@ app.use((req, res, next) => {
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
-app.use('/player', playersRouter);
-app.use('/auction', auctionRouter);
-app.use('/group', groupRouter);
-app.use('/team', teamRouter);
-app.use('/stat', statRouter);
-app.use('/match', matchRouter);
-app.use('/tournament', tournamentRouter);
-app.use('/wallet', walletRouter);
-app.use('/prize', prizeRouter);
+app.use('/nifty', niftyRouter);
 
 // ---- start of globals
 // connection string for database
-mongoose_conn_string = "mongodb+srv://akshama:akshama@cluster0-urc6p.mongodb.net/IPL2020";
+//mongoose_conn_string = "mongodb+srv://akshama:akshama@cluster0-urc6p.mongodb.net/IPL2020";
+mongoose_conn_string = "mongodb+srv://ArpanaSalgia:Arpana%4001@niftydata.alj4u.mongodb.net/NIFTY?authSource=admin&replicaSet=atlas-kvq10m-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true"
 
+//Schema
 //Schema
 MasterSettingsSchema = mongoose.Schema ({
   msid: Number,
@@ -138,233 +132,106 @@ UserSchema = mongoose.Schema({
   displayName: String,
   password: String,
   status: Boolean,
-  defaultGroup: Number,
+  //defaultGroup: Number,
   email: String,
   userPlan: Number
 });
 
-IPLGroupSchema = mongoose.Schema({
-  gid: Number,
+NiftySchema = mongoose.Schema({
+  nid: Number,
+  niftyName: String,
+  niftyCode: Number,
+  enable: Boolean,
+});
+
+NSEDataSchema = mongoose.Schema({
+  nseName: String,
+  expiryDate: String,
+  strikePrice: Number,
+  time: Number, 
+  underlyingValue: Number,
+  pe_openInterest: Number,
+  pe_changeinOpenInterest: Number,
+  pe_totalTradedVolume: Number,
+  pe_impliedVolatility: Number,
+  pe_lastPrice: Number,
+  pe_pChange: Number,
+  pe_bidQty: Number,
+  pe_bidprice: Number,
+  pe_askQty: Number,
+  pe_askPrice: Number,
+  ce_openInterest: Number,
+  ce_changeinOpenInterest: Number,
+  ce_totalTradedVolume: Number,
+  ce_impliedVolatility: Number,
+  ce_lastPrice: Number,
+  ce_pChange: Number,
+  ce_bidQty: Number,
+  ce_bidprice: Number,
+  ce_askQty: Number,
+  ce_askPrice: Number,
+});
+
+
+ExpiryDateSchema = mongoose.Schema({
+  nseName: String,
+  expiryDate: String,
+  revDate: String,
+  time: Number,
+  timestamp: String,
+  underlyingValue: String,
+});
+
+HolidaySchema = mongoose.Schema({
   name: String,
-  owner: Number,
-  maxBidAmount: Number,
-  tournament: String,
-  auctionStatus: String,
-  auctionPlayer: Number,
-  auctionBid: Number,
-  currentBidUid: Number,
-  currentBidUser: String,
-  memberCount: Number,
-  memberFee: Number,
-  prizeCount: Number,
-  enable: Boolean
+  day: Number,
+  month: Number,
+  year: Number, 
+  yearMonthDay: String, /// string in YYYYMMDD format. It can be used for sorting
 });
 
-PlayerSchema = mongoose.Schema({
-  pid: Number,
-  name: String,
-  fullName: String,
-  Team: String,
-  role: String,
-  bowlingStyle: String,
-  battingStyle: String,
-  tournament: String
-});
-
-SkippedPlayerSchema = mongoose.Schema({
-  gid: Number,
-  pid: Number,
-  playerName: String,
-  tournament: String
-});
-
-AuctionSchema = mongoose.Schema({
-  gid: Number,
-  uid: Number,
-  pid: Number,
-  team: String,
-  playerName: String,
-  bidAmount: Number
-});
-GroupMemberSchema = mongoose.Schema({
-  gid: Number,
-  uid: Number,
-  userName: String,
-  balanceAmount: Number,        // balance available to be used for bid
-  displayName: String,
-  score: Number,
-  rank: Number,
-  prize: Number,
-  enable: Boolean
-});
-
-CaptainSchema = mongoose.Schema({
-  gid: Number,
-  uid: Number,
-  captain: Number,     // captain's player id 
-  captainName: String,
-  viceCaptain: Number,  // viceCaptain's players id
-  viceCaptainName: String
-});
-TeamSchema = mongoose.Schema({
-  name: String,
-  fullname: String,
-  tournament: String
-})
-
-TournamentSchema = mongoose.Schema({
-  name: String,
-  desc: String,
-  type: String,
-  started: Boolean,
-  over: Boolean,
-  enabled: Boolean
-})
-
-WalletSchema = mongoose.Schema({
-  transNumber: Number,
-  transDate: String,
-  transType: String,
-  transSubType: String,
-  uid: Number,
-  gid: Number,
-  rank: Number,
-  transLink: Number,
-  amount: Number,
-  transStatus: Boolean,
-})
-
-PrizeSchema = mongoose.Schema({
-  prizeCount: Number,
-  prize1: Number,
-  prize2: Number,
-  prize3: Number,
-  prize4: Number,
-  prize5: Number,
-  prize6: Number,
-  prize7: Number,
-  prize8: Number,
-  prize9: Number,
-  prize10: Number,
-});
-// USE CRICMATCHSCHEMA since match details will be imported from CRICAPI 
-// Avoid createing match database
-// MatchSchema = mongoose.Schema({
-//   mid: Number,
-//   description: String,
-//   team1: String,
-//   team2: String,
-//   team1Desciption: String,
-//   team2Desciption: String,
-//   matchTime: Date,
-//   weekDay: String
-// });
-StatSchema = mongoose.Schema({
-  mid: Number,
-  pid: Number,
-  inning: Number,
-  score: Number,
-  playerName: String,
-  // batting details
-  run: Number,
-  four: Number,
-  six: Number,
-  fifty: Number,
-  hundred: Number,
-  ballsPlayed: Number,
-  // bowling details
-  wicket: Number,
-  wicket3: Number,
-  wicket5: Number,
-  hattrick: Number,
-  maiden: Number,
-  oversBowled: Number,
-  maxTouramentRun: Number,
-  maxTouramentWicket: Number,
-  // fielding details
-  runout: Number,
-  stumped: Number,
-  bowled: Number,
-  lbw: Number,
-  catch: Number,
-
-  // overall performance
-  manOfTheMatch: Boolean
-});
-//--- data available from CRICAPI
-CricapiMatchSchema = mongoose.Schema({
-  mid: Number,
-  tournament: String,
-  team1: String,
-  team2: String,
-  // team1Description:String,
-  // team2Description:String,
-  weekDay: String,
-  type: String,
-  matchStarted: Boolean,
-  matchEnded: Boolean,
-  matchStartTime: Date,
-  matchEndTime: Date,
-  squad: Boolean
-})
-
-BriefStatSchema = mongoose.Schema({
-  sid: Number,    // 0 => data, 1 => maxRUn, 2 => maxWick
-  pid: Number,
-  playerName: String,
-  inning: Number,
-  score: Number,
-  // batting details
-  run: Number,
-  four: Number,
-  six: Number,
-  fifty: Number,
-  hundred: Number,
-  ballsPlayed: Number,
-  // bowling details
-  wicket: Number,
-  wicket3: Number,
-  wicket5: Number,
-  hattrick: Number,
-  maiden: Number,
-  oversBowled: Number,
-  // fielding details
-  runout: Number,
-  stumped: Number,
-  bowled: Number,
-  lbw: Number,
-  catch: Number,
-  // overall performance
-  maxTouramentRun: Number,
-  maxTouramentWicket: Number,
-  manOfTheMatch: Number
-});  
 // table name will be <tournament Name>_brief r.g. IPL2020_brief
-BRIEFSUFFIX = "_brief";
-RUNNINGMATCH=1;
-PROCESSOVER=0;
-AUCT_RUNNING="RUNNING";
-AUCT_PENING="PENDING";
-AUCT_OEVR="OVER";
 
 // models
-User = mongoose.model("users", UserSchema);
-Player = mongoose.model("iplplayers", PlayerSchema);
-Auction = mongoose.model("iplauction", AuctionSchema);
-IPLGroup = mongoose.model("iplgroups", IPLGroupSchema);
-GroupMember = mongoose.model("groupmembers", GroupMemberSchema);
-Captain = mongoose.model("iplcaptains", CaptainSchema);
-Team = mongoose.model("iplteams", TeamSchema);
-// Match = mongoose.model("iplmatches", MatchSchema);
-Stat = mongoose.model("iplplayerstats", StatSchema);
-Tournament = mongoose.model("tournaments", TournamentSchema);
 MasterData = mongoose.model("MasterSettings", MasterSettingsSchema)
-SkippedPlayer = mongoose.model("skippedplayers", SkippedPlayerSchema)
-CricapiMatch = mongoose.model("cricApiMatch", CricapiMatchSchema)
-Wallet = mongoose.model('wallet', WalletSchema);
-Prize = mongoose.model('prize', PrizeSchema);
+User = mongoose.model("users", UserSchema);
+NiftyNames = mongoose.model("niftynames", NiftySchema);
+NSEData = mongoose.model("nse_data", NSEDataSchema)
+ExpiryDate = mongoose.model("expirydate", ExpiryDateSchema)
+Holiday = mongoose.model("holiday", HolidaySchema)
 
-nextMatchFetchTime = new Date();
+getBlankNSEDataRec = function () {
+  let myblankRec = new NSEData();
+  myblankRec.nseName = "";
+  myblankRec.expiryDate = "";
+  myblankRec.strikePrice = 0;
+  myblankRec.time = 0;
+  myblankRec.underlyingValue = 0;
+  myblankRec.pe_openInterest = 0;
+  myblankRec.pe_changeinOpenInterest = 0;
+  myblankRec.pe_totalTradedVolume = 0;
+  myblankRec.pe_impliedVolatility = 0;
+  myblankRec.pe_lastPrice = 0;
+  myblankRec.pe_pChange = 0;
+  myblankRec.pe_bidQty = 0;
+  myblankRec.pe_bidprice = 0;
+  myblankRec.pe_askQty = 0;
+  myblankRec.pe_askPrice = 0;
+  myblankRec.ce_openInterest = 0;
+  myblankRec.ce_changeinOpenInterest = 0;
+  myblankRec.ce_totalTradedVolume = 0;
+  myblankRec.ce_impliedVolatility = 0;
+  myblankRec.ce_lastPrice = 0;
+  myblankRec.ce_pChange = 0;
+  myblankRec.ce_bidQty = 0;
+  myblankRec.ce_bidprice = 0;
+  myblankRec.ce_askQty = 0;
+  myblankRec.ce_askPrice = 0;
+  // console.log(myblankRec);
+  return myblankRec;
+
+}
+
 router = express.Router();
 
 db_connection = false;      // status of mongoose connection
@@ -372,18 +239,10 @@ connectRequest = true;
 // constant used by routers
 minutesIST = 330;    // IST time zone in minutes 330 i.e. GMT+5:30
 minutesDay = 1440;   // minutes in a day 24*60 = 1440
+SHORTMONTHNAME = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 MONTHNAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 weekDays = new Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
 weekShortDays = new Array("Sun", "Mon", "Tue", "Wedn", "Thu", "Fri", "Sat");
-// IPL_Start_Date = new Date("2020-09-19");   // IPL Starts on this date
-
-// if match type not provided by cric api and
-// team1/team2 both contains any of these string then
-// set match type as T20  (used in playerstat)
-IPLSPECIAL = ["MUMBAI", "HYDERABAD", "CHENNAI", "RAJASTHAN",
- "KOLKATA", "BANGALORE", "DELHI", "PUNJAB",
- "VELOCITY", "SUPERNOVAS", "TRAILBLAZERS"
-];
 
 SENDRES = 1;        // send OK response
 SENDSOCKET = 2;     // send data on socket
@@ -402,54 +261,11 @@ allUSER = 99999999;
 MATCHREADINTERVAL = 3;
 
 // Wallet 
-// WalletStatus = {success: "success", failed: "success"};
-WalletTransType = {
-  accountOpen: "accountOpen",
-  refill: "refill",
-  withdrawl: "withdrawl",
-  offer: "offer",
-  bonus: "bonus",
-  prize: "prize",
-  groupJoin: "groupJoin",
-  groupCancel: "groupCancel"
-};
 
 // match id for record which has bonus score for  Maximum Run and Maximum Wicket
 // Note that it has be be set -ve
-MaxRunMid = -1;
-MaxWicketMid = -2;
-
-defaultGroup = 1;
-defaultTournament = "IPL2020";
-forceGroupInfo = false;
-defaultMaxPlayerCount = 15;
-
-// Point scroring
-ViceCaptain_MultiplyingFactor = 1.5;
-Captain_MultiplyingFactor = 2;
-BonusRun = 1;
-Bonus4 = 1;
-Bonus6 = 2;
-Bonus50 = 20;
-Bonus100 = 50;
-
-BonusWkt = 25;
-BonusWkt3 = 20;
-BonusWkt5 = 50;
-BonusMaiden = 20;
-
-BonusDuck = -5;
-BonusNoWkt = 0;
-BonusMOM = 20;
-
-BonusMaxRun = 100;
-BonusMaxWicket = 100;
 
 // variables rreuiqred by timer
-sendDashboard = false;
-sendMyStat = false;
-myStatGroup = [];
-myDashboardGroup = [];
 serverTimer = 0;
 
 // time interval for scheduler
@@ -566,10 +382,8 @@ masterRec = null;
 joinOffer=500;
 
 fetchMasterSettings = async function () {
-  // if (masterRec === null) {
     let tmp = await MasterData.find();
     masterRec = tmp[0];  
-  // }  
 }
 
 USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2}
@@ -598,330 +412,8 @@ userAlive = async function (uRec) {
   return sts;
 }
 
-refundGroupFee = async function(groupid, amount) {
-  let allMembers = await GroupMember.find({gid: groupid});
-  for(gm of allMembers) {
-    await WalletAccountGroupCancel(gm.gid, gm.uid, amount)
-  };
-}
-
-doDisableAndRefund = async function(g) {
-  // console.log(`Disable group ${g.gid}`)
-  let memberCount = await GroupMemberCount(g.gid);
-  // let groupRec = await IPLGroup.findOne({gid: g.gid});
-  if (memberCount !== g.memberCount) {
-    g.enable = false;
-    g.save();
-    // refund wallet amount since group is disabled.
-    await refundGroupFee(g.gid, g.memberFee);
-    console.log(`Refund compeletd fpr group ${g.gid}`)
-  }
-}
-
-disableIncompleteGroup = async function(tournamentName) {
-  // this will disable all groups in which reqiured numbers of members
-  // have not joined. Remember to refund the member fee amount to their wallet
-  allGroups = await IPLGroup.find({tournament: tournamentName, enable: true});
-  // console.log("----in Disable");
-  // console.log(allGroups);
-  for(const g of allGroups ) {
-    console.log(`Group is ${g.gid} to be DISABLED-------------------------`)
-    await doDisableAndRefund(g);
-  };
-}
 
 
-
-// set tournament Started
-updateTournamentStarted = async function (tournamentName) {
-  // console.log("in update tournament started")
-  let tRec = await Tournament.findOne({name: tournamentName, started: false});
-  if (tRec) {
-    // disable group for which required number of members have not been formed.
-    tRec.started = true;
-    tRec.save();
-    await disableIncompleteGroup(tournamentName);
-  }
-};
-
-
-// set tournament Over
-updateTournamentOver = async function (tournamentName) {
-  let tRec = await Tournament.findOne({name: tournamentName});
-  if (!tRec.over) {
-    tRec.over = true;
-    tRec.save();
-  } 
-};
-
-// check if all matches complete. If yes then set tournament over
-checkTournamentOver = async function (tournamentName) {
-  // await update brief of this tournament
-  await updatePendingBrief(tournamentName);
-  // check if any uncomplete match  
-  let matchesNotOver = await CricapiMatch.find({tournament: tournamentName, matchEnded: false});
-  // if no uncomplete match then declare tournament as over
-  if (matchesNotOver.length === 0) {
-    // set tournamet as over
-    await updateTournamentOver(tournamentName);
-    // add min and max run of the tournamenet and assign points to user
-    await updateTournamentMaxRunWicket(tournamentName);
-    // update group with rank / score. Also allocate prize money
-    await awardRankPrize(tournamentName);
-  }
-}
-
-
-
-getBlankStatRecord = function(tournamentStat) {
-  return new tournamentStat( {
-    mid: 0,
-    pid: 0,
-    score: 0,
-    inning: 0,
-    playerName: "",
-  // batting details
-    run: 0,
-    four: 0,
-    six: 0,
-    fifty: 0,
-    hundred:  0,
-    ballsPlayed: 0,
-    // bowling details
-    wicket: 0,
-    wicket3: 0,
-    wicket5: 0,
-    hattrick: 0,
-    maiden: 0,
-    oversBowled: 0,
-    maxTouramentRun: 0,
-    maxTouramentWicket: 0,
-    // fielding details
-    runout: 0,
-    stumped: 0,
-    bowled: 0,
-    lbw: 0,
-    catch: 0,
-    // overall performance
-    manOfTheMatch: false
-  });
-}
-
-getBlankBriefRecord = function(tournamentStat) {
-  let tmp = new tournamentStat( {
-    sid: RUNNINGMATCH,
-    pid: 0,
-    playerName: "",
-    score: 0,
-    inning: 0,
-  // batting details
-    run: 0,
-    four: 0,
-    six: 0,
-    fifty: 0,
-    hundred:  0,
-    ballsPlayed: 0,
-    // bowling details
-    wicket: 0,
-    wicket3: 0,
-    wicket5: 0,
-    hattrick: 0,
-    maiden: 0,
-    oversBowled: 0,
-    // fielding details
-    runout: 0,
-    stumped: 0,
-    bowled: 0,
-    lbw: 0,
-    catch: 0,
-    // overall performance
-    manOfTheMatch: 0,
-    maxTouramentRun: 0,
-    maxTouramentWicket: 0,
-  });
-  // console.log(tmp);
-  return(tmp);
-}
-
-awardRankPrize = async function(tournamentName) {
-  let allGroups = await IPLGroup.find({tournament: tournamentName, enable: true});
-  // allGroups.forEach(g => {
-  for(const g of allGroups) {
-    // arun
-    // memberCount: Number,
-    // memberFee: Number,
-    // prizeCount: Number,
-    let prizeTable = await getPrizeTable(g.prizeCount, g.memberCount*memberFee);
-    let allgmRec = await GroupMember.find({gid: g.gid});
-    // allgmRec.forEach(gmRec => {
-    for (const gmRec of allgmRec) {
-      // arun
-      if (gmRec.rank <= g.prizeCount) {
-        gmRec.prize = prizeTable[gmRec.rank-1].prizeAmount;
-        await WalletArun(gmRec.gid, gmRec.uid, prizeTable[gmRec.rank-1].prizeAmount)
-      } else {
-        gmRec.prize = 0;
-      }
-      gmRec.save();
-    }
-  }
-}
-
-
-updateTournamentMaxRunWicket = async function(tournamentName) {
-//--- start
-  // ------------ Assuming tournament as over
-  // let myTournament = await Tournament.findOne({name: tournamentName});
-  // if (!myTournament) return false;
-  // if (!myTournament.over) return false;
-
-  let tournamentStat = mongoose.model(tournamentName, StatSchema);
-  let BriefStat = mongoose.model(tournamentName+BRIEFSUFFIX, BriefStatSchema);
-
-  let tdata = await BriefStat.find({});
-  let tmp = _.filter(tdata, x => x.sid === MaxRunMid);
-  if (tmp.length > 0) return true;    // max run already assigned. Assuming same done for max wicket
-
-  tmp = _.filter(tdata, x => x.sid == MaxWicketMid);
-  if (tmp.length > 0) return true;
-
-  let pidList = _.map(tdata, 'pid');
-  pidList = _.uniqBy(pidList);
-
-  // calculate total runs and total wickets of each player (played in tournament matches)
-  let sumList = [];
-  pidList.forEach( mypid => {
-    tmp = _.filter(tdata, x => x.pid === mypid);
-    if (tmp.length > 0) {
-      var iRun = _.sumBy(tmp, 'run');
-      var iWicket = _.sumBy(tmp, 'wicket');
-      sumList.push({pid: mypid, playerName: tmp[0].playerName, totalRun: iRun, totalWicket: iWicket});
-    }
-  });
-
-  // now get list of players who have score max runs (note there can be more than 1)
-  tmp = _.maxBy(sumList, x => x.totalRun);
-  //console.log(tmp);
-  let maxList = _.filter(sumList, x => x.totalRun == tmp.totalRun);
-  let bonusAmount  = BonusMaxRun / maxList.length;
-  maxList.forEach( mmm => {
-    let myrec = getBlankStatRecord(tournamentStat);
-    myrec.mid = MaxRunMid;
-    myrec.pid = mmm.pid;
-    myrec.playerName = mmm.playerName;
-    myrec.score = bonusAmount;
-    myrec.maxTouramentRun = mmm.totalRun;  
-    myrec.save(); 
-
-    let mybrief = getBlankBriefRecord(BriefStat);
-    mybrief.sid = MaxRunMid;
-    mybrief.pid = mmm.pid;
-    mybrief.playerName = mmm.playerName;
-    mybrief.score = bonusAmount;
-    mybrief.maxTouramentRun = mmm.totalRun;  
-    mybrief.save(); 
-  });
-
-  // now get list of players who have taken max wickets (note there can be more than 1)
-  tmp = _.maxBy(sumList, x => x.totalWicket);
-  //console.log(tmp);
-  maxList = _.filter(sumList, x => x.totalWicket == tmp.totalWicket);
-  bonusAmount  = BonusMaxWicket / maxList.length;
-  maxList.forEach( mmm => {
-    let myrec = getBlankStatRecord(tournamentStat);
-    myrec.mid = MaxWicketMid;
-    myrec.pid = mmm.pid;
-    myrec.playerName = mmm.playerName;
-    myrec.score = bonusAmount;
-    myrec.maxTouramentWicket = mmm.totalWicket;
-    myrec.save(); 
-
-    let mybrief = getBlankBriefRecord(BriefStat);
-    mybrief.sid = MaxWicketMid;
-    mybrief.pid = mmm.pid;
-    mybrief.playerName = mmm.playerName;
-    mybrief.score = bonusAmount;
-    mybrief.maxTouramentRun = mmm.totalWicket;  
-    mybrief.save(); 
-  });
-
-  // all done
-  return true;
-}
-
-
-
-updatePendingBrief = async function (mytournament) {
-  // get match if the matches that are completed in this tournament
-  let ttt = mytournament.toUpperCase();
-  let completedMatchList = await CricapiMatch.find({tournament: ttt, matchEnded: true});
-  // console.log(`${ttt} Completed match status ${completedMatchList.length}`)
-  if (completedMatchList.length <= 0) return;
-  let midList = _.map(completedMatchList, 'mid');
-
-  // get gets record in brief table which are not yet merge
-  let BriefStat = mongoose.model(mytournament+BRIEFSUFFIX, BriefStatSchema);
-  var briefList = await BriefStat.find({ sid: { $in: midList } });
-  if (briefList.length === 0) return;
-  console.log("Pending procesing started");
-  // some pending reocrd to be update
-  sidList = _.map(briefList, 'sid');
-  sidList = _.uniq(sidList);
-  console.log(sidList);
-  // console.log( `Completed match is ${PROCESSOVER}`)
-  let masterList = await BriefStat.find({ sid: PROCESSOVER });
-  console.log(`Compltetd: ${masterList.length}    Pedning: ${briefList.length}`);
-  for(sidx=0; sidx < sidList.length; ++sidx) {
-    let myList = _.filter(briefList, x => x.sid === sidList[sidx]);
-    for(i=0; i<myList.length; ++i) {
-      var myMasterRec = _.find(masterList, x => x.pid === myList[i].pid);
-      if (!myMasterRec) {
-        myMasterRec = new getBlankBriefRecord(BriefStat);
-        myMasterRec.sid = PROCESSOVER;
-        myMasterRec.pid = myList[i].pid;
-        myMasterRec.playerName = myList[i].playerName;
-        masterList.push(myMasterRec);
-      }
-      myMasterRec.score += myList[i].score;
-      myMasterRec.inning += myList[i].inning;
-      // batting details
-      myMasterRec.run += myList[i].run;
-      myMasterRec.four += myList[i].four;
-      myMasterRec.six += myList[i].six;
-      myMasterRec.fifty += myList[i].fifty;
-      myMasterRec.hundred += myList[i].hundred;
-      myMasterRec.ballsPlayed += myList[i].ballsPlayed;
-      // bowling details
-      myMasterRec.wicket += myList[i].wicket;
-      myMasterRec.wicket3 += myList[i].wicket3;
-      myMasterRec.wicket5 + myList[i].wicket5;
-      myMasterRec.hattrick += myList[i].hattrick;
-      myMasterRec.maiden += myList[i].maiden;
-      // console.log(`${myMasterRec.pid} ${myMasterRec.playerName} ${myMasterRec.oversBowled}   ${myList[i].oversBowled}`);
-      myMasterRec.oversBowled += myList[i].oversBowled
-      // fielding details
-      // runout: 0,
-      // stumped: 0,
-      // bowled: 0,
-      // lbw: 0,
-      // catch: 0,
-      myMasterRec.runout += myList[i].runout;
-      myMasterRec.stumped += myList[i].stumped;
-      myMasterRec.bowled += myList[i].bowled;
-      myMasterRec.lbw += myList[i].lbw;
-      myMasterRec.catch += myList[i].catch;
-      // overall performance
-      myMasterRec.manOfTheMatch += myList[i].manOfTheMatch;
-      myMasterRec.maxTouramentRun += myList[i].maxTouramentRun;
-      myMasterRec.maxTouramentWicket += myList[i].maxTouramentWicket;
-    }
-    console.log(`Now deleting recrods with sid ${sidList[sidx]}`)
-    await BriefStat.deleteMany({sid: sidList[sidx]})
-  }
-  masterList.forEach(x => {
-    x.save();
-  })
-}
 
 
 EMAILERROR="";
@@ -975,125 +467,64 @@ sendEmailToUser = async function(userEmailId, userSubject, userText) {
   });
 }
 
-//------------- wallet function
 
-createWalletTransaction = function () {
-  myTrans = new Wallet();
-  currTime = new Date();
-  // Tue Dec 08 2020 14:22:21 GMT+0530 (India Standard Time)"
-  myTrans.transNumber = currTime.getTime();
-  let tmp = currTime.toString();
-  let xxx = tmp.split(' ');
-  myTrans.transDate = `${xxx[2]}-${xxx[1]}-${xxx[3]} ${xxx[4]}`;  
-  myTrans.transType = "";
-  myTrans.transSubType = "";
-  myTrans.uid = 0;
-  myTrans.gid = 0;
-  myTrans.rank = 0;
-  myTrans.transLink = 0;
-  myTrans.amount = 0;
-  myTrans.transStatus = true;
-  return (myTrans);
-}
+WEEKEND = [0, 6]       // (SUN=0 and SAT=6 is weekend)
+STARTTIME = {hours: 9, minutes: 15}
+ENDTIME = {hours: 15, minutes: 30}
 
-WalletAccountOpen = async function (userid, openamount) {
-  // console.log(`Account open for user ${userid} for amount ${openamount}`)
-  let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.accountOpen;
-  myTrans.uid = userid;
-  myTrans.amount = openamount;
-  await myTrans.save();
-  // console.log(myTrans);
-  return myTrans;
-}
+const prevday = 0;
+const todayIsHoliday = false;
 
+nseWorkingTime = async function() {
+ 
+  let currDate = new Date();
+  let today = currDate.getDate();
+  let currHour = currDate.getHours();
+  let currMinute = currDate.getMinutes();
+  console.log(`Curr Time: ${currHour}:${currMinute}`);
 
-WalletAccountOffer = async function (userid, offeramount) {
-  let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.offer;
-  myTrans.uid = userid;
-  myTrans.amount = offeramount;
-  await myTrans.save();
-  return myTrans;
-}
-
-//  = async function (userid, openamount) {
-//   let myTrans = createWalletTransaction();
-//   myTrans.transType = WalletTransType.offer;
-//   myTrans.uid = userid;
-//   myTrans.amount = openamount;
-//   await myTrans.save();
-//   return myTransWalletAccountOpen;
-// }
-
-WalletAccountGroupJoin = async function (groupid, userid, groupfee) {
-  let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.groupJoin;
-  myTrans.gid = groupid;
-  myTrans.uid = userid;
-  myTrans.amount = -groupfee;
-  await myTrans.save();
-  return myTrans;
-}
-
-WalletAccountGroupCancel = async function (groupid, userid, groupfee) {
-  let myTrans = createWalletTransaction();
-  myTrans.transType = WalletTransType.groupCancel;
-  myTrans.uid = userid;
-  myTrans.gid = groupid;
-  myTrans.amount = groupfee;
-  await myTrans.save();
-  return myTrans;
-}
-
-WalletBalance = async function (userid) {
-  let tmp = 0;
-  // let allRec = await Wallet.find({uid: userid});
-  // if (allRec.length > 0)
-  //   tmp = _.sumBy(allRec, x => x.amount);
-  // db.articles.aggregate( [
-  //   { $match: { $or: [ { score: { $gt: 70, $lt: 90 } }, { views: { $gte: 1000 } } ] } },
-  //   { $group: { _id: null, count: { $sum: 1 } } }
-  // ] );
-  // iuserid = ;
-  let xxx = await Wallet.aggregate([
-    {$match: {uid: parseInt(userid)}},
-    {$group : {_id : "$uid", balance : {$sum : "$amount"}}}
-  ]);
-  if (xxx.length === 1) tmp = xxx[0].balance;
-  return tmp;
-}
-
-
-getPrizeTable = async function (count, amount) {
-  let myPrize = await Prize.findOne({prizeCount: count})
-  // we will keep 5% of amount
-  // rest (i.e. 95%) will be distributed among users
-  let totPrize = Math.floor(amount*0.95)
-  let allotPrize = 0;
-  let prizeTable=[]
-  for(i=1; i<count; ++i) {
-    let thisPrize = Math.floor(totPrize*myPrize["prize"+i.toString()]/100);
-    prizeTable.push({rank: i, prize: thisPrize})
-    allotPrize += thisPrize;
+  // if there is change of date then check if today it is holiday
+  if (today !== prevday) {
+    let tmp = await Holiday.findOne({
+      day: today, 
+      month: (currDate.getMonth()+1), 
+      year: currDate.getFullYear()
+    });
+    todayIsHoliday = (tmp !== null);
+    prevday = today;
   }
-  prizeTable.push({rank: count, prize: totPrize-allotPrize});
-  return prizeTable;
+  if (todayIsHoliday) return false;
+
+  // check if it is weekend
+  if (WEEKEND.includes(currDate.getDay()))  // if week end
+    return false;
+
+  // working day thus cehck if time is in range i.e. is it is working hour of NSE
+
+  if (currHour < STARTTIME.hours) 
+    return false;
+  if (currHour > ENDTIME.hours)
+    return false;
+  if ((currHour === STARTTIME.hours) && (currMinute < STARTTIME.minutes))
+    return false;
+  if ((currHour === ENDTIME.hours) && (currMinute > ENDTIME.minutes))
+    return false;
+
+  console.log("Working time");
+  return true;
 }
 
-GroupMemberCount = async function (groupid) {
-  // let allRec = await GroupMember.find({gid: groupid});
-  // return allRec.length;
-//   > db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])
-// { "_id" : "tutorials point", "num_tutorial" : 2 }
-// { "_id" : "Neo4j", "num_tutorial" : 1 }
-  let memberCount = 0;
-  let xxx = await GroupMember.aggregate([
-    {$match: {gid: parseInt(groupid)}},
-    {$group : {_id : "$gid", num_members : {$sum : 1}}}
-  ]);
-  if (xxx.length === 1) memberCount = xxx[0].num_members;
-  return(memberCount);
+revDate = function (myDate) {
+  let xxx = myDate.split('-');
+  let myIdx = SHORTMONTHNAME.indexOf(xxx[1].substr(0,3).toUpperCase()).toString();
+  if (myIdx.length === 1) myIdx = "0" + myIdx;
+  return(xxx[2]+myIdx+xxx[0]);
 }
-// module.exports = app;
 
+const zerostr = "000000";
+datePriceKey = function(myDate, strikePrice) {
+  let p1 = revDate(myDate);
+  let p3 = strikePrice.toString();
+  let p2 = (p3.length < 5) ? zerostr.substr(0, 5-p3.length) : "";
+  return(`${p1}-${p2}${p3}`)
+}

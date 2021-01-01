@@ -1,0 +1,7 @@
+{
+    "name": "cricdream",
+    "integrations": {
+      "capacitor": {}
+    },
+    "type": "react"
+  }

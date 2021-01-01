@@ -18,7 +18,7 @@ import red from '@material-ui/core/colors/red';
 import { useHistory } from "react-router-dom";
 import SignIn from "./SignIn.js";
 import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
-import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
+import { CadSysLogo } from 'CustomComponents/CustomComponents.js';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -172,7 +172,7 @@ export default function SignUp() {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <CricDreamLogo />
+        <CadSysLogo />
         {/* <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
         </Avatar> */}

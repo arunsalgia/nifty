@@ -8,22 +8,22 @@ import "assets/css/material-dashboard-react.css?v=1.9.0";
 import { CricDreamTabs, setTab }from "CustomComponents/CricDreamTabs"
 import SignIn from "views/Login/SignIn.js";
 import SignUp from "views/Login/SignUp.js";
-import JoinGroup from "views/Group/JoinGroup.js"
+// import JoinGroup from "views/Group/JoinGroup.js"
 import ForgotPassword from "views/Login/ForgotPassword.js";
 
 const hist = createBrowserHistory();
 
-function checkJoinGroup(pathArray) {
-  let sts = false;
-  if ((pathArray[1].toLowerCase() === "joingroup") && (pathArray.length === 3) && (pathArray[2].length > 0)) {
-    localStorage.setItem("joinGroupCode", pathArray[2]);
-    sts = true;
-  }
-  return sts;
-}
+// function checkJoinGroup(pathArray) {
+//   let sts = false;
+//   if ((pathArray[1].toLowerCase() === "joingroup") && (pathArray.length === 3) && (pathArray[2].length > 0)) {
+//     localStorage.setItem("joinGroupCode", pathArray[2]);
+//     sts = true;
+//   }
+//   return sts;
+// }
 
 function initCdParams() {
-  localStorage.setItem("joinGroupCode", "");
+  // localStorage.setItem("joinGroupCode", "");
   let ipos = 0;
   if ((localStorage.getItem("tabpos") !== null) &&
   (localStorage.getItem("tabpos") !== "") ) {
@@ -54,7 +54,6 @@ function AppRouter() {
   function DispayTabs() {
     // console.log(localStorage.getItem("uid"));
     // console.log(`Status is ${isUserLogged()}`)
-
     if (isUserLogged())
       return (<CricDreamTabs/>)  
     else {
@@ -73,12 +72,12 @@ function AppRouter() {
   // console.log("clearing local storage");
     initCdParams();
     //console.log("GTP "+window.location.pathname.toLowerCase());
-    let mypath = window.location.pathname.split("/");
-    if (checkJoinGroup(mypath)) {
-      //console.log("join group found");
-      localStorage.setItem("tabpos", 105);
-      //history.push("/")
-    } 
+    // let mypath = window.location.pathname.split("/");
+    // if (checkJoinGroup(mypath)) {
+    //   //console.log("join group found");
+    //   localStorage.setItem("tabpos", 105);
+    //   //history.push("/")
+    // } 
 
   // return (
     // <Router history={hist}> 

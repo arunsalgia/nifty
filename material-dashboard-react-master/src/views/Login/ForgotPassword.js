@@ -17,7 +17,7 @@ import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import red from '@material-ui/core/colors/red';
 import { useHistory } from "react-router-dom";
 import SignIn from "./SignIn.js";
-import {BlankArea, CricDreamLogo} from "CustomComponents/CustomComponents.js"
+import {BlankArea, CadSysLogo} from "CustomComponents/CustomComponents.js"
 import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
 
 
@@ -140,7 +140,7 @@ export default function ForgotPassword() {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-      <CricDreamLogo />
+      <CadSysLogo />
         {/* <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
         </Avatar> */}

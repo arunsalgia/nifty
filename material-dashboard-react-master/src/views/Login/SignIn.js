@@ -1,26 +1,26 @@
 import React, { useState, useContext, useEffect } from 'react';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import { Switch, Route } from 'react-router-dom';
+// import Link from '@material-ui/core/Link';
+// import { Switch, Route } from 'react-router-dom';
 // import Dialog from '@material-ui/core/Dialog';
 // import DialogTitle from '@material-ui/core/DialogTitle';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+// import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import SignUp from "../Login/SignUp.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { useHistory } from "react-router-dom";
-import { UserContext } from "../../UserContext";
+// import { UserContext } from "../../UserContext";
 import axios from "axios";
 import red from '@material-ui/core/colors/red';
-import { DesktopWindows } from '@material-ui/icons';
+// import { DesktopWindows } from '@material-ui/icons';
 import { cdRefresh, specialSetPos } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
-import { CricDreamLogo } from 'CustomComponents/CustomComponents.js';
+import { CadSysLogo } from 'CustomComponents/CustomComponents.js';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -96,42 +96,35 @@ export default function SignIn() {
     try { 
       response = await axios.get(`/user/login/${userName}/${password}`); 
       setErrorMessage("");
+      if (response.status === 200) {
+        // console.log(response.data);
+        // SAMPLE OUTPUT
+        // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
+        // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}
+        window.localStorage.setItem("uid", response.data.uid)
+        window.localStorage.setItem("displayName", response.data.displayName);
+        window.localStorage.setItem("userName", response.data.userName);
+        // window.localStorage.setItem("groupName", response.data.groupName);
+        // window.localStorage.setItem("tournament", response.data.tournament);
+        // window.localStorage.setItem("admin", response.data.admin)
+        // setUser({ uid: myUID, admin: response.data.admin });
+        // cdRefresh(true);
+        let newPos = specialSetPos();
+        //if (newPos < 0) newPos = 0;
+        setTab(newPos);
+      }
     } catch (err) {
       // setOpen(true)
       setErrorMessage("Invalid Username / Password");
     }
-    // console.log(response.status)
-    if (response.status === 200) {
-      var myUID = response.data;
-      response = await axios.get(`/group/default/${myUID}`);
-      console.log(response.data);
-      // SAMPLE OUTPUT
-      // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
-      // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}
-      window.localStorage.setItem("uid", myUID)
-      window.localStorage.setItem("gid", response.data.gid);
-      window.localStorage.setItem("displayName", response.data.displayName);
-      window.localStorage.setItem("userName", response.data.userName);
-      window.localStorage.setItem("groupName", response.data.groupName);
-      window.localStorage.setItem("tournament", response.data.tournament);
-      window.localStorage.setItem("admin", response.data.admin)
-      // setUser({ uid: myUID, admin: response.data.admin });
-      // cdRefresh(true);
-      let newPos = specialSetPos();
-      //if (newPos < 0) newPos = 0;
-      setTab(newPos);
-    }
+  };
 
-  }
   
   return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <CricDreamLogo />        
-          {/* <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar> */}
+          <CadSysLogo />        
           <Typography component="h1" variant="h5">
             Sign in
         </Typography>
@@ -172,7 +165,7 @@ export default function SignIn() {
             >
               Sign In
           </Button>
-          <Typography className={classes.root}>
+          {/* <Typography className={classes.root}>
               Forgot password: 
               <Link href="#" onClick={handleForgot} variant="body2">
               Click here
@@ -183,7 +176,7 @@ export default function SignIn() {
               <Link href="#" onClick={handleRegister} variant="body2">
               Register
             </Link>
-          </Typography>
+          </Typography> */}
           </form>
         </div>
         {/* <Route  path='/admin/emailpassword' component={Reset} key="MemberList"/>

@@ -71,29 +71,29 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export function DisplayPrizeTable(props) {
-  const classes = useStyles();
-  return (
-    <TableContainer component={Paper}>
-    <Table size="small" className={classes.table} aria-label="simple table">
-      <TableHead>
-        <TableRow>
-          <TableCell align="center">Rank</TableCell>
-          <TableCell align="center">Prize</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {props.tableName.map((row) => (
-          <TableRow key={row.rank}>
-            <TableCell align="center">{row.rank}</TableCell>
-            <TableCell align="center">{row.prize}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>    
-  );
-}
+// export function DisplayPrizeTable(props) {
+//   const classes = useStyles();
+//   return (
+//     <TableContainer component={Paper}>
+//     <Table size="small" className={classes.table} aria-label="simple table">
+//       <TableHead>
+//         <TableRow>
+//           <TableCell align="center">Rank</TableCell>
+//           <TableCell align="center">Prize</TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {props.tableName.map((row) => (
+//           <TableRow key={row.rank}>
+//             <TableCell align="center">{row.rank}</TableCell>
+//             <TableCell align="center">{row.prize}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>    
+//   );
+// }
 
 export class NoGroup extends React.Component {
   render() {return <h3 align="center">Do not belong to any Group</h3>;}
@@ -113,30 +113,30 @@ export function GeneralMessage (props) {
 }
 
 
-export function DisplayGroupName (props) {
-  const classes = useStyles();
-  return(<Typography className={classes.groupName} align="center">({props.groupName})</Typography>);
-}
+// export function DisplayGroupName (props) {
+//   const classes = useStyles();
+//   return(<Typography className={classes.groupName} align="center">({props.groupName})</Typography>);
+// }
 
 export function DisplayPageHeader (props) {
-    let msg = props.groupName + '-' + props.tournament;
+    // let msg = props.groupName + '-' + props.tournament;
     return (
     <div>
       <Typography align="center" component="h1" variant="h5">{props.headerName}</Typography>
-      <DisplayGroupName groupName={msg}/>
+      {/* <DisplayGroupName groupName={msg}/> */}
     </div>
   );
 }
 
-export function DisplayBalance (props) {
-  const classes = useStyles();
-  let msg =  `Wallet balance: ${props.balance}`;
-  return (
-  <div>
-    <Typography align="right" className={classes.balance} >{msg}</Typography>
-  </div>
-  );
-}
+// export function DisplayBalance (props) {
+//   const classes = useStyles();
+//   let msg =  `Wallet balance: ${props.balance}`;
+//   return (
+//   <div>
+//     <Typography align="right" className={classes.balance} >{msg}</Typography>
+//   </div>
+//   );
+// }
 
 
 export function MessageToUser (props) {
@@ -165,8 +165,8 @@ export class Copyright extends React.Component {
   }
 }
 
-export function CricDreamLogo () {
-  let mylogo = `${process.env.PUBLIC_URL}/CricDream.ico`;
+export function CadSysLogo () {
+  let mylogo = `${process.env.PUBLIC_URL}/logo192.png`;
   const classes = useStyles();
   return (
     <Avatar className={classes.avatar}  src={mylogo}/>

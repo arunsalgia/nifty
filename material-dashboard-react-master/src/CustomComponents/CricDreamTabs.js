@@ -6,20 +6,21 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import Group from "views/Group/Group"
-import Dash from "views/Dashboard/Dashboard"
-import Auction from "views/Auction/Auction"
-import Captain from "views/Captain/Captain"
-import MyTeam from "views/MyTeam/MyTeam"
-import Match from "views/UpcomingMatch/UpcomingMatch"
-import Stats from "views/Statistics/Statistics"
-import NewGroup from "views/Group/NewGroup.js"
-import JoinGroup from "views/Group/JoinGroup.js"
-import GroupDetails from "views/Group/GroupDetails.js"
-import GroupMember from "views/Group/GroupMember.js"
+import Nifty from "views/Nifty/Nifty"
+// import Group from "views/Group/Group"
+// import Dash from "views/Dashboard/Dashboard"
+// import Auction from "views/Auction/Auction"
+// import Captain from "views/Captain/Captain"
+// import MyTeam from "views/MyTeam/MyTeam"
+// import Match from "views/UpcomingMatch/UpcomingMatch"
+// import Stats from "views/Statistics/Statistics"
+// import NewGroup from "views/Group/NewGroup.js"
+// import JoinGroup from "views/Group/JoinGroup.js"
+// import GroupDetails from "views/Group/GroupDetails.js"
+// import GroupMember from "views/Group/GroupMember.js"
+// import AddGroupMember from "views/Group/AddGroupMember.js"
 import { useHistory } from "react-router-dom";
-import {cdRefresh, specialSetPos} from "views/functions.js"
-import AddGroupMember from "views/Group/AddGroupMember.js"
+import {cdRefresh } from "views/functions.js"
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -72,9 +73,11 @@ export function setTab(num) {
 }
 
 function Logout() {
+  console.log("In LOGOUT------")
   const history = useHistory();
   localStorage.setItem("uid", "");
   // localStorage.setItem("newTabPos", "0)
+  localStorage.setItem("currentLogin", "");
   cdRefresh();  
   return (<div></div>);
 }
@@ -107,7 +110,6 @@ export function CricDreamTabs() {
       setValue(newValue);
     }
   };
-
   // value={value}
   // onChange={handleChange}
   // indicatorColor="primary"
@@ -126,29 +128,30 @@ export function CricDreamTabs() {
           scrollButtons="auto"
           aria-label="simple tabs example"
         >
-          <Tab label="Group" {...a11yProps(0)} />
-          <Tab label="DashBoard" {...a11yProps(1)} />
+          <Tab label="NIFTY" {...a11yProps(0)} />
+          <Tab label="Logout" {...a11yProps(1)} />
+          {/* <Tab label="DashBoard" {...a11yProps(1)} />
           <Tab label="Auction" {...a11yProps(2)} />
           <Tab label="Captain" {...a11yProps(3)} />
           <Tab label="Team" {...a11yProps(4)} />
           <Tab label="Match" {...a11yProps(5)} />
-          <Tab label="Stats" {...a11yProps(6)} />
-          <Tab label="Logout" {...a11yProps(7)} />
+          <Tab label="Stats" {...a11yProps(6)} /> */}
         </Tabs>
       </AppBar>
-      <TabPanel value={value} index={0}><Group /></TabPanel>
-      <TabPanel value={value} index={1}><Dash/></TabPanel>
+      <TabPanel value={value} index={0}><Nifty /></TabPanel>
+      <TabPanel value={value} index={1}><Logout/></TabPanel>
+      {/* <TabPanel value={value} index={1}><Dash/></TabPanel>
       <TabPanel value={value} index={2}><Auction/></TabPanel>
       <TabPanel value={value} index={3}><Captain/></TabPanel>
       <TabPanel value={value} index={4}><MyTeam/></TabPanel>
       <TabPanel value={value} index={5}><Match/></TabPanel>
       <TabPanel value={value} index={6}><Stats/></TabPanel>
-      <TabPanel value={value} index={7}><Logout/></TabPanel>
       <TabPanel value={value} index={101}><NewGroup /></TabPanel>
       <TabPanel value={value} index={102}><GroupDetails /></TabPanel>
       <TabPanel value={value} index={103}><GroupMember /></TabPanel>
       <TabPanel value={value} index={104}><AddGroupMember /></TabPanel>
-      <TabPanel value={value} index={105}><JoinGroup /></TabPanel>
+      <TabPanel value={value} index={105}><JoinGroup /></TabPanel> */}
+      <TabPanel value={value} index={1}><Logout/></TabPanel>
     </div>
   );
 }

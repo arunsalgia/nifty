@@ -258,7 +258,8 @@ async function processConnection(i) {
         let latestData = await read_nse_data(nameRec);
         if (latestData)
             myData = {stockName: connectionArray[i].stockName, stockData: latestData.niftyData, dispString: latestData.dispString, underlyingValue: latestData.underlyingValue }
-      }
+        console.log(myData);
+      } 
     }
 
     if (myData) {

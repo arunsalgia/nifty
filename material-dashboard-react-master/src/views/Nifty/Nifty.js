@@ -47,6 +47,8 @@ function leavingNifty(myConn) {
   myConn.disconnect();
 }
 
+var sockConn; 
+
 export default function Nifty() {
 
   // const history = useHistory();
@@ -77,13 +79,16 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+
 const headCells = [
   { id: 'ce_openInterest', numeric: true, disablePadding: true, label: 'OI' },
   { id: 'ce_changeinOpenInterest', numeric: true, disablePadding: true, label: 'Chng in OI' },
   { id: 'ce_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
+  { id: 'ce_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
   { id: 'ce_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
   { id: 'strikePrice', numeric: true, disablePadding: true, label: 'Strike Price' },
   { id: 'pe_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
+  { id: 'pe_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
   { id: 'pe_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
   { id: 'pe_changeinOpenInterest', numeric: true, disablePadding: true, label: 'Chng in OI' },
   { id: 'pe_openInterest', numeric: true, disablePadding: true, label: 'OI' },
@@ -94,24 +99,27 @@ function EnhancedTableHead(props) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
-  const THColumnStyle= { backgroundColor: '#EEEEEE' };
+  const THColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black" };
+  const THColumnStyleBorderTop= { backgroundColor: '#EEEEEE', borderTop: "1px solid black" };
+  const THColumnStyleBorderBottom= { backgroundColor: '#EEEEEE', borderBottom: "1px solid black" };
   return (
     <TableHead>
       <TableRow borderBottom="none" align="center">
         <TableCell style={THColumnStyle} align="center"
-            padding='none' colSpan={4}>CALLS</TableCell>
+            padding='none' colSpan={5}>CALLS</TableCell>
         <TableCell style={THColumnStyle} align="center"
             padding='none' colSpan={1}></TableCell>      
         <TableCell style={THColumnStyle} align="center"
-            padding='none' colSpan={4}>PUTS</TableCell>            
+            padding='none' colSpan={5}>PUTS</TableCell>            
       </TableRow>
-      <TableRow borderBottom="none" align="center">
+      <TableRow>
         {headCells.map((headCell) => (
           <TableCell
             style={THColumnStyle} 
             key={headCell.id}
-            align="center"
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            align="center" colSpan={1}
+            //padding={headCell.disablePadding ? 'none' : 'default'}
+            padding="none"
             sortDirection={orderBy === headCell.id ? order : false}
           >
           <TableSortLabel
@@ -275,7 +283,7 @@ const [rows, setNiftyDataArray] = React.useState([]);
 const [filterString, setfilterString] = React.useState("");
 const [page, setPage] = React.useState(0);
 const [dense, setDense] = React.useState(true);
-const [rowsPerPage, setRowsPerPage] = React.useState(25);
+const [rowsPerPage, setRowsPerPage] = React.useState(50);
 const [errorMessage, setErrorMessage ] = React.useState("");
 const [backDropOpen, setBackDropOpen] = React.useState(false);
 const [userMessage, setUserMessage] = React.useState("");
@@ -287,10 +295,8 @@ const [displayString, setDisplayString] = React.useState("");
 const [underlyingValue, setUnderlyingValue] = React.useState(0);
 const [margin, setMargin] = React.useState(2000);
 
-setUnderlyingValue
 
 var sendMessage = {page: "NSEDATA"};
-var sockConn; 
 
 useEffect(() => {       
 
@@ -370,10 +376,17 @@ useEffect(() => {
 
   async function readNSEData(nseName, expiryDate) {
     try {
-      var response = await axios.get(`/nifty/getnsedata/${nseName}/${expiryDate}`);
-      setNiftyDataArray(response.data.niftyData);
-      setmasterData(response.data.niftyData);
-      setDisplayString(response.data.dispString);
+      sendMessage["uid"] = localStorage.getItem("uid");
+      sendMessage["stockName"] = nseName;
+      sendMessage["expiryDate"] = expiryDate;
+      sendMessage["margin"] = margin;
+      console.log(sendMessage);
+      sockConn.emit("page", sendMessage);
+
+      // var response = await axios.get(`/nifty/getnsedata/${nseName}/${expiryDate}`);
+      // setNiftyDataArray(response.data.niftyData);
+      // setmasterData(response.data.niftyData);
+      // setDisplayString(response.data.dispString);
     } catch (e) {
         console.log(e)
     }
@@ -521,7 +534,7 @@ function ShowGmButtons() {
 function DisplayNse() {
   return (
     <Grid container spacing={3}>
-      <Grid item xs>
+      <Grid item xs display="flex" alignItems="center" flexDirection="column">
         <Typography align="right" className={classes.dispString} >NSE Name</Typography>
       </Grid>
       <Grid item xs>
@@ -532,11 +545,6 @@ function DisplayNse() {
         name="nsename"
         id="nsenameList"
         value={selectedNseName}
-        // displayEmpty 
-        // inputProps={{
-        //   name: 'age',
-        //   id: 'outlined-age-native-simple',
-        // }}
         onChange={handleSelectedNseName}>
         {nseNameList.map(x =><MenuItem key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
       </Select>
@@ -588,59 +596,50 @@ function DisplayTimeStamp() {
 function DisplaySelection() {
   return(
     <Grid container>
-      <Grid justify="right" item xs>
+      <Grid justify="right" item xs="2" >
         <Typography align="right" className={classes.dispString} >NSE Name</Typography>
       </Grid>
-      <Grid item xs>
+      <Grid justify="right" item xs>
         <Select labelId='nsename' id='nsename' variant="outlined" required 
-        // fullWidth
+        style={ {padding: "0px"} }
         size="small"
         label="NSE Name"
         name="nsename"
         id="nsenameList"
         value={selectedNseName}
-        // displayEmpty 
-        // inputProps={{
-        //   name: 'age',
-        //   id: 'outlined-age-native-simple',
-        // }}
         onChange={handleSelectedNseName}>
         {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
       </Select>
-    </Grid>
-    {/* <Grid item xs></Grid> */}
-    <Grid justify="right" item xs>
-        <Typography className={classes.dispString} >Expiry Date</Typography>
       </Grid>
-      <Grid item xs>
+      <Grid justify="right" item xs="2">
+        <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
+      </Grid>
+      <Grid justify="right" item xs>
         <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
+        style={ {padding: "0px"} }
         // fullWidth
         size="small"
         label="Expiry Date"
         name="expirydate"
         id="expirydateList"
         value={selectedExpiryDate}
-        // displayEmpty 
-        // inputProps={{
-        //   name: 'age',
-        //   id: 'outlined-age-native-simple',
-        // }}
         onChange={handleSelectedExpiryDate}>
         {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
         </Select>
       </Grid>
-      {/* <Grid item xs></Grid> */}
-      <Grid  item xs={8}>
-        <Typography align="right" className={classes.dispString} >{displayString}</Typography>
+      <Grid  item xs={5}>
+          <Typography align="right" className={classes.dispString} >{displayString}</Typography>
       </Grid>
-    </Grid>
+      <Grid  item xs></Grid>
+      </Grid>
   );
 }
+
 const PEColumnStyle= { backgroundColor: '#FFB6C1' };
 const CEColumnStyle= { backgroundColor: '#ADFF2F' };
-const SPColumnStyle= { backgroundColor: '#EEEEEE' };
-const PinkColumnStyle= { backgroundColor: '#FCE4EC' };
-const WhiteColumnStyle= { backgroundColor: '#F5F5F5' };
+const SPColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
+const PinkColumnStyle= { backgroundColor: '#FFF3E0', border: "1px solid black", margin: "0px"};
+const WhiteColumnStyle= { backgroundColor: '#FFFFFF', border: "1px solid black", margin: "0px"};
 
 
 function DisplayTableCell(props) {
@@ -652,7 +651,7 @@ function DisplayTableCell(props) {
   } else
     myStyle = SPColumnStyle;
   return (
-    <TableCell style={myStyle} component="th" scope="row" align="center" padding="none">
+    <TableCell style={myStyle} component="th" scope="row"  padding="none" align="center" >
       {props.data}
     </TableCell>
   );
@@ -684,27 +683,21 @@ function DisplayTableCell(props) {
             <TableBody>
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                // .filter(x => x.StationName.toLowerCase().includes('r'))
                 .map((row, index) => {
-                  // const isItemSelected = isSelected(row.name);
-                //   const isItemSelected = (selectedStation === row.StationName);
-                  // console.log(`Info on ${selectedStation} and ${row.StationName}`)
-                  // console.log(row);
                 const labelId = `enhanced-table-checkbox-${index}`;
+                //console.log(`${row.ce_openInterest}`)
                 return (
                   <TableRow
-                    // hover
-                    // onClick={(event) => handleClick(event, row.uid)}
-                    // role="checkbox"
-                  //   aria-checked={(selectedStation === row.StationName)}
                     tabIndex={-1}
                     key={row.strikePrice}>
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} cdata={row.ce_openInterest} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_openInterest} />
                   <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_changeinOpenInterest} />
                   <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_totalTradedVolume} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_impliedVolatility} />
                   <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_lastPrice} />
                   <DisplayTableCell dataType="SP" sp={row.strikePrice} data={row.strikePrice} />
                   <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_lastPrice} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_impliedVolatility} />
                   <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_totalTradedVolume} />
                   <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_changeinOpenInterest} />
                   <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_openInterest} />
@@ -712,16 +705,11 @@ function DisplayTableCell(props) {
                 );
                 })
               }
-              {/* {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 27 : 53) * emptyRows }}>
-                  <TableCell colSpan={2} />
-                </TableRow>
-              )} */}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[25, 50, 75, 100]}
+          rowsPerPageOptions={[50, 75, 100, 150, 200]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}

@@ -45,7 +45,7 @@ clientData = [];
 nseData = [];
 
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
-readNseTimer = 0;
+readNseTimer = 1000;
 
 CLIENTUPDATEINTERVAL=60; //
 clientUpdateCount=0;
@@ -472,10 +472,10 @@ WEEKEND = [0, 6]       // (SUN=0 and SAT=6 is weekend)
 STARTTIME = {hours: 9, minutes: 15}
 ENDTIME = {hours: 15, minutes: 30}
 
-const prevday = 0;
-const todayIsHoliday = false;
+let prevday = 0;
+let todayIsHoliday = false;
 
-nseWorkingTime = async function() {
+nseWorkingTime = function() {
  
   let currDate = new Date();
   let today = currDate.getDate();
@@ -484,17 +484,18 @@ nseWorkingTime = async function() {
   console.log(`Curr Time: ${currHour}:${currMinute}`);
 
   // if there is change of date then check if today it is holiday
-  if (today !== prevday) {
-    let tmp = await Holiday.findOne({
-      day: today, 
-      month: (currDate.getMonth()+1), 
-      year: currDate.getFullYear()
-    });
-    todayIsHoliday = (tmp !== null);
-    prevday = today;
-  }
+  // if (today !== prevday) {
+  //   let tmp = await Holiday.findOne({
+  //     day: today, 
+  //     month: (currDate.getMonth()+1), 
+  //     year: currDate.getFullYear()
+  //   });
+  //   todayIsHoliday = (tmp !== null);
+  //   prevday = today;
+  // }
   if (todayIsHoliday) return false;
 
+  // console.log("Not holiday")
   // check if it is weekend
   if (WEEKEND.includes(currDate.getDay()))  // if week end
     return false;

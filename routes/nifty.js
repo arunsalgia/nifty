@@ -147,7 +147,6 @@ function get_nseindia_URL(nRec)
 }
 
 
-
 async function axiosNiftyData(iREC) {
   // first get the url string to get data
   let myUrl = get_nseindia_URL(iREC);
@@ -387,19 +386,19 @@ cron.schedule('*/1 * * * * *', () => {
     readNseTimer = 0;
     console.log("======== nse stock update start");
     // if NSE is working then get data
-    if (nseWorkingTime()) {
+    let sts = nseWorkingTime();
+    // console.log(`NEW Working time: ${sts}`)
+    if (sts) {
+      // console.log("Get nSE data");
       readalldata();
     }
-    // // console.log("nse read update over")
   }
 
   if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
-    clientUpdateCount = 0;
+    clientUpdateCount = 0; 
     console.log("======== clinet update start");
     console.log(connectionArray);
     sendClientData(); 
-
-    // console.log("client update over")
   }
 });
 

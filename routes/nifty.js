@@ -380,7 +380,7 @@ async function sendClientData() {
 // schedule task
 
 
-cron.schedule('*/1 * * * * *', async () => {
+cron.schedule('*/1 * * * *', async () => {
   if (!db_connection) {
     console.log("============= No mongoose connection");
     return;

@@ -12,6 +12,7 @@ axios = require('axios');
 const { promisify } = require('util')
 sleep = promisify(setTimeout)
 app = express();
+PRODUCTION=false;
 
 PORT = process.env.PORT || 1961;
 http = require('http');
@@ -45,9 +46,11 @@ clientData = [];
 nseData = [];
 
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
+READNSEINTERVALMINUTES=15;
 readNseTimer = 1000;
 
 CLIENTUPDATEINTERVAL=60; //
+CLIENTUPDATEINTERVALMINUTES=1;
 clientUpdateCount=0;
 
 
@@ -336,10 +339,20 @@ const AMPM = [
  * @param {Date} d The date
  */
 const TZ_IST={hours: 5, minutes: 30};
+
+getISTtime = function () {
+  let currDate = new Date();
+  // on production server. current time is GST. Need to add IST time zone for calculation
+  if (PRODUCTION) {
+    currDate.setHours(currDate.getHours()+TZ_IST.hours);
+    currDate.setMinutes(currDate.getMinutes()+TZ_IST.minutes);
+  }
+  return currDate
+}  
+
 cricDate = function (d)  {
-  var xxx = new Date(d.getTime());
-  xxx.setHours(xxx.getHours()+TZ_IST.hours);
-  xxx.setMinutes(xxx.getMinutes()+TZ_IST.minutes);
+  var xxx = getISTtime();
+
   var myHour = xxx.getHours();
   var myampm = AMPM[myHour];
   if (myHour > 12) myHour -= 12;
@@ -475,27 +488,29 @@ ENDTIME = {hours: 15, minutes: 30}
 let prevday = 0;
 let todayIsHoliday = false;
 
-nseWorkingTime = function() {
+ nseWorkingTime = async function() {
  
-  let currDate = new Date();
+  let currDate = getISTtime();
+
   let today = currDate.getDate();
   let currHour = currDate.getHours();
   let currMinute = currDate.getMinutes();
   console.log(`Curr Time: ${currHour}:${currMinute}`);
-
+  
   // if there is change of date then check if today it is holiday
-  // if (today !== prevday) {
-  //   let tmp = await Holiday.findOne({
-  //     day: today, 
-  //     month: (currDate.getMonth()+1), 
-  //     year: currDate.getFullYear()
-  //   });
-  //   todayIsHoliday = (tmp !== null);
-  //   prevday = today;
-  // }
-  if (todayIsHoliday) return false;
+  if (today !== prevday) {
+    let tmp = await Holiday.findOne({
+      day: today, 
+      month: (currDate.getMonth()+1), 
+      year: currDate.getFullYear()
+    });
+    todayIsHoliday = (tmp !== null);
+    prevday = today;
+  }
 
+  if (todayIsHoliday) return false;
   // console.log("Not holiday")
+  
   // check if it is weekend
   if (WEEKEND.includes(currDate.getDay()))  // if week end
     return false;

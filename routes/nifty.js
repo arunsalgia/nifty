@@ -138,11 +138,15 @@ const nonNiftyUrl = `https://www1.nseindia.com/live_market/dynaContent/live_watc
 // const niftyUrl = `https://www1.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10006&symbol=NIFTY&symbol=NIFTY&instrument=-&date=-&segmentLink=17&symbolCount=2&segmentLink=17`;
 const niftyUrl_prefix = "https://www.nseindia.com/api/option-chain-indices?symbol=";
 const niftyUrl_postfix = "";
+// / Equivalent to `axios.get('https://httpbin.org/get?answer=42')`
+// const res = await axios.get('https://httpbin.org/get', { params: { answer: 42 } });
+
 
 function get_nseindia_URL(nRec)
 { 
   // console.log(nRec);
-  let myUrl = niftyUrl_prefix + nRec.niftyName + niftyUrl_postfix;
+  //let myUrl = niftyUrl_prefix + nRec.niftyName + niftyUrl_postfix;
+  let myUrl = "'https://www.nseindia.com/api/option-chain-indices', { params: { symbol: 'NIFTY' } }"
   return myUrl;
 }
 
@@ -153,7 +157,8 @@ async function axiosNiftyData(iREC) {
   console.log(myUrl);
   try {
     console.log(`AXIOS call ${myUrl}`)
-    let niftyres = await axios.get(myUrl);
+    //let niftyres = await axios.get(myUrl);
+    let niftyres = await axios.get('https://www.nseindia.com/api/option-chain-indices', { params: { symbol: 'NIFTY' } });
     console.log("git nse data from site using AXIOS")
     return {sts: true, data: niftyres.data};
   } catch (error) {
@@ -375,19 +380,20 @@ async function sendClientData() {
 // schedule task
 
 
-cron.schedule('*/1 * * * * *', () => {
+cron.schedule('*/1 * * * * *', async () => {
   if (!db_connection) {
     console.log("============= No mongoose connection");
     return;
   }   
-
-  //console.log("in schedule")
-
-  if (++readNseTimer >= READNSEINTERVAL) {
+  let currtime = getISTtime();
+  let myMinutes = currtime.getMinutes()
+  
+  // if (++readNseTimer >= READNSEINTERVAL) {
+  if ((myMinutes % READNSEINTERVALMINUTES) == 0) {
     readNseTimer = 0;
     console.log("======== nse stock update start");
     // if NSE is working then get data
-    let sts = nseWorkingTime();
+    let sts = await nseWorkingTime();
     // console.log(`NEW Working time: ${sts}`)
     if (sts) {
       // console.log("Get nSE data");
@@ -395,7 +401,8 @@ cron.schedule('*/1 * * * * *', () => {
     }
   }
 
-  if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
+  // if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
+  if ((myMinutes % CLIENTUPDATEINTERVALMINUTES) == 0) {
     clientUpdateCount = 0; 
     console.log("======== clinet update start");
     console.log(connectionArray);

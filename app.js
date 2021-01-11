@@ -36,7 +36,7 @@ indexRouter = require('./routes/index');
 usersRouter = require('./routes/user');
 niftyRouter = require('./routes/nifty');
 
-nseRetry=5    // retry count 
+nseRetry=5   // retry count 
 nseSleep=1000 // sleep for 1 second and try to fetch data from NSE if error while getching
 
 // maintaing list of all active client connection
@@ -46,7 +46,7 @@ clientData = [];
 nseData = [];
 
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
-READNSEINTERVALMINUTES=15;
+READNSEINTERVALMINUTES=1;
 readNseTimer = 1000;
 
 CLIENTUPDATEINTERVAL=60; //
@@ -496,7 +496,8 @@ let todayIsHoliday = false;
   let currHour = currDate.getHours();
   let currMinute = currDate.getMinutes();
   console.log(`Curr Time: ${currHour}:${currMinute}`);
-  
+  return true;
+
   // if there is change of date then check if today it is holiday
   if (today !== prevday) {
     let tmp = await Holiday.findOne({

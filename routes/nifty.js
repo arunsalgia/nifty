@@ -145,13 +145,34 @@ const niftyUrl_postfix = "";
 function get_nseindia_URL(nRec)
 { 
   // console.log(nRec);
-  //let myUrl = niftyUrl_prefix + nRec.niftyName + niftyUrl_postfix;
-  let myUrl = "'https://www.nseindia.com/api/option-chain-indices', { params: { symbol: 'NIFTY' } }"
+  let myUrl = niftyUrl_prefix + nRec.niftyName + niftyUrl_postfix;
+  // let myUrl = "'https://www.nseindia.com/api/option-chain-indices', { params: { symbol: 'NIFTY' } }"
   return myUrl;
 }
 
-
 async function axiosNiftyData(iREC) {
+  // first get the url string to get data
+  let myUrl = get_nseindia_URL(iREC);
+  console.log(myUrl);
+  console.log(`AXIOS call ${myUrl}`);
+  try {
+    // let niftyres = await axios.get(myUrl,{
+    //   proxy: {
+    //     host: '127.0.0.1',
+    //     port: 80
+    //   }});
+    let niftyres = await axios.get(myUrl);
+    console.log(niftyres.status);
+    // console.log(niftyres.data);
+    return {sts: true, data: niftyres.data};
+  } catch (error) {
+    console.log("error from site using AXIOS")
+    console.log(error);
+    return {sts: false, data: []};
+  }
+}
+
+async function noproxy_axiosNiftyData(iREC) {
   // first get the url string to get data
   let myUrl = get_nseindia_URL(iREC);
   console.log(myUrl);
@@ -187,11 +208,13 @@ return {sts: true, data: json};
 
 async function fetchNiftyData(iREC) {
   let retryCount = nseRetry;
-  while (retryCount-- >= 0) {
+  while (retryCount > 0) {
     console.log(retryCount);
     let xxx = await axiosNiftyData(iREC);
+    console.log(`Status is ${xxx.sts}`);
     if (xxx.sts) return (xxx.data);
     // console.log("about to sleep");
+    --retryCount;
     await sleep(nseSleep);
   }
   return;
@@ -388,8 +411,7 @@ cron.schedule('*/1 * * * *', async () => {
   let currtime = getISTtime();
   let myMinutes = currtime.getMinutes()
   
-  // if (++readNseTimer >= READNSEINTERVAL) {
-  if ((myMinutes % READNSEINTERVALMINUTES) == 0) {
+  if ((myMinutes % READNSEINTERVALMINUTES) === 0) {
     readNseTimer = 0;
     console.log("======== nse stock update start");
     // if NSE is working then get data
@@ -400,9 +422,8 @@ cron.schedule('*/1 * * * *', async () => {
       readalldata();
     }
   }
-
-  // if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
-  if ((myMinutes % CLIENTUPDATEINTERVALMINUTES) == 0) {
+  
+  if ((myMinutes % CLIENTUPDATEINTERVALMINUTES) === 0) {
     clientUpdateCount = 0; 
     console.log("======== clinet update start");
     console.log(connectionArray);

@@ -12,7 +12,7 @@ axios = require('axios');
 const { promisify } = require('util')
 sleep = promisify(setTimeout)
 app = express();
-PRODUCTION=false;
+PRODUCTION=true;
 
 PORT = process.env.PORT || 1961;
 http = require('http');
@@ -46,11 +46,15 @@ clientData = [];
 nseData = [];
 
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
-READNSEINTERVALMINUTES=1;
-readNseTimer = 1000;
-
 CLIENTUPDATEINTERVAL=60; //
+
+if (PRODUCTION)
+READNSEINTERVALMINUTES=15;
+else
+READNSEINTERVALMINUTES=1;
 CLIENTUPDATEINTERVALMINUTES=1;
+
+readNseTimer = 0;
 clientUpdateCount=0;
 
 
@@ -118,9 +122,6 @@ app.use('/user', usersRouter);
 app.use('/nifty', niftyRouter);
 
 // ---- start of globals
-// connection string for database
-//mongoose_conn_string = "mongodb+srv://akshama:akshama@cluster0-urc6p.mongodb.net/IPL2020";
-mongoose_conn_string = "mongodb+srv://ArpanaSalgia:Arpana%4001@niftydata.alj4u.mongodb.net/NIFTY?authSource=admin&replicaSet=atlas-kvq10m-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true"
 
 //Schema
 //Schema
@@ -277,6 +278,10 @@ serverUpdateInterval = 10; // in seconds. INterval after which data to be update
 // ----------------  end of globals
 
 // make mogoose connection
+
+// connection string for database
+//mongoose_conn_string = "mongodb+srv://akshama:akshama@cluster0-urc6p.mongodb.net/IPL2020";
+mongoose_conn_string = "mongodb+srv://ArpanaSalgia:Arpana%4001@niftydata.alj4u.mongodb.net/NIFTY?authSource=admin&replicaSet=atlas-kvq10m-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true"
 
 // Create the database connection 
 //mongoose.connect(mongoose_conn_string);
@@ -496,7 +501,7 @@ let todayIsHoliday = false;
   let currHour = currDate.getHours();
   let currMinute = currDate.getMinutes();
   console.log(`Curr Time: ${currHour}:${currMinute}`);
-  return true;
+  if (!PRODUCTION) return true;
 
   // if there is change of date then check if today it is holiday
   if (today !== prevday) {

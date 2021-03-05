@@ -1,3 +1,5 @@
+const { default: axios } = require('axios');
+const { getISTtime, nseWorkingTime } = require('./niftyfunctions'); 
 var router = express.Router();
 let NiftyRes;
 // const NSE_NIFTY = {"_id":"5fd88d6688e28d0c64ecd6d0","nid":2,"niftyName":"NIFTY","niftyCode":-10006,"__v":0};
@@ -162,7 +164,7 @@ async function axiosNiftyData(iREC) {
     //     port: 80
     //   }});
     let niftyres = await axios.get(myUrl);
-    console.log(niftyres.status);
+    console.log(`Status is ${niftyres.status}`);
     // console.log(niftyres.data);
     return {sts: true, data: niftyres.data};
   } catch (error) {
@@ -411,7 +413,7 @@ cron.schedule('*/1 * * * *', async () => {
   let currtime = getISTtime();
   let myMinutes = currtime.getMinutes()
   
-  if ((myMinutes % READNSEINTERVALMINUTES) === 0) {
+  //if ((myMinutes % READNSEINTERVALMINUTES) === 0) {
     readNseTimer = 0;
     console.log("======== nse stock update start");
     // if NSE is working then get data
@@ -421,9 +423,10 @@ cron.schedule('*/1 * * * *', async () => {
       // console.log("Get nSE data");
       readalldata();
     }
-  }
+  //}
   
-  if ((myMinutes % CLIENTUPDATEINTERVALMINUTES) === 0) {
+  //if ((myMinutes % CLIENTUPDATEINTERVALMINUTES) === 0) {
+  if (false) {
     clientUpdateCount = 0; 
     console.log("======== clinet update start");
     console.log(connectionArray);

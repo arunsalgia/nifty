@@ -12,7 +12,7 @@ axios = require('axios');
 const { promisify } = require('util')
 sleep = promisify(setTimeout)
 app = express();
-PRODUCTION=true;
+PRODUCTION=false;
 
 PORT = process.env.PORT || 1961;
 http = require('http');
@@ -343,17 +343,6 @@ const AMPM = [
   /**
  * @param {Date} d The date
  */
-const TZ_IST={hours: 5, minutes: 30};
-
-getISTtime = function () {
-  let currDate = new Date();
-  // on production server. current time is GST. Need to add IST time zone for calculation
-  if (PRODUCTION) {
-    currDate.setHours(currDate.getHours()+TZ_IST.hours);
-    currDate.setMinutes(currDate.getMinutes()+TZ_IST.minutes);
-  }
-  return currDate
-}  
 
 cricDate = function (d)  {
   var xxx = getISTtime();
@@ -486,55 +475,6 @@ sendEmailToUser = async function(userEmailId, userSubject, userText) {
 }
 
 
-WEEKEND = [0, 6]       // (SUN=0 and SAT=6 is weekend)
-STARTTIME = {hours: 9, minutes: 15}
-ENDTIME = {hours: 15, minutes: 30}
-
-let prevday = 0;
-let todayIsHoliday = false;
-
- nseWorkingTime = async function() {
- 
-  let currDate = getISTtime();
-
-  let today = currDate.getDate();
-  let currHour = currDate.getHours();
-  let currMinute = currDate.getMinutes();
-  console.log(`Curr Time: ${currHour}:${currMinute}`);
-  if (!PRODUCTION) return true;
-
-  // if there is change of date then check if today it is holiday
-  if (today !== prevday) {
-    let tmp = await Holiday.findOne({
-      day: today, 
-      month: (currDate.getMonth()+1), 
-      year: currDate.getFullYear()
-    });
-    todayIsHoliday = (tmp !== null);
-    prevday = today;
-  }
-
-  if (todayIsHoliday) return false;
-  // console.log("Not holiday")
-  
-  // check if it is weekend
-  if (WEEKEND.includes(currDate.getDay()))  // if week end
-    return false;
-
-  // working day thus cehck if time is in range i.e. is it is working hour of NSE
-
-  if (currHour < STARTTIME.hours) 
-    return false;
-  if (currHour > ENDTIME.hours)
-    return false;
-  if ((currHour === STARTTIME.hours) && (currMinute < STARTTIME.minutes))
-    return false;
-  if ((currHour === ENDTIME.hours) && (currMinute > ENDTIME.minutes))
-    return false;
-
-  console.log("Working time");
-  return true;
-}
 
 revDate = function (myDate) {
   let xxx = myDate.split('-');

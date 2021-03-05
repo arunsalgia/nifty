@@ -163,7 +163,11 @@ async function axiosNiftyData(iREC) {
     //     host: '127.0.0.1',
     //     port: 80
     //   }});
-    let niftyres = await axios.get(myUrl);
+    let niftyres = await axios.get(myUrl,{
+      headers: {"Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+      }
+    });
     console.log(`Status is ${niftyres.status}`);
     // console.log(niftyres.data);
     return {sts: true, data: niftyres.data};

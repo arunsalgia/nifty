@@ -156,7 +156,7 @@ async function axiosNiftyData(iREC) {
   // first get the url string to get data
   let myUrl = get_nseindia_URL(iREC);
   console.log(myUrl);
-  console.log(`AXIOS call ${myUrl}`);
+  console.log(`AXIOS call------- ${myUrl}`);
   try {
     // let niftyres = await axios.get(myUrl,{
     //   proxy: {

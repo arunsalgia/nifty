@@ -164,11 +164,11 @@ async function axiosNiftyData(iREC) {
     //     port: 80
     //   }});
     let niftyres = await axios.get(myUrl,{
-      headers: {"Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+      headers: {"Access-Control-Allow-Origin": "*"
+        //"Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
       }
     });
-    console.log(`Status is ${niftyres.status}`);
+    //console.log(`Status is ${JSON.stringify(niftyres)}`);
     // console.log(niftyres.data);
     return {sts: true, data: niftyres.data};
   } catch (error) {
@@ -422,6 +422,7 @@ cron.schedule('*/1 * * * *', async () => {
     console.log("======== nse stock update start");
     // if NSE is working then get data
     let sts = await nseWorkingTime();
+    sts = true;
     // console.log(`NEW Working time: ${sts}`)
     if (sts) {
       // console.log("Get nSE data");

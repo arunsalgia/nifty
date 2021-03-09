@@ -1,13 +1,5 @@
 const { sortedIndexOf } = require("lodash");
 const { route, use } = require(".");
-const {getLoginName, getDisplayName, cricDate,
-  encrypt, decrypt, dbencrypt, dbdecrypt,
-	dbToSvrText, svrToDbText,
-	sendCricMail,
-  userAlive,
-  getBlankNSEDataRec, getBlankCurrNSEDataRec,
-  revDate, datePriceKey,
-  getISTtime, nseWorkingTime,} = require("./niftyfunctions")
 router = express.Router();
 // const allUSER = 99999999;
 let UserRes;
@@ -92,13 +84,11 @@ router.get('/login/:uName/:uPassword', async function (req, res, next) {
   var {uName, uPassword } = req.params;
   var isValid = false;
   let lName = getLoginName(uName);
-  console.log(lName);
   let uRec = await User.findOne({ userName:  lName});
-  console.log(uRec)
+  // console.log(uRec)
   if (await userAlive(uRec)) 
     isValid = (uPassword === uRec.password);
 
-  console.log(isValid);
   if (isValid) sendok(uRec);
   else         senderr(602, "Invalid User name or password");
 });

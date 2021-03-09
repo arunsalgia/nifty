@@ -324,6 +324,7 @@ useEffect(() => {
         console.log("In DISPLAY STRING");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
+        console.log(dispStr);
         setDisplayString(dispStr);
       });
 

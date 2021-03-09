@@ -104,11 +104,13 @@ export default function SignIn() {
         window.localStorage.setItem("uid", response.data.uid)
         window.localStorage.setItem("displayName", response.data.displayName);
         window.localStorage.setItem("userName", response.data.userName);
+        window.localStorage.setItem("userPlan", response.data.userPlan);
+        setTab(1);  // show NIFTY be default
         // setUser({ uid: myUID, admin: response.data.admin });
         // cdRefresh(true);
-        let newPos = specialSetPos();
+        //let newPos = specialSetPos();
         //if (newPos < 0) newPos = 0;
-        setTab(newPos);
+        //setTab(newPos);
       }
     } catch (err) {
       setErrorMessage("Invalid Username / Password");

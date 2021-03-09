@@ -1,8 +1,9 @@
 const algorithm = 'aes-256-ctr';
 const akshusecretKey = 'TihomHahs@UhskaHahs#19941995Bona';
 const ankitsecretKey = 'Tikna@Itark#1989#1993Bonaventure';
+
 const iv = '05bd9fbf50b124cd2bad8f31ca1e9ca4';           //crypto.randomBytes(16);
-USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2}
+//zTvzr3p67VC61jmV54rIYu1545x4TlY
 
 const encrypt = (text) => {
 
@@ -185,175 +186,11 @@ async function nseWorkingTime() {
   return true;
 }
 
-function getBlankNSEDataRec() {
-  let myblankRec = new NSEData();
-  myblankRec.nseName = "";
-  myblankRec.expiryDate = "";
-  myblankRec.strikePrice = 0;
-  myblankRec.time = 0;
-  myblankRec.underlyingValue = 0;
-  myblankRec.pe_openInterest = 0;
-  myblankRec.pe_changeinOpenInterest = 0;
-  myblankRec.pe_totalTradedVolume = 0;
-  myblankRec.pe_impliedVolatility = 0;
-  myblankRec.pe_lastPrice = 0;
-  myblankRec.pe_pChange = 0;
-  myblankRec.pe_bidQty = 0;
-  myblankRec.pe_bidprice = 0;
-  myblankRec.pe_askQty = 0;
-  myblankRec.pe_askPrice = 0;
-  myblankRec.ce_openInterest = 0;
-  myblankRec.ce_changeinOpenInterest = 0;
-  myblankRec.ce_totalTradedVolume = 0;
-  myblankRec.ce_impliedVolatility = 0;
-  myblankRec.ce_lastPrice = 0;
-  myblankRec.ce_pChange = 0;
-  myblankRec.ce_bidQty = 0;
-  myblankRec.ce_bidprice = 0;
-  myblankRec.ce_askQty = 0;
-  myblankRec.ce_askPrice = 0;
-  // console.log(myblankRec);
-  return myblankRec;
-
-}
-
-function getBlankNSEDataRec() {
-  let myblankRec = new NSEData();
-  myblankRec.nseName = "";
-  myblankRec.expiryDate = "";
-  myblankRec.strikePrice = 0;
-  myblankRec.time = 0;
-  myblankRec.underlyingValue = 0;
-  myblankRec.pe_openInterest = 0;
-  myblankRec.pe_changeinOpenInterest = 0;
-  myblankRec.pe_totalTradedVolume = 0;
-  myblankRec.pe_impliedVolatility = 0;
-  myblankRec.pe_lastPrice = 0;
-  myblankRec.pe_pChange = 0;
-  myblankRec.pe_bidQty = 0;
-  myblankRec.pe_bidprice = 0;
-  myblankRec.pe_askQty = 0;
-  myblankRec.pe_askPrice = 0;
-  myblankRec.ce_openInterest = 0;
-  myblankRec.ce_changeinOpenInterest = 0;
-  myblankRec.ce_totalTradedVolume = 0;
-  myblankRec.ce_impliedVolatility = 0;
-  myblankRec.ce_lastPrice = 0;
-  myblankRec.ce_pChange = 0;
-  myblankRec.ce_bidQty = 0;
-  myblankRec.ce_bidprice = 0;
-  myblankRec.ce_askQty = 0;
-  myblankRec.ce_askPrice = 0;
-  return myblankRec;
-}
-
-function getBlankCurrNSEDataRec() {
-  //console.log("Blank NSE Data");
-  let myblankRec = new CurrNSEData();
-  myblankRec.nseName = "";
-  myblankRec.expiryDate = "";
-  myblankRec.strikePrice = 0;
-  myblankRec.time = 0;
-  myblankRec.underlyingValue = 0;
-  myblankRec.pe_openInterest = 0;
-  myblankRec.pe_changeinOpenInterest = 0;
-  myblankRec.pe_totalTradedVolume = 0;
-  myblankRec.pe_impliedVolatility = 0;
-  myblankRec.pe_lastPrice = 0;
-  myblankRec.pe_pChange = 0;
-  myblankRec.pe_bidQty = 0;
-  myblankRec.pe_bidprice = 0;
-  myblankRec.pe_askQty = 0;
-  myblankRec.pe_askPrice = 0;
-  myblankRec.ce_openInterest = 0;
-  myblankRec.ce_changeinOpenInterest = 0;
-  myblankRec.ce_totalTradedVolume = 0;
-  myblankRec.ce_impliedVolatility = 0;
-  myblankRec.ce_lastPrice = 0;
-  myblankRec.ce_pChange = 0;
-  myblankRec.ce_bidQty = 0;
-  myblankRec.ce_bidprice = 0;
-  myblankRec.ce_askQty = 0;
-  myblankRec.ce_askPrice = 0;
-  return myblankRec;
-}
-
-function revDate(myDate) {
-  let xxx = myDate.split('-');
-  let myIdx = SHORTMONTHNAME.indexOf(xxx[1].substr(0,3).toUpperCase()).toString();
-  if (myIdx.length === 1) myIdx = "0" + myIdx;
-  return(xxx[2]+myIdx+xxx[0]);
-}
-
-const zerostr = "000000";
-function datePriceKey(myDate, strikePrice) {
-  let p1 = revDate(myDate);
-  let p3 = strikePrice.toString();
-  let p2 = (p3.length < 5) ? zerostr.substr(0, 5-p3.length) : "";
-  return(`${p1}-${p2}${p3}`)
-}
-
-async function userAlive(uRec) {
-  let sts = false;
-  if (uRec) {
-    switch (uRec.userPlan) {
-      case USERTYPE.SUPERUSER:
-        sts = true;
-        break;
-      case  USERTYPE.PAID:
-        sts = true;
-        break;
-      case  USERTYPE.TRIAL:
-        let cTime = new Date();
-        await fetchMasterSettings(); 
-        // console.log(masterRec);
-        let tTime = new Date(masterRec.trialExpiry);
-        // console.log(cTime);
-        // console.log(tTime);
-        sts =  (tTime.getTime() > cTime.getTime());
-        break;
-    }
-  }
-  return sts;
-}
-
-// date time constants
-
-minutesIST = 330;    // IST time zone in minutes 330 i.e. GMT+5:30
-minutesDay = 1440;   // minutes in a day 24*60 = 1440
-
-const AMPM = [
-  "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM",
-  "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM"
-];
-
-SHORTMONTHNAME = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-MONTHNAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-weekDays = new Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
-weekShortDays = new Array("Sun", "Mon", "Tue", "Wedn", "Thu", "Fri", "Sat");
-
-  /**
- * @param {Date} d The date
- */
-
-function cricDate(d)  {
-  var xxx = getISTtime();
-
-  var myHour = xxx.getHours();
-  var myampm = AMPM[myHour];
-  if (myHour > 12) myHour -= 12;
-  var tmp = `${MONTHNAME[xxx.getMonth()]} ${("0" + xxx.getDate()).slice(-2)} ${("0" + myHour).slice(-2)}:${("0" +  xxx.getMinutes()).slice(-2)}${myampm}`
-  return tmp;
-}
-
-
+  
 module.exports = {
-  getLoginName, getDisplayName, cricDate,
+  getLoginName, getDisplayName,
   encrypt, decrypt, dbencrypt, dbdecrypt,
 	dbToSvrText, svrToDbText,
 	sendCricMail,
-  userAlive,
-  getBlankNSEDataRec, getBlankCurrNSEDataRec,
-  revDate, datePriceKey,
   getISTtime, nseWorkingTime,
 }; 

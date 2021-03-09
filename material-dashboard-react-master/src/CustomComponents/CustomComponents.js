@@ -166,7 +166,7 @@ export class Copyright extends React.Component {
 }
 
 export function CadSysLogo () {
-  let mylogo = `${process.env.PUBLIC_URL}/logo192.png`;
+  let mylogo = `${process.env.PUBLIC_URL}/VS.JPG`;
   const classes = useStyles();
   return (
     <Avatar className={classes.avatar}  src={mylogo}/>

@@ -12,7 +12,7 @@ import routes from "routes.js";
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 import bgImage from "assets/img/sidebar-2.jpg";
 // import logo from "assets/img/reactlogo.png";
-import logo from "assets/img/cricdream2.png";
+import logo from "assets/img/VS.JPG";
 import SignUp from "views/Login/SignUp.js";
 import SignIn from "views/Login/SignIn.js";
 import ForgotPassword from "views/Login/ForgotPassword.js";

@@ -14,8 +14,7 @@ sleep = promisify(setTimeout)
 app = express();
 PRODUCTION=false;
 
-PORT = process.env.PORT || 1965;
-console.log(`Port is ${PORT}`);
+PORT = process.env.PORT || 1961;
 http = require('http');
 httpServer = http.createServer(app);
 io = require('socket.io')(httpServer, {
@@ -47,7 +46,7 @@ clientData = [];
 nseData = [];
 
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
-CLIENTUPDATEINTERVAL=10; //
+CLIENTUPDATEINTERVAL=60; //
 
 if (PRODUCTION)
 READNSEINTERVALMINUTES=15;
@@ -125,6 +124,7 @@ app.use('/nifty', niftyRouter);
 // ---- start of globals
 
 //Schema
+//Schema
 MasterSettingsSchema = mongoose.Schema ({
   msid: Number,
   trialExpiry: String,
@@ -194,25 +194,59 @@ HolidaySchema = mongoose.Schema({
   yearMonthDay: String, /// string in YYYYMMDD format. It can be used for sorting
 });
 
+// table name will be <tournament Name>_brief r.g. IPL2020_brief
+
 // models
 MasterData = mongoose.model("MasterSettings", MasterSettingsSchema)
 User = mongoose.model("users", UserSchema);
 NiftyNames = mongoose.model("niftynames", NiftySchema);
-Holiday = mongoose.model("holiday", HolidaySchema)
-// for historical
-NSEData = mongoose.model("nse_data", NSEDataSchema);
+NSEData = mongoose.model("nse_data", NSEDataSchema)
 ExpiryDate = mongoose.model("expirydate", ExpiryDateSchema)
-// for current display
-CurrNSEData = mongoose.model("curr_nse_data", NSEDataSchema);
-CurrExpiryDate = mongoose.model("curr_expirydate", ExpiryDateSchema)
+Holiday = mongoose.model("holiday", HolidaySchema)
 
+getBlankNSEDataRec = function () {
+  let myblankRec = new NSEData();
+  myblankRec.nseName = "";
+  myblankRec.expiryDate = "";
+  myblankRec.strikePrice = 0;
+  myblankRec.time = 0;
+  myblankRec.underlyingValue = 0;
+  myblankRec.pe_openInterest = 0;
+  myblankRec.pe_changeinOpenInterest = 0;
+  myblankRec.pe_totalTradedVolume = 0;
+  myblankRec.pe_impliedVolatility = 0;
+  myblankRec.pe_lastPrice = 0;
+  myblankRec.pe_pChange = 0;
+  myblankRec.pe_bidQty = 0;
+  myblankRec.pe_bidprice = 0;
+  myblankRec.pe_askQty = 0;
+  myblankRec.pe_askPrice = 0;
+  myblankRec.ce_openInterest = 0;
+  myblankRec.ce_changeinOpenInterest = 0;
+  myblankRec.ce_totalTradedVolume = 0;
+  myblankRec.ce_impliedVolatility = 0;
+  myblankRec.ce_lastPrice = 0;
+  myblankRec.ce_pChange = 0;
+  myblankRec.ce_bidQty = 0;
+  myblankRec.ce_bidprice = 0;
+  myblankRec.ce_askQty = 0;
+  myblankRec.ce_askPrice = 0;
+  // console.log(myblankRec);
+  return myblankRec;
 
+}
 
 router = express.Router();
 
 db_connection = false;      // status of mongoose connection
 connectRequest = true;
 // constant used by routers
+minutesIST = 330;    // IST time zone in minutes 330 i.e. GMT+5:30
+minutesDay = 1440;   // minutes in a day 24*60 = 1440
+SHORTMONTHNAME = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+MONTHNAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+weekDays = new Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
+weekShortDays = new Array("Sun", "Mon", "Tue", "Wedn", "Thu", "Fri", "Sat");
 
 SENDRES = 1;        // send OK response
 SENDSOCKET = 2;     // send data on socket
@@ -223,9 +257,19 @@ DBFETCHERR = 991;
 CRICFETCHERR = 992;
 ERR_NODB = "No connection to CricDream database";
 
+// Bid amount given to user when he/she joins group 1
+GROUP1_MAXBALANCE = 1000;
+allUSER = 99999999;
 
+// Number of hours after which match details to be read frpom cricapi.
+MATCHREADINTERVAL = 3;
 
-// variables rreuiqred by timerma
+// Wallet 
+
+// match id for record which has bonus score for  Maximum Run and Maximum Wicket
+// Note that it has be be set -ve
+
+// variables rreuiqred by timer
 serverTimer = 0;
 
 // time interval for scheduler
@@ -292,12 +336,157 @@ httpServer.listen(PORT, () => {
 
 // global functions
 
+const AMPM = [
+  "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM", "AM",
+  "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM", "PM"
+];
+  /**
+ * @param {Date} d The date
+ */
+
+cricDate = function (d)  {
+  var xxx = getISTtime();
+
+  var myHour = xxx.getHours();
+  var myampm = AMPM[myHour];
+  if (myHour > 12) myHour -= 12;
+  var tmp = `${MONTHNAME[xxx.getMonth()]} ${("0" + xxx.getDate()).slice(-2)} ${("0" + myHour).slice(-2)}:${("0" +  xxx.getMinutes()).slice(-2)}${myampm}`
+  return tmp;
+}
+
+const notToConvert = ['XI', 'ARUN']
+/**
+ * @param {string} t The date
+ */
+
+cricTeamName = function (t)  {
+  var tmp = t.split(' ');
+  for(i=0; i < tmp.length; ++i)  {
+    var x = tmp[i].trim().toUpperCase();
+    if (notToConvert.includes(x))
+      tmp[i] = x;
+    else
+      tmp[i] = x.substr(0, 1) + x.substr(1, x.length - 1).toLowerCase();
+  }
+  return tmp.join(' ');
+}
+
+getLoginName = function (name) {
+  return name.toLowerCase().replace(/\s/g, "");
+}
+
+getDisplayName = function (name) {
+  var xxx = name.split(" ");
+  xxx.forEach( x => { 
+    x = x.trim()
+    x = x.substr(0,1).toUpperCase() +
+      (x.length > 1) ? x.substr(1, x.length-1).toLowerCase() : "";
+  });
+  return xxx.join(" ");
+}
+
 masterRec = null;
 joinOffer=500;
 
 fetchMasterSettings = async function () {
-  // if (masterRec === null) {
     let tmp = await MasterData.find();
     masterRec = tmp[0];  
-  // }  
+}
+
+USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2}
+
+userAlive = async function (uRec) {
+  let sts = false;
+  if (uRec) {
+    switch (uRec.userPlan) {
+      case USERTYPE.SUPERUSER:
+        sts = true;
+        break;
+      case  USERTYPE.PAID:
+        sts = true;
+        break;
+      case  USERTYPE.TRIAL:
+        let cTime = new Date();
+        await fetchMasterSettings(); 
+        // console.log(masterRec);
+        let tTime = new Date(masterRec.trialExpiry);
+        // console.log(cTime);
+        // console.log(tTime);
+        sts =  (tTime.getTime() > cTime.getTime());
+        break;
+    }
+  }
+  return sts;
+}
+
+
+
+
+
+EMAILERROR="";
+CRICDREAMEMAILID='cricketpwd@gmail.com';
+sendEmailToUser = async function(userEmailId, userSubject, userText) {
+  // USERSUBJECT='User info from CricDream';
+  // USEREMAILID='salgia.ankit@gmail.com';
+  // USERTEXT=`Dear User,
+    
+      // Greeting from CricDeam.
+  
+      // As requested by you here is login details.
+  
+      // Login Name: ${uRec.userName} 
+      // User Name : ${uRec.displayName}
+      // Password  : ${uRec.password}
+  
+      // Regards,
+      // for Cricdream.`
+    
+  var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: CRICDREAMEMAILID,
+    pass: 'Anob@1989#93'
+  }
+  });
+  
+  var mailOptions = {
+  from: CRICDREAMEMAILID,
+  to: userEmailId,
+  subject: userSubject,
+  text: userText
+  };
+  
+  //mailOptions.to = uRec.email;
+  //mailOptions.text = 
+  
+  var status = true;
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+      EMAILERROR=error;
+      //senderr(603, error);
+      status=false;
+    } else {
+      //console.log('Email sent: ' + info.response);
+      //sendok('Email sent: ' + info.response);
+    }
+    return(status);
+  });
+}
+
+
+
+revDate = function (myDate) {
+  let xxx = myDate.split('-');
+  let myIdx = SHORTMONTHNAME.indexOf(xxx[1].substr(0,3).toUpperCase()).toString();
+  if (myIdx.length === 1) myIdx = "0" + myIdx;
+  return(xxx[2]+myIdx+xxx[0]);
+}
+
+const zerostr = "000000";
+datePriceKey = function(myDate, strikePrice) {
+  let p1 = revDate(myDate);
+  let p3 = strikePrice.toString();
+  let p2 = (p3.length < 5) ? zerostr.substr(0, 5-p3.length) : "";
+  return(`${p1}-${p2}${p3}`)
 }

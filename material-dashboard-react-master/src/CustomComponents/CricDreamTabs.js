@@ -1,157 +1,143 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
+import React, { useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import GroupIcon from '@material-ui/icons/Group';
+import Button from '@material-ui/core/Button';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu'; 
+import {red, blue, green} from '@material-ui/core/colors';
+import Divider from '@material-ui/core/Divider';
+import {cdRefresh, specialSetPos} from "views/functions.js"
+/// cd items import
 import Nifty from "views/Nifty/Nifty"
-// import Group from "views/Group/Group"
-// import Dash from "views/Dashboard/Dashboard"
-// import Auction from "views/Auction/Auction"
-// import Captain from "views/Captain/Captain"
-// import MyTeam from "views/MyTeam/MyTeam"
-// import Match from "views/UpcomingMatch/UpcomingMatch"
-// import Stats from "views/Statistics/Statistics"
-// import NewGroup from "views/Group/NewGroup.js"
-// import JoinGroup from "views/Group/JoinGroup.js"
-// import GroupDetails from "views/Group/GroupDetails.js"
-// import GroupMember from "views/Group/GroupMember.js"
-// import AddGroupMember from "views/Group/AddGroupMember.js"
-import { useHistory } from "react-router-dom";
-import {cdRefresh } from "views/functions.js"
-
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box p={3}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`
-  };
-}
+//import Profile from "views/Profile/Profile.js"
+//import ChangePassword from "views/Login/ChangePassword.js"
+//import About from "views/APL/About.js"
+//import ContactUs from "views/APL/ContactUs.js"
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    // backgroundColor: theme.palette.background.paper
-    backgroundColor: '#eeeeee',
-  }
+  },
+  menuButton: {
+    // marginRight: theme.spacing(2),
+    marginLeft: theme.spacing(1),
+  },
+  icon : {
+    color: '#FFFFFF',
+    marginRight: theme.spacing(0),
+    marginLeft: theme.spacing(0),
+  },
+  dashButton: {
+    // marginRight: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+  },
+  statButton: {
+    //marginRight: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+  },
+  teamButton: {
+    marginRight: theme.spacing(0),
+    marginLeft: theme.spacing(0),
+  },
+
+
+  title: {
+    flexGrow: 1,
+  },
+  avatar: {
+    margin: theme.spacing(0),
+    // backgroundColor: theme.palette.secondary.main,
+    // width: theme.spacing(10),
+    // height: theme.spacing(10),
+  
+  },
+
 }));
-
-var myTabPosition = 0;
-
 
 export function setTab(num) {
   //myTabPosition = num;
-  localStorage.setItem("tabpos", num);
+  console.log(`Menu pos ${num}`);
+  localStorage.setItem("menuValue", num);
   cdRefresh();
-}
-
-function Logout() {
-  console.log("In LOGOUT------")
-  const history = useHistory();
-  localStorage.setItem("uid", "");
-  // localStorage.setItem("newTabPos", "0)
-  localStorage.setItem("currentLogin", "");
-  cdRefresh();  
-  return (<div></div>);
-}
-
-
-function getTabPos() {
-  let pos = 0;
-  //console.log(`My tab position is ${localStorage.getItem("tabpos")}`)
-  if ((localStorage.getItem("tabpos") === null)  ||
-        (localStorage.getItem("tabpos") === "") ||
-        (localStorage.getItem("tabpos") === "0")) {
-        //console.log("Setting TABPOS to 0")
-        pos = 0;  
-  } else {
-    //console.log(`Settab as per setting which is ${localStorage.getItem("tabpos")}`)
-    pos = parseInt(localStorage.getItem("tabpos"));
-  }
-  //console.log(`Tab position ${pos}`);
-  return pos;
 }
 
 export function CricDreamTabs() {
   const classes = useStyles();
-  //console.log("in Cric Dream Tabs");
-  const [value, setValue] = React.useState(getTabPos());
-  // localStorage.setItem("tabpos", "0");
-  const handleChange = (event, newValue) => {
-    if (newValue !== value) {
-      localStorage.setItem("tabpos", newValue);
-      setValue(newValue);
-    }
+  // for menu 
+  const [auth, setAuth] = React.useState(true);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  // for group menu
+  const [grpAuth, setGrpAuth] = React.useState(true);
+  const [grpAnchorEl, setGrpAnchorEl] = React.useState(null);
+  const grpOpen = Boolean(grpAnchorEl);
+  const [value, setValue] = React.useState(parseInt(localStorage.getItem("menuValue")));
+
+  console.log(`in Tab function  ${localStorage.getItem("menuValue")}`);
+
+  const handleChange = (event) => {
+    setAuth(event.target.checked);
   };
-  // value={value}
-  // onChange={handleChange}
-  // indicatorColor="primary"
-  // textColor="primary"
-  // variant="scrollable"
-  // scrollButtons="auto"
-  // aria-label="scrollable auto tabs example"
-  console.log(`value is ${value}`);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleGrpMenu = (event) => {
+    setGrpAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleGrpClose = () => {
+    setGrpAnchorEl(null);
+  };
+
+  function setMenuValue(num) {
+    setValue(num);
+    handleClose();
+    localStorage.setItem("menuValue", num);
+  }
+
+  const handleNifty = () => { setMenuValue(1);  }
+  const handleLogout = () => {
+    handleClose();
+    localStorage.setItem("uid", "");
+    //localStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
+    cdRefresh();  
+  };
+
+
+  function DisplayCdItems() {
+    switch(value) {
+      case 1: return <Nifty/>; 
+      default: return  <div></div>;
+    }
+  }
+
+  let mylogo = `${process.env.PUBLIC_URL}/VS.ICO`;
   return (
     <div className={classes.root}>
       <AppBar position="static">
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="simple tabs example"
-        >
-          <Tab label="NIFTY" {...a11yProps(0)} />
-          <Tab label="Logout" {...a11yProps(1)} />
-          {/* <Tab label="DashBoard" {...a11yProps(1)} />
-          <Tab label="Auction" {...a11yProps(2)} />
-          <Tab label="Captain" {...a11yProps(3)} />
-          <Tab label="Team" {...a11yProps(4)} />
-          <Tab label="Match" {...a11yProps(5)} />
-          <Tab label="Stats" {...a11yProps(6)} /> */}
-        </Tabs>
+      <Toolbar>
+        <Avatar variant="square" className={classes.avatar}  src={mylogo}/>
+        <Button color="inherit" className={classes.dashButton} onClick={handleNifty}>Nifty</Button>
+        <Button color="inherit" className={classes.dashButton} onClick={handleLogout}>Logout</Button>
+      </Toolbar>
       </AppBar>
-      <TabPanel value={value} index={0}><Nifty /></TabPanel>
-      <TabPanel value={value} index={1}><Logout/></TabPanel>
-      {/* <TabPanel value={value} index={1}><Dash/></TabPanel>
-      <TabPanel value={value} index={2}><Auction/></TabPanel>
-      <TabPanel value={value} index={3}><Captain/></TabPanel>
-      <TabPanel value={value} index={4}><MyTeam/></TabPanel>
-      <TabPanel value={value} index={5}><Match/></TabPanel>
-      <TabPanel value={value} index={6}><Stats/></TabPanel>
-      <TabPanel value={value} index={101}><NewGroup /></TabPanel>
-      <TabPanel value={value} index={102}><GroupDetails /></TabPanel>
-      <TabPanel value={value} index={103}><GroupMember /></TabPanel>
-      <TabPanel value={value} index={104}><AddGroupMember /></TabPanel>
-      <TabPanel value={value} index={105}><JoinGroup /></TabPanel> */}
-      <TabPanel value={value} index={1}><Logout/></TabPanel>
+      <DisplayCdItems/>
     </div>
   );
 }

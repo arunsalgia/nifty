@@ -314,6 +314,7 @@ async function userAlive(uRec) {
         break;
     }
   }
+  console.log(`user alibe ${sts}`);
   return sts;
 }
 
@@ -346,6 +347,36 @@ function cricDate(d)  {
   return tmp;
 }
 
+function checkActiveUser(userId) {
+  console.log(activeUserList);
+  console.log(userId);
+  let tmp = activeUserList.find(x => x.uid == userId);
+  console.log(tmp);
+  if (tmp) return(true);
+  else     return(false);
+}
+
+function addActiveUser(userId) {
+  let tmp = activeUserList.find(x => x.uid == userId);
+  if (!tmp) {
+    activeUserList.push({uid: userId, timer: 0});
+  }
+}
+
+
+
+function resetActiveUserTimer(userId) {
+  let tmp = activeUserList.find(x => x.uid == userId);
+  if (tmp)
+    tmp.timer = 0;
+}
+
+
+function delActiveUser(userId) {
+  _.remove(activeUserList, {uid: userId})
+}
+
+
 
 module.exports = {
   getLoginName, getDisplayName, cricDate,
@@ -356,4 +387,6 @@ module.exports = {
   getBlankNSEDataRec, getBlankCurrNSEDataRec,
   revDate, datePriceKey,
   getISTtime, nseWorkingTime,
+  checkActiveUser, addActiveUser, delActiveUser, resetActiveUserTimer,
 }; 
+

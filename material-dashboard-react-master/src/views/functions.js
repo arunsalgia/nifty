@@ -34,17 +34,6 @@ export function validateSpecialCharacters(sss) {
     return sts;
 }
 
-export function validateEmail(sss) {
-    let sts = false;
-    if (validateSpecialCharacters(sss)) {
-      let xxx = sss.split("@");
-      if (xxx.length === 2) {
-        if (xxx[1].includes(".")) 
-          sts = true;
-      }
-    }
-    return sts;
-}
 
 
 // export function hasGroup() {
@@ -76,4 +65,41 @@ export function specialSetPos() {
   //   retval = 105;
   // //console.log(`in SSP: ${retval}`)
   return retval;
+}
+
+export function validateMobile(sss) {
+var sts = false;
+const TerroristCharacters = [];
+
+if (sss.length === 10)
+if (!sss.includes("\."))
+if (!sss.includes("\-"))
+if (!sss.includes("\+"))
+if (!sss.includes("\*"))
+if (!sss.includes("\/"))
+if (!sss.includes("e"))
+if (!sss.includes("E"))
+if (!isNaN(sss))
+  sts = true;
+return sts;
+}
+
+export function validateEmail(sss) {
+  let sts = false;
+  if (validateSpecialCharacters(sss)) {
+    let xxx = sss.split("@");
+    if (xxx.length === 2) {
+      if (xxx[1].includes(".")) 
+        sts = true;
+    }
+  }
+  return sts;
+}
+
+export function getCurrentuser() {
+  let myUid = 0;
+  if (localStorage.getItem("uid") !== null)
+  if (localStorage.getItem("uid").length > 0)
+    myUid = parseInt(localStorage.getItem("uid"))
+  return myUid;
 }

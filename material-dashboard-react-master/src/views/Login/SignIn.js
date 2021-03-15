@@ -21,7 +21,7 @@ import red from '@material-ui/core/colors/red';
 import { cdRefresh, specialSetPos } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CadSysLogo } from 'CustomComponents/CustomComponents.js';
-
+import {setLoggedState} from "App.js"
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -69,12 +69,13 @@ export default function SignIn() {
     if (window.localStorage.getItem("logout")) {
       localStorage.clear();
     }
-    if (window.localStorage.getItem("uid")) {
-      // setUser({ uid: window.localStorage.getItem("uid"), admin: window.localStorage.getItem("admin") })
-      // history.push("/admin")
-    } else {
-      // setShowPage(true)
-    }
+    //----localStorage.setItem
+    // if (window.localStorage.getItem("uid")) {
+    //   // setUser({ uid: window.localStorage.getItem("uid"), admin: window.localStorage.getItem("admin") })
+    //   // history.push("/admin")
+    // } else {
+    //   // setShowPage(true)
+    // }
   });
 
   function handleForgot() {
@@ -94,7 +95,7 @@ export default function SignIn() {
   const handleClick = async () => {
     let response = ""
     try { 
-      response = await axios.get(`/user/login/${userName}/${password}`); 
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/login/${userName}/${password}`); 
       setErrorMessage("");
       if (response.status === 200) {
         console.log(response.data);
@@ -105,12 +106,8 @@ export default function SignIn() {
         window.localStorage.setItem("displayName", response.data.displayName);
         window.localStorage.setItem("userName", response.data.userName);
         window.localStorage.setItem("userPlan", response.data.userPlan);
-        setTab(1);  // show NIFTY be default
-        // setUser({ uid: myUID, admin: response.data.admin });
-        // cdRefresh(true);
-        //let newPos = specialSetPos();
-        //if (newPos < 0) newPos = 0;
-        //setTab(newPos);
+        //setTab(1);  // show NIFTY be default
+        setLoggedState(1)
       }
     } catch (err) {
       setErrorMessage("Invalid Username / Password");
@@ -178,8 +175,6 @@ export default function SignIn() {
           </Typography> */}
           </form>
         </div>
-        {/* <Route  path='/admin/emailpassword' component={Reset} key="MemberList"/>
-        <Route  path='/admin/register' component={SignUp} key="NewGroup"></Route> */}
       </Container>
   );
 }

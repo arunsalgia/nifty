@@ -294,16 +294,14 @@ const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("31-Dec-2020"
 const [displayString, setDisplayString] = React.useState("");
 const [underlyingValue, setUnderlyingValue] = React.useState(0);
 const [margin, setMargin] = React.useState(2000);
+const [nextSP, setNextSP] = React.useState(0);
 
-
-var sendMessage = {page: "NSEDATA"};
+var sendMessage = {page: "NSEDATA", uid: localStorage.getItem("uid")};
 
 useEffect(() => {       
 
     const makeconnection = async () => {
       await sockConn.connect();
-      // console.log("just after connect command");
-      sockConn.emit("page", {page: "NSEDATA", uid: "0" });
     }
 
     sockConn = socketIOClient(process.env.REACT_APP_ENDPOINT);
@@ -311,56 +309,63 @@ useEffect(() => {
     makeconnection();
 
     sockConn.on("connect", function() {
-      sockConn.emit("page", sendMessage);
+      sockConn.emit("page", {page: "NSEDATA", uid: '0' });
 
       sockConn.on("NSEDATA", (mynsedata) => {
-        console.log("In NSEDATA");
+        //console.log("In NSEDATA");
         setNiftyDataArray(mynsedata);
         setmasterData(mynsedata);
+        //setNextSP(getNextSP(mynsedata, underlyingValue));
+        // get 1st SP greate than 
         // setDisplayString(response.data.dispString);
       });
 
       sockConn.on("NSEDISPLAYSTRING", (dispStr) => {
-        console.log("In DISPLAY STRING");
+        // console.log("In DISPLAY STRING");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
-        console.log(dispStr);
+        // console.log(dispStr);
         setDisplayString(dispStr);
       });
 
       sockConn.on("NSEUNDERLYINGVALUE", (ulvalue) => {
-        console.log("In uderlying value");
+        // console.log("In uderlying value");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
         setUnderlyingValue(ulvalue);
+        //setNextSP(getNextSP(masterData, ulvalue));
       });
 
     });
 
-
+    function getNextSP(myTable, ulValue) {
+      let i = 0;
+      for(i=0; i<myTable.length; ++i) {
+        if (myTable.sp > unValue)
+          return(myTable.sp);
+      }
+      return myTable[myTable.length - 1].sp;
+    }
     const fetchnifty = async () => {
       let response, response1;
       try {
         response = await axios.get(`/nifty/list`);
         setNseNameList(response.data);
         setselectedNseName(response.data[0].niftyName);
-
+        //console.log(`LIst success ${response.data[0].niftyName}`);
         response1 = await axios.get(`/nifty/getexpirydate/${response.data[0].niftyName}`);
         // console.log(response1.data);
         setExpiryDateList(response1.data);
         setSelectedExpiryDate(response1.data[0].expiryDate);
+        //console.log(`expiry success ${response1.data[0].expiryDate}`)
 
         sendMessage["uid"] = localStorage.getItem("uid");
         sendMessage["stockName"] = response.data[0].niftyName;
         sendMessage["expiryDate"] = response1.data[0].expiryDate;
         sendMessage["margin"] = margin;
-        console.log(sendMessage);
-
+        //console.log(sendMessage);
+        //console.log("Now making correction");
         sockConn.emit("page", sendMessage);
-
-        //makeconnection();
-
-        //await readNSEData(response.data[0].niftyName, response1.data[0].expiryDate);
       } catch (e) {
             console.log(e)
       }
@@ -368,6 +373,12 @@ useEffect(() => {
     }
 
     fetchnifty();
+
+    return () => {
+      // componentwillunmount in functional component.
+      // Anything in here is fired on component unmount.
+      leavingNifty(sockConn);
+  }
 }, []);
 
   const classes = useStyles();
@@ -381,7 +392,7 @@ useEffect(() => {
       sendMessage["stockName"] = nseName;
       sendMessage["expiryDate"] = expiryDate;
       sendMessage["margin"] = margin;
-      console.log(sendMessage);
+      //console.log(sendMessage);
       sockConn.emit("page", sendMessage);
 
       // var response = await axios.get(`/nifty/getnsedata/${nseName}/${expiryDate}`);
@@ -395,14 +406,14 @@ useEffect(() => {
 
   const handleSelectedExpiryDate = async (event) => {
     setSelectedExpiryDate(event.target.value);
-    console.log(`Selecyed expiry daye ${event.target.value}`);
+    //console.log(`Selecyed expiry daye ${event.target.value}`);
     await readNSEData(selectedNseName, event.target.value);
   }
 
   
   const handleSelectedNseName = async (event) => {
     setselectedNseName(event.target.value);
-    console.log(`Selecyed nse name ${event.target.value}`);
+    //console.log(`Selecyed nse name ${event.target.value}`);
     await readNSEData(event.target.value, selectedExpiryDate);
   }
 
@@ -638,7 +649,8 @@ function DisplaySelection() {
 
 const PEColumnStyle= { backgroundColor: '#FFB6C1' };
 const CEColumnStyle= { backgroundColor: '#ADFF2F' };
-const SPColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
+const SPLowColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
+const SPHighColumnStyle= { backgroundColor: '#FFFF00', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
 const PinkColumnStyle= { backgroundColor: '#FFF3E0', border: "1px solid black", margin: "0px"};
 const WhiteColumnStyle= { backgroundColor: '#FFFFFF', border: "1px solid black", margin: "0px"};
 
@@ -650,7 +662,7 @@ function DisplayTableCell(props) {
   } else if (props.dataType === "PE") {
     myStyle = (props.sp < underlyingValue) ? WhiteColumnStyle : PinkColumnStyle;
   } else
-    myStyle = SPColumnStyle;
+    myStyle = (props.sp < underlyingValue) ? SPLowColumnStyle : SPHighColumnStyle;
   return (
     <TableCell style={myStyle} component="th" scope="row"  padding="none" align="center" >
       {props.data}

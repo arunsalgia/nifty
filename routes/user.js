@@ -7,7 +7,9 @@ const {getLoginName, getDisplayName, cricDate,
   userAlive,
   getBlankNSEDataRec, getBlankCurrNSEDataRec,
   revDate, datePriceKey,
-  getISTtime, nseWorkingTime,} = require("./niftyfunctions")
+  getISTtime, nseWorkingTime,
+  checkActiveUser, addActiveUser, delActiveUser, resetActiveUserTimer,
+} = require("./niftyfunctions")
 router = express.Router();
 // const allUSER = 99999999;
 let UserRes;
@@ -83,7 +85,48 @@ router.get('/reset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
   uDoc.password = newPwd;
   uDoc.save();
   sendok("OK");
+}); 
+
+//=============== LOGIN
+router.get('/islogged/:uid', async function (req, res, next) {
+  UserRes = res;
+  var {uid } = req.params;
+  let status = false;
+
+  let uRec = User.find({uid: uid});
+  let cActive = activeUserList.find(x => x.uid == uid);
+  if (cActive) {
+    if (cActive.time <= 100000000000)
+      status = true;
+  }
+  status = true;
+  sendok({status: status});
 });
+
+  router.get('/heartbeat/:uid', async function (req, res, next) {
+  UserRes = res;
+  var {uid } = req.params;
+
+  resetActiveUserTimer(parseInt(uid));
+  sendok("OK");
+});
+
+router.get('/showactive', async function (req, res, next) {
+  UserRes = res;
+  sendok(activeUserList)
+});
+
+router.get('/logout/:uid', async function (req, res, next) {
+  UserRes = res;
+  setHeader();
+  var {uid } = req.params;
+  let myRec = await User.findOne({uid: uid});
+  console.log(myRec);
+  if (myRec) {
+    delActiveUser(myRec.uid);
+  }
+  sendok("OK");
+})
 
 //=============== LOGIN
 router.get('/login/:uName/:uPassword', async function (req, res, next) {
@@ -94,13 +137,20 @@ router.get('/login/:uName/:uPassword', async function (req, res, next) {
   let lName = getLoginName(uName);
   console.log(lName);
   let uRec = await User.findOne({ userName:  lName});
-  console.log(uRec)
-  if (await userAlive(uRec)) 
-    isValid = (uPassword === uRec.password);
+  //console.log(uRec);
+  if (uRec) {
+    //if (!checkActiveUser(uRec.uid))
+    //if (await userAlive(uRec))
+    if (uPassword === uRec.password) 
+      isValid = true;
+  }
 
   console.log(isValid);
-  if (isValid) sendok(uRec);
-  else         senderr(602, "Invalid User name or password");
+  if (isValid) {
+    addActiveUser(uRec.uid);
+    sendok(uRec);
+  } else
+    senderr(602, "Invalid User name or password");
 });
 
 //=============== forgot passord. email pwd to user

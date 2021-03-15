@@ -13,6 +13,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import {red, blue, green, yellow} from '@material-ui/core/colors';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+import {validateSpecialCharacters, validateEmail, validateMobile } from "views/functions.js";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -166,9 +168,55 @@ export class Copyright extends React.Component {
 }
 
 export function CadSysLogo () {
-  let mylogo = `${process.env.PUBLIC_URL}/VS.JPG`;
+  let mylogo = `${process.env.PUBLIC_URL}/CS3.JPG`;
   const classes = useStyles();
   return (
     <Avatar className={classes.avatar}  src={mylogo}/>
 );
 }
+
+export class ValidComp extends React.Component {
+  componentDidMount()  {
+    // custom rule will have name 'isPasswordMatch'
+    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+      return (value === this.props.p1)
+    });
+
+    ValidatorForm.addValidationRule('minLength', (value) => {
+      return (value.length >= 6)
+    });
+
+    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
+      return validateSpecialCharacters(value);
+    });
+
+    ValidatorForm.addValidationRule('isEmailOK', (value) => {
+      return validateEmail(value);
+    });
+
+    ValidatorForm.addValidationRule('mobile', (value) => {
+      return validateMobile(value);
+    });
+
+    ValidatorForm.addValidationRule('checkbalance', (value) => {
+      return validateSpecialCharacters(value > this.props.balance);
+    });
+  }
+
+  
+  componentWillUnmount() {
+    // remove rule when it is not needed
+    ValidatorForm.removeValidationRule('isPasswordMatch');
+    ValidatorForm.removeValidationRule('isEmailOK');
+    ValidatorForm.removeValidationRule('mobile');
+    ValidatorForm.removeValidationRule('minLength');
+    ValidatorForm.removeValidationRule('noSpecialCharacters');   
+    ValidatorForm.removeValidationRule('checkbalance');   
+  }
+
+  render() {
+    return <br/>;
+  }
+
+}
+

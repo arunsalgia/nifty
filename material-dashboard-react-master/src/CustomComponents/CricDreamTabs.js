@@ -19,6 +19,11 @@ import Divider from '@material-ui/core/Divider';
 import {cdRefresh, specialSetPos} from "views/functions.js"
 /// cd items import
 import Nifty from "views/Nifty/Nifty"
+import Holiday from "views/Holiday/Holiday"
+import Greek from "views/Greek/Greek"
+import ContactUs from "views/CadSys/ContactUs"
+import axios from 'axios';
+import { setLoggedState } from 'App';
 //import Profile from "views/Profile/Profile.js"
 //import ChangePassword from "views/Login/ChangePassword.js"
 //import About from "views/APL/About.js"
@@ -112,28 +117,42 @@ export function CricDreamTabs() {
   }
 
   const handleNifty = () => { setMenuValue(1);  }
-  const handleLogout = () => {
+  const handleGreek = () => { setMenuValue(2);  }
+  const handleHoliday = () => { setMenuValue(98);  }
+  const handleContactUs = () => { setMenuValue(99);  }
+
+  async function handleLogout() {
+    console.log("in logout");
     handleClose();
-    localStorage.setItem("uid", "");
+    // await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    await axios.get(`/user/logout/${localStorage.getItem("uid")}`);
+    //localStorage.setItem("uid", "");
     //localStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
-    cdRefresh();  
+    setLoggedState(-1);  // in unlogged state
+    //cdRefresh();  
   };
 
 
   function DisplayCdItems() {
     switch(value) {
       case 1: return <Nifty/>; 
+      case 2: return <Greek/>; 
+      case 98: return <Holiday/>; 
+      case 99: return <ContactUs/>; 
       default: return  <div></div>;
     }
   }
 
-  let mylogo = `${process.env.PUBLIC_URL}/VS.ICO`;
+  let mylogo = `${process.env.PUBLIC_URL}/CS3.ICO`;
   return (
     <div className={classes.root}>
       <AppBar position="static">
       <Toolbar>
         <Avatar variant="square" className={classes.avatar}  src={mylogo}/>
         <Button color="inherit" className={classes.dashButton} onClick={handleNifty}>Nifty</Button>
+        <Button color="inherit" className={classes.dashButton} onClick={handleGreek}>Greek</Button>
+        <Button color="inherit" className={classes.dashButton} onClick={handleHoliday}>Custom Days</Button>
+        <Button color="inherit" className={classes.dashButton} onClick={handleContactUs}>Contact Us</Button>
         <Button color="inherit" className={classes.dashButton} onClick={handleLogout}>Logout</Button>
       </Toolbar>
       </AppBar>

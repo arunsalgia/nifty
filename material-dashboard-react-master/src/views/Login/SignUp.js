@@ -18,7 +18,7 @@ import red from '@material-ui/core/colors/red';
 import { useHistory } from "react-router-dom";
 import SignIn from "./SignIn.js";
 import {validateSpecialCharacters, validateEmail, cdRefresh} from "views/functions.js";
-import { CadSysLogo } from 'CustomComponents/CustomComponents.js';
+import { CadSysLogo } from "CustomComponents/CustomComponents.js";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -99,13 +99,6 @@ export default function SignUp() {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [registerStatus, setRegisterStatus] = useState(0);
 
-  // const { setUser } = useContext(UserContext);
-
-  // const handleChange = (event) => {
-  //   const { user } = this.state;
-  //   user[event.target.name] = event.target.value;
-  //   this.setState({ user });
-  // }
 
   const handleSubmit = async() => {
     console.log("Submit command provided");

@@ -82,7 +82,7 @@ router.get('/getexpirydate/:nseName', async function (req, res, next) {
 
   let myData = await CurrExpiryDate.find({nseName: nseName});
   myData = _.sortBy(myData, 'revDate');
-  //console.log(myData);
+  console.log(`Expiry date length: ${myData.length}`);
   sendok(myData);
 }); 
 
@@ -116,17 +116,40 @@ async function processConnection(i) {
   if ((connectionArray[i].uid  <= 0)  ||
       (connectionArray[i].page.length  <= 0)) return;
 
-  console.log(`Process contion of ${connectionArray[i].page}`);
+  console.log(`Process connection of ${connectionArray[i].page} for user ${connectionArray[i].uid}`);
   var myDate1 = new Date();
   var myData;
+  //console.log(connectionArray[i])
   if (connectionArray[i].page === "NSEDATA") {
+    /**  find the latest data
+    const filter = { age: { $gte: 30 } };
+    let docs = await Character.aggregate([
+      { $match: filter }
+    ]);
+    ***/
+    /**
+      * This is good example of aggregate. 
+      * Not usefull since nse data will be archived every 5/15 minues
+      * and need to update web site every 10 seconds.
+    */
+    /**
+      let docs = await NSEData.aggregate([
+        { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
+        { "$group": {
+          "_id": null,
+          "MaximumValue": { "$max": "$time" },
+          "MinimumValue": { "$min": "$time" }
+      }}
+      ]);
+      console.log(docs);
+    */
     let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
-    console.log(`Fetched nseata: ${latestData.length}`);
+    //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
+    //console.log(`Fetched nseata: ${latestData.length}`);
     if (latestData.length === 0) return;  // no data
 
     let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    console.log(tmp);
+    //console.log(tmp);
     if (!tmp) return; // error. no data
 
     let myUnderlyingValue = parseFloat(tmp.underlyingValue);
@@ -140,78 +163,17 @@ async function processConnection(i) {
     //myData = {stockName: connectionArray[i].stockName, stockData: latestData.niftyData, dispString: "heelo", underlyingValue: 11.0 }
     let minSP = myUnderlyingValue - connectionArray[i].margin;
     let maxSP = myUnderlyingValue + connectionArray[i].margin;
-    console.log(`${minSP}  ${maxSP}`);
-    console.log(`${myUnderlyingValue}  ${connectionArray[i].margin}`);
-    //tmp = _.filter(latestData, x => x.expiryDate === connectionArray[i].expiryDate);
-    console.log(`Before ${latestData.length}`);
     tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
-    console.log(`After ${tmp.length}`);
     io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
-      // io.to(connectionArray[i].socketId).emit('rank', myData.dbData.rank);
-    console.log("sent NSE data to " + connectionArray[i].socketId);``
   } else {
 
   }
-
-  return;
-/***
-  // console.log(clientData);
-  var myData = _.find(clientData, x => x.tournament === myTournament);
-  let sts = false;
-  if (!myData) {
-    // no data of this tournament with us. Read database and do calculation
-    // console.log("------------------reading database");
-    sts = await readDatabase(connectionArray[i].gid );
-    // console.log(`Status is ${sts} for tournamenet data ${myTournament}`);
-    if (sts) {
-      // console.log(connectionArray[i].gid );
-      let myDB_Data = await statCalculation(connectionArray[i].gid );
-      let mySTAT_Data = await statBrief(connectionArray[i].gid , 0 , SENDSOCKET);
-      myData = {tournament: myTournament, dbData: myDB_Data, statData: mySTAT_Data}
-      clientData.push(myData);
-      var myDate2 = new Date();
-      var duration = myDate2.getTime() - myDate1.getTime();
-      console.log(`Total calculation Time: ${duration}`)
-    }
-  }
-  // else
-  //   console.log("----- data already availanle");
-  // console.log(clientData);
-  // console.log(`Will send data of ${myData.tournament} to UID ${connectionArray[i].uid}  with GID ${connectionArray[i].gid}`);
-  // console.log(connectionArray[i].page);
-  switch(connectionArray[i].page.substr(0, 4).toUpperCase()) {
-    case "DASH":
-      if (myData) {
-        io.to(connectionArray[i].socketId).emit('maxRun', myData.dbData.maxRun);
-        io.to(connectionArray[i].socketId).emit('maxWicket', myData.dbData.maxWicket);
-        io.to(connectionArray[i].socketId).emit('rank', myData.dbData.rank);
-        console.log("sent Dash data to " + connectionArray[i].socketId);
-      }
-      break;
-    case "STAT":
-      if (myData) {
-          io.to(connectionArray[i].socketId).emit('brief', myData.statData);
-          console.log("Sent Stat data to " + connectionArray[i].socketId);
-      }
-      break
-    // case "AUCT":
-    //   console.log(auctioData);
-    //   var myRec = _.filter(auctioData, x => x.gid == connectionArray[i].gid);
-    //   console.log(myRec);
-    //   if (myRec.length > 0) {
-    //     io.to(connectionArray[i].socketId).emit('playerChange', 
-    //         myRec[0].player, myRec[0].balance );
-    //       console.log("Sent Auction data to " + connectionArray[i].socketId);          
-    //   }
-    //   break;
-  }
-***/
   return;
 }
 
 async function sendClientData() {
   let T1 = new Date();
-  console.log("---------------------");
+  //console.log("---------------------");
   connectionArray = [].concat(masterConnectionArray)
   nseData = [];
   for(i=0; i<connectionArray.length; ++i)  {
@@ -232,12 +194,15 @@ cron.schedule('*/1 * * * * *', async () => {
     console.log("============= No mongoose connection");
     return;
   }   
-
+  // increment counter of each active user
+  activeUserList.forEach(x => { ++x.timer; });
+  
   //let currtime = getISTtime();
   //let myMinutes = currtime.getMinutes()
   if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
+    console.log("======== client update"); 
     clientUpdateCount = 0; 
-    console.log("======== clinet update start");
+    console.log(activeUserList);
     //console.log(masterConnectionArray);
     sendClientData(); 
   }

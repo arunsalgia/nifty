@@ -12,6 +12,16 @@ axios = require('axios');
 const { promisify } = require('util')
 sleep = promisify(setTimeout)
 app = express();
+const {getLoginName, getDisplayName, cricDate,
+  encrypt, decrypt, dbencrypt, dbdecrypt,
+	dbToSvrText, svrToDbText,
+	sendCricMail,
+  userAlive,
+  getBlankNSEDataRec, getBlankCurrNSEDataRec,
+  revDate, datePriceKey,
+  getISTtime, nseWorkingTime,
+  checkActiveUser, addActiveUser, delActiveUser,
+} = require("./routes/niftyfunctions")
 PRODUCTION=false;
 
 PORT = process.env.PORT || 1965;
@@ -36,6 +46,7 @@ router = express.Router();
 indexRouter = require('./routes/index');
 usersRouter = require('./routes/user');
 niftyRouter = require('./routes/nifty');
+holidayRouter = require('./routes/holiday');
 
 nseRetry=5   // retry count 
 nseSleep=1000 // sleep for 1 second and try to fetch data from NSE if error while getching
@@ -46,6 +57,7 @@ masterConnectionArray  = [];
 clientData = [];
 nseData = [];
 
+activeUserList = [];
 READNSEINTERVAL=900;    // 900 seconds in 15 minues
 CLIENTUPDATEINTERVAL=10; //
 
@@ -63,28 +75,22 @@ io.on('connect', socket => {
   app.set("socket",socket);
   socket.on("page", (pageMessage) => {
     console.log("page message from "+socket.id);
-    console.log(pageMessage);
+    // console.log(pageMessage);
     var myClient = _.find(masterConnectionArray, x => x.socketId === socket.id);
-    if (pageMessage.page.toUpperCase().includes("NSEDATA")) {
-      myClient.page = "NSEDATA";
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.stockName = pageMessage.stockName;
-      myClient.expiryDate = pageMessage.expiryDate;
-      myClient.margin = parseInt(pageMessage.margin)
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
-    } else if (pageMessage.page.toUpperCase().includes("STAT")) {
-      myClient.page = "STAT";
-      myClient.gid = parseInt(pageMessage.gid);
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
-    } else if (pageMessage.page.toUpperCase().includes("AUCT")) {
-      myClient.page = "AUCT";
-      myClient.gid = parseInt(pageMessage.gid);
-      myClient.uid = parseInt(pageMessage.uid);
-      myClient.firstTime = true;
-      clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+    // console.log("Current clinet is");
+    //console.log(myClient);
+    if (myClient) { //(checkActiveUser(parseInt(pageMessage.uid))) {
+      if (pageMessage.page.toUpperCase().includes("NSEDATA")) {
+        // console.log("----Updatig page message");
+        // console.log(pageMessage);
+        myClient.page = "NSEDATA";
+        myClient.uid = parseInt(pageMessage.uid);
+        myClient.stockName = pageMessage.stockName;
+        myClient.expiryDate = pageMessage.expiryDate;
+        myClient.margin = pageMessage.margin;
+        myClient.firstTime = true;
+        clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+      } 
     }
   });
 });
@@ -93,8 +99,9 @@ io.sockets.on('connection', function(socket){
   // console.log("Connected Socket = " + socket.id)
   masterConnectionArray.push({socketId: socket.id, page: "", uid: 0});
   socket.on('disconnect', function(){
+    console.log("---------------------disconnect")
     _.remove(masterConnectionArray, {socketId: socket.id});
-    
+    //console.log(masterConnectionArray);
   });
 });
 
@@ -121,6 +128,7 @@ app.use((req, res, next) => {
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/nifty', niftyRouter);
+app.use('/holiday', holidayRouter);
 
 // ---- start of globals
 
@@ -186,12 +194,15 @@ ExpiryDateSchema = mongoose.Schema({
   underlyingValue: String,
 });
 
+HOLIDAYTYPE = [{type: 1, desc: "Holiday"}, {type: 2, desc: "Special"}];
 HolidaySchema = mongoose.Schema({
-  name: String,
-  day: Number,
-  month: Number,
-  year: Number, 
-  yearMonthDay: String, /// string in YYYYMMDD format. It can be used for sorting
+  desc: String,
+  type: String,
+  date: String,
+  startTime: String,
+  endTime: String,
+  year: String
+  //yearMonthDay: String, /// string in YYYYMMDD format. It can be used for sorting
 });
 
 // models

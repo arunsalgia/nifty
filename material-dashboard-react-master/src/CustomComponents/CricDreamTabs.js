@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import { Swipeable } from "react-swipeable";
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import GroupIcon from '@material-ui/icons/Group';
-import Button from '@material-ui/core/Button';
+import Button from '@material-ui/core/Button'; 
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -29,6 +30,23 @@ import { setLoggedState } from 'App';
 //import About from "views/APL/About.js"
 //import ContactUs from "views/APL/ContactUs.js"
 
+const RIGHT = "-1";
+const LEFT = "+1";
+
+const IMG_WIDTH = "342px";
+const IMG_HEIGHT = "249px";
+
+const buttonStyles = {
+  height: IMG_HEIGHT,
+  color: "#eeeeee",
+  fontSize: "2em",
+  backgroundColor: "rgba(230,230,230,.2)",
+  border: "0",
+  cursor: "pointer"
+};
+const buttonLeft = { ...buttonStyles, float: "left" };
+const buttonRight = { ...buttonStyles, float: "right" };
+  
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -88,6 +106,7 @@ export function CricDreamTabs() {
   const grpOpen = Boolean(grpAnchorEl);
   const [value, setValue] = React.useState(parseInt(localStorage.getItem("menuValue")));
 
+  
   console.log(`in Tab function  ${localStorage.getItem("menuValue")}`);
 
   const handleChange = (event) => {
@@ -118,8 +137,8 @@ export function CricDreamTabs() {
 
   const handleNifty = () => { setMenuValue(1);  }
   const handleGreek = () => { setMenuValue(2);  }
-  const handleHoliday = () => { setMenuValue(98);  }
-  const handleContactUs = () => { setMenuValue(99);  }
+  const handleHoliday = () => { setMenuValue(3);  }
+  const handleContactUs = () => { setMenuValue(4);  }
 
   async function handleLogout() {
     console.log("in logout");
@@ -137,10 +156,25 @@ export function CricDreamTabs() {
     switch(value) {
       case 1: return <Nifty/>; 
       case 2: return <Greek/>; 
-      case 98: return <Holiday/>; 
-      case 99: return <ContactUs/>; 
+      case 3: return <Holiday/>; 
+      case 4: return <ContactUs/>; 
       default: return  <div></div>;
     }
+  }
+
+  function onSwiped(direction) {
+    let newValue = balue + Number(direction);
+    if ((newValue >= 1) && (newValue  <= 4)) {
+      setValue(newValue);
+    }
+    // if (adjustedIdx >= images.length) {
+    //   newIdx = 0;
+    // } else if (adjustedIdx < 0) {
+    //   newIdx = images.length - 1;
+    // } else {
+    //   newIdx = adjustedIdx;
+    // }
+    // this.setState({ imageIdx: newIdx });
   }
 
   let mylogo = `${process.env.PUBLIC_URL}/CS3.ICO`;
@@ -157,6 +191,22 @@ export function CricDreamTabs() {
       </Toolbar>
       </AppBar>
       <DisplayCdItems/>
+      {/* <Swipeable
+          trackMouse
+          preventDefaultTouchmoveEvent
+          onSwipedLeft={() => onSwiped(LEFT)}
+          onSwipedRight={() => onSwiped(RIGHT)}
+          // style={{ width: IMG_WIDTH }}
+        >
+          <div>
+            <button onClick={() => this.onSwiped(RIGHT)} style={buttonLeft}>
+              ⇦
+            </button>
+            <button onClick={() => this.onSwiped(LEFT)} style={buttonRight}>
+              ⇨
+            </button>
+          </div>
+        </Swipeable> */}
     </div>
   );
 }

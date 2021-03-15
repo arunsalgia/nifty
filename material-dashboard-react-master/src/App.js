@@ -164,14 +164,14 @@ function AppRouter() {
     //console.log('user is active', event);
     // console.log('time remaining', idleTimer.getRemainingTime());
     //console.log(localStorage.getItem("uid"));
-    if (localStorage.getItem("uid").length > 0)
-      await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+    // if (localStorage.getItem("uid").length > 0)
+    //   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
   }
 
   async function handleOnAction (event) {
     //console.log(localStorage.getItem("uid"));
-    if (localStorage.getItem("uid").length > 0)
-      await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+    // if (localStorage.getItem("uid").length > 0)
+    //   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
   }
 
 

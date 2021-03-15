@@ -75,14 +75,14 @@ export default function Holiday() {
       //border: 5,
       //align: "center",
       padding: "none",
-      fontSize: theme.typography.pxToRem(18),
+      fontSize: theme.typography.pxToRem(14),
       fontWeight: theme.typography.fontWeightBold,
     },
     td : {
       // border: 5,
       // align: "center",
       padding: "none",
-      fontSize: theme.typography.pxToRem(18),
+      fontSize: theme.typography.pxToRem(14),
       // fontWeight: theme.typography.fontWeightBold,
     },
     visuallyHidden: {

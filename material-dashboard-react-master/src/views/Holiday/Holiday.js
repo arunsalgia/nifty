@@ -168,7 +168,7 @@ export default function Holiday() {
   async function readHolidays(myYear) {
     try {
       //console.log(`Getting list fof holidays of ${myYear}`)
-      let response = await axios.get(`/holiday/year/${myYear}`);
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/year/${myYear}`);
       setHolidayList(response.data);
       //console.log(response.data);
     } catch (e) {
@@ -447,7 +447,7 @@ export default function Holiday() {
     //console.log(`in Delete`);
     //console.log(myDate);
     try {
-      let response = await axios.get(`/holiday/delete/${myDate}`);
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/delete/${myDate}`);
       setHolidayList(holidayList.filter(x => x.date != myDate));
     } catch (e) {
       cosole.log(e);

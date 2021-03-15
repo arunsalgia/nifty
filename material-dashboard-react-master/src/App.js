@@ -88,7 +88,7 @@ function AppRouter() {
       let newLoginState = getCurrent();
       // console.log(`original state is ${newLoginState}`);
       if (getCurrentuser() > 0) {
-        let resp = await axios.get(`/user/islogged/${localStorage.getItem("uid")}`);
+        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${localStorage.getItem("uid")}`);
         // console.log(`islogged response`);
         // console.log(resp);
         if (resp.data.status) {
@@ -175,12 +175,13 @@ function AppRouter() {
   }
 
 
-  function handleOnIdle (event) {
+  async function handleOnIdle (event) {
     console.log('user is idle', event);
     console.log('last active', idleTimer.getLastActiveTime());
-    if (localStorage.getItem("uid").length > 0)
-      axios.get(`/user/logout/${localStorage.getItem("uid")}`);
-    setMyLogout(true);
+    if (localStorage.getItem("uid").length > 0) {
+      setMyLogout(true);
+      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    }
   }
 
   console.log("in Main APP");

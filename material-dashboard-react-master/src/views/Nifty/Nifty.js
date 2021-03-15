@@ -349,11 +349,11 @@ useEffect(() => {
     const fetchnifty = async () => {
       let response, response1;
       try {
-        response = await axios.get(`/nifty/list`);
+        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/list`);
         setNseNameList(response.data);
         setselectedNseName(response.data[0].niftyName);
         //console.log(`LIst success ${response.data[0].niftyName}`);
-        response1 = await axios.get(`/nifty/getexpirydate/${response.data[0].niftyName}`);
+        response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${response.data[0].niftyName}`);
         // console.log(response1.data);
         setExpiryDateList(response1.data);
         setSelectedExpiryDate(response1.data[0].expiryDate);
@@ -506,7 +506,7 @@ const handleClick = (event, myUid) => {
     }
     // console.log(addMember);
     for(uidx=0; uidx<addMember.length; ++uidx) {
-      let response = await axios.get(`/group/add/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${addMember[uidx]}`)
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/add/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${addMember[uidx]}`)
     }
 
     let delMember = [];
@@ -516,7 +516,7 @@ const handleClick = (event, myUid) => {
     }
     // console.log(delMember);
     for(uidx=0; uidx<delMember.length; ++uidx) {
-      let response = await axios.get(`/group/delete/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${delMember[uidx]}`)
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/delete/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${delMember[uidx]}`)
       // console.log(response);
     }
     // setErrorMessage(`Successfully added and/or removed members of group ${localStorage.getItem("gdName")}`)

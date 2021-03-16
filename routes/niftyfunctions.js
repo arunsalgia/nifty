@@ -2,7 +2,7 @@ const algorithm = 'aes-256-ctr';
 const akshusecretKey = 'TihomHahs@UhskaHahs#19941995Bona';
 const ankitsecretKey = 'Tikna@Itark#1989#1993Bonaventure';
 const iv = '05bd9fbf50b124cd2bad8f31ca1e9ca4';           //crypto.randomBytes(16);
-USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2}
+USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2, OPERATOR: 3}
 
 const encrypt = (text) => {
 
@@ -298,6 +298,7 @@ async function userAlive(uRec) {
   if (uRec) {
     switch (uRec.userPlan) {
       case USERTYPE.SUPERUSER:
+      case USERTYPE.OPERATOR:
         sts = true;
         break;
       case  USERTYPE.PAID:

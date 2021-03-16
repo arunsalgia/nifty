@@ -18,7 +18,7 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import red from '@material-ui/core/colors/red';
 // import { DesktopWindows } from '@material-ui/icons';
-import { cdRefresh, specialSetPos } from "views/functions.js"
+import { cdRefresh, specialSetPos, encrypt } from "views/functions.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { CadSysLogo } from 'CustomComponents/CustomComponents.js';
 import {setLoggedState} from "App.js"
@@ -95,7 +95,10 @@ export default function SignIn() {
   const handleClick = async () => {
     let response = ""
     try { 
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/login/${userName}/${password}`); 
+      let encpassword = encrypt(password);
+      
+      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/login/${userName}/${encpassword}`); 
+
       setErrorMessage("");
       if (response.status === 200) {
         console.log(response.data);

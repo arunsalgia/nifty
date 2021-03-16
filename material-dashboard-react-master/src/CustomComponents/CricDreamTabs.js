@@ -142,12 +142,13 @@ export function CricDreamTabs() {
 
   async function handleLogout() {
     console.log("in logout");
-    handleClose();
     // await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    setLoggedState(-1);  // in unlogged state
     await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    cosole.log("just give logout axios call");
+    handleClose();
     //localStorage.setItem("uid", "");
     //localStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
-    setLoggedState(-1);  // in unlogged state
     //cdRefresh();  
   };
 

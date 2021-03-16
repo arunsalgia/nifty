@@ -24,11 +24,14 @@ function getCurrent() {
   let myCurr = LOGINSTATE.transientState;
   if (localStorage.getItem("currLoginState") !== undefined)
     myCurr = parseInt(localStorage.getItem("currLoginState"));
+  console.log(`Current state ${myCurr}`)
   return myCurr;
 }
 
 function setCurrent(newState) {
   let myCurr = getCurrent();
+  console.log(`Curr State ${myCurr}  New State ${newState}`);
+  console.log("Calloog refresh");
   localStorage.setItem("currLoginState", newState);
   if (myCurr !== newState)
     cdRefresh();
@@ -89,8 +92,8 @@ function AppRouter() {
       // console.log(`original state is ${newLoginState}`);
       if (getCurrentuser() > 0) {
         let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${localStorage.getItem("uid")}`);
-        // console.log(`islogged response`);
-        // console.log(resp);
+        console.log(`islogged response`);
+        console.log(resp);
         if (resp.data.status) {
           status = true;
           newLoginState = LOGINSTATE.loggedState;
@@ -118,14 +121,14 @@ function AppRouter() {
       return (
       <div>
         <CricDreamTabs/>
-        <IdleTimer
+        {/* <IdleTimer
         ref={ref => { idleTimer = ref }}
         timeout={1000 * 60 * 1}
         onActive={handleOnActive}
         // onIdle={handleOnIdle}
         onAction={handleOnAction}
         debounce={250}
-      />
+      /> */}
       </div>
       )  
     else if (getCurrent() === LOGINSTATE.unLoggedState)
@@ -161,7 +164,7 @@ function AppRouter() {
 
   
   async function handleOnActive (event) {
-    //console.log('user is active', event);
+    console.log('user is active', event);
     // console.log('time remaining', idleTimer.getRemainingTime());
     //console.log(localStorage.getItem("uid"));
     // if (localStorage.getItem("uid").length > 0)
@@ -169,7 +172,7 @@ function AppRouter() {
   }
 
   async function handleOnAction (event) {
-    //console.log(localStorage.getItem("uid"));
+    console.log(`Action from user ${localStorage.getItem("uid")}`);
     // if (localStorage.getItem("uid").length > 0)
     //   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
   }
@@ -178,10 +181,10 @@ function AppRouter() {
   async function handleOnIdle (event) {
     console.log('user is idle', event);
     console.log('last active', idleTimer.getLastActiveTime());
-    if (localStorage.getItem("uid").length > 0) {
-      setMyLogout(true);
-      await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
-    }
+    // if (localStorage.getItem("uid").length > 0) {
+    //   setMyLogout(true);
+    //   await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    // }
   }
 
   console.log("in Main APP");

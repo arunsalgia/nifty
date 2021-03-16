@@ -8,6 +8,7 @@ fetch = require('node-fetch');
 _ = require("lodash");
 cron = require('node-cron');
 nodemailer = require('nodemailer');
+crypto = require('crypto');
 axios = require('axios');
 const { promisify } = require('util')
 sleep = promisify(setTimeout)
@@ -139,6 +140,18 @@ MasterSettingsSchema = mongoose.Schema ({
 })
 
 UserSchema = mongoose.Schema({
+  uid: Number,
+  userName: String,
+  displayName: String,
+  password: String,
+  status: Boolean,
+  defaultGroup: Number,
+  email: String,
+  userPlan: Number,
+  mobile: String
+});
+
+OLDUserSchema = mongoose.Schema({
   uid: Number,
   userName: String,
   displayName: String,

@@ -2,9 +2,10 @@
 // export const ENDPOINT = "http://localhost:4000";
 
 import axios from "axios";
-
+var crypto = require("crypto");
 
 export function cdRefresh() {
+  console.log("in refresh");
   window.location.reload();
 }
 
@@ -34,6 +35,28 @@ export function validateSpecialCharacters(sss) {
     return sts;
 }
 
+export function encrypt(text) {
+  let hash="";
+  try {
+    const cipher = crypto.createCipheriv(process.env.REACT_APP_ALGORITHM, 
+      process.env.REACT_APP_AKSHUSECRETKEY, 
+      Buffer.from(process.env.REACT_APP_IV, 'hex'));
+    const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+    hash = encrypted.toString('hex');
+  }
+  catch (err) {
+    console.log(err);
+  } 
+  return hash;
+};
+
+export function decrypt(hash) {
+  const decipher = crypto.createDecipheriv(process.env.REACT_APP_ALGORITHM, 
+    process.env.REACT_APP_AKSHUSECRETKEY, 
+    Buffer.from(process.env.REACT_APP_IV, 'hex'));
+  const decrpyted = Buffer.concat([decipher.update(Buffer.from(hash, 'hex')), decipher.final()]);
+  return decrpyted.toString();
+};
 
 
 // export function hasGroup() {

@@ -142,14 +142,13 @@ export function CricDreamTabs() {
 
   async function handleLogout() {
     console.log("in logout");
-    // await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
-    setLoggedState(-1);  // in unlogged state
     await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
-    cosole.log("just give logout axios call");
+    console.log("just given logout axios call");
+    setLoggedState(-1);  // in unlogged state
     handleClose();
-    //localStorage.setItem("uid", "");
+    localStorage.setItem("uid", "");
     //localStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
-    //cdRefresh();  
+    cdRefresh();  
   };
 
 
@@ -163,20 +162,20 @@ export function CricDreamTabs() {
     }
   }
 
-  function onSwiped(direction) {
-    let newValue = balue + Number(direction);
-    if ((newValue >= 1) && (newValue  <= 4)) {
-      setValue(newValue);
-    }
-    // if (adjustedIdx >= images.length) {
-    //   newIdx = 0;
-    // } else if (adjustedIdx < 0) {
-    //   newIdx = images.length - 1;
-    // } else {
-    //   newIdx = adjustedIdx;
-    // }
-    // this.setState({ imageIdx: newIdx });
-  }
+  // function onSwiped(direction) {
+  //   let newValue = balue + Number(direction);
+  //   if ((newValue >= 1) && (newValue  <= 4)) {
+  //     setValue(newValue);
+  //   }
+  //   // if (adjustedIdx >= images.length) {
+  //   //   newIdx = 0;
+  //   // } else if (adjustedIdx < 0) {
+  //   //   newIdx = images.length - 1;
+  //   // } else {
+  //   //   newIdx = adjustedIdx;
+  //   // }
+  //   // this.setState({ imageIdx: newIdx });
+  // }
 
   let mylogo = `${process.env.PUBLIC_URL}/CS3.ICO`;
   return (

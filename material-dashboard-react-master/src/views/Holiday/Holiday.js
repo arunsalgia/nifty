@@ -37,7 +37,7 @@ import { useHistory } from "react-router-dom";
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
-import { validateSpecialCharacters } from "views/functions"
+import { validateSpecialCharacters, getUserType, sendHeartBeat } from "views/functions"
 //import DeleteIcon from '@material-ui/icons/Delete';
 
 const yearList = ["2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"];
@@ -152,7 +152,7 @@ export default function Holiday() {
   const [holidayDate, setHolidayDate] = React.useState("2021-01-26");
   const [holidayStartTime, setHolidayStartTime] = React.useState("09:30");
   const [holidayEndTime, setHolidayEndTime] = React.useState("15:30");
-    
+  const [generalUser, setGeneralUser] = React.useState(true);
   useEffect(() => {       
       const fetchHolidays = async () => {
         let response, response1;
@@ -162,12 +162,16 @@ export default function Holiday() {
         //console.log(myYear);
         await readHolidays(myYear);
       }
+      let myUserType = getUserType();
+      if (myUserType.includes("OPER") || myUserType.includes("SUPER"))
+        setGeneralUser(false);
       fetchHolidays();
   }, []);
 
   async function readHolidays(myYear) {
     try {
       //console.log(`Getting list fof holidays of ${myYear}`)
+      await sendHeartBeat();
       let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/year/${myYear}`);
       setHolidayList(response.data);
       //console.log(response.data);
@@ -257,6 +261,7 @@ export default function Holiday() {
     }
     console.log("Allfine")
     try {
+      await sendHeartBeat();
       let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/add/${holidayType}/${newDesc}/${myDate}/${sTime}/${eTime}`); 
       await readHolidays(currYear);
       //console.log("Update without erro");
@@ -447,6 +452,7 @@ export default function Holiday() {
     //console.log(`in Delete`);
     //console.log(myDate);
     try {
+      await sendHeartBeat();
       let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/holiday/delete/${myDate}`);
       setHolidayList(holidayList.filter(x => x.date != myDate));
     } catch (e) {
@@ -501,7 +507,7 @@ export default function Holiday() {
                   {myEndTime}
                </TableCell>
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
-                <IconButton key={x.date} id={x.date} aria-label="delete" className={classes.delete}
+                <IconButton disabled={generalUser} key={x.date} id={x.date} aria-label="delete" className={classes.delete}
                   onClick={ () => deleteDate(x.date) }
                   >
                     <DeleteIcon />
@@ -526,7 +532,7 @@ export default function Holiday() {
         <DisplayHolidayList />
         <Typography className={classes.error} align="left">{errorMessage}</Typography>
         <br/>
-        <button onClick={openModal}>Add New Holiday</button>
+        <button disabled={generalUser} onClick={openModal}>Add New Holiday</button>
         <Modal
             isOpen={modalIsOpen}
             onAfterOpen={afterOpenModal}

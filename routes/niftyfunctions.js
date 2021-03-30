@@ -348,22 +348,52 @@ function cricDate(d)  {
   return tmp;
 }
 
-function checkActiveUser(userId) {
-  console.log(activeUserList);
-  console.log(userId);
-  let tmp = activeUserList.find(x => x.uid == userId);
-  console.log(tmp);
-  if (tmp) return(true);
-  else     return(false);
-}
 
-function addActiveUser(userId) {
+function original_addActiveUser(userId) {
   let tmp = activeUserList.find(x => x.uid == userId);
   if (!tmp) {
     activeUserList.push({uid: userId, timer: 0});
   }
 }
 
+function makeCSUid(userId) {
+  return ("0000" + userId).slice(-4);
+}
+
+function checkActiveUser(userId) {
+  let userPortion = makeCSUid(userId);
+  let tmp = activeUserList.find(x => x.csuid.startsWith(userPortion));
+  let sts = (tmp) ? true : false;
+  return sts;
+}
+
+
+function delActiveUser(userId) {
+  let userPortion = makeCSUid(userId);
+  activeUserList = activeUserList.filter(x => !x.csuid.startsWith(userPortion));
+}
+
+function addActiveUser(userId) {
+  let userPortion = makeCSUid(userId);
+  // temporary allow user to login 
+  activeUserList = activeUserList.filter(x => x.csuid.startsWith(userPortion));
+  // check if any user already connected
+  let tmp = activeUserList.find(x => x.csuid.startsWith(userPortion));
+  if (tmp) return "";  // user already exists
+  // new user. Make correct id
+  let myDate = new Date();
+  let newId = userPortion + 
+    "-" + 
+    myDate.getFullYear().toString() +
+    ("00" + myDate.getMonth()).slice(-2) +
+    ("00" + myDate.getDate()).slice(-2) + 
+    "-" +
+    ("00" + myDate.getHours()).slice(-2) +
+    ("00" + myDate.getMinutes()).slice(-2) +
+    ("00" + myDate.getSeconds()).slice(-2);
+  activeUserList.push({csuid: newId});
+  return (newId);
+}
 
 
 function resetActiveUserTimer(userId) {
@@ -372,10 +402,6 @@ function resetActiveUserTimer(userId) {
     tmp.timer = 0;
 }
 
-
-function delActiveUser(userId) {
-  _.remove(activeUserList, {uid: userId})
-}
 
 
 

@@ -16,56 +16,22 @@ import axios from 'axios';
 import {getCurrentuser, cdRefresh} from "views/functions"
 
 const LOGINSTATE = {transientState: -1, unLoggedState: 0, loggedState: 1}
-var currLoginState = LOGINSTATE.transientState;
-var currLoginState = LOGINSTATE.transientState;
 
-
-function getCurrent() {
-  let myCurr = LOGINSTATE.transientState;
-  if (localStorage.getItem("currLoginState") !== undefined)
-    myCurr = parseInt(localStorage.getItem("currLoginState"));
-  console.log(`Current state ${myCurr}`)
-  return myCurr;
-}
-
-function setCurrent(newState) {
-  let myCurr = getCurrent();
-  console.log(`Curr State ${myCurr}  New State ${newState}`);
-  console.log("Calloog refresh");
-  localStorage.setItem("currLoginState", newState);
-  if (myCurr !== newState)
-    cdRefresh();
-  return
-}
 
 export function setLoggedState(num) {
-  //myTabPosition = num;
   if (num > 0) {
-    currLoginState = LOGINSTATE.loggedState;
     localStorage.getItem("menuValue", num);
   } else if (num < 0) {
-    currLoginState = LOGINSTATE.unLoggedState;
     localStorage.setItem("uid", "");
   } else {
-    currLoginState = LOGINSTATE.transientState;
     localStorage.setItem("uid", "");
   }
-  setCurrent(currLoginState);
 }
 
 const hist = createBrowserHistory();
 
-// function checkJoinGroup(pathArray) {
-//   let sts = false;
-//   if ((pathArray[1].toLowerCase() === "joingroup") && (pathArray.length === 3) && (pathArray[2].length > 0)) {
-//     localStorage.setItem("joinGroupCode", pathArray[2]);
-//     sts = true;
-//   }
-//   return sts;
-// }
 
 function initCdParams() {
-  // localStorage.setItem("joinGroupCode", "");
   let ipos = 0;
   if ((localStorage.getItem("tabpos") !== null) &&
   (localStorage.getItem("tabpos") !== "") ) {
@@ -81,43 +47,33 @@ function initCdParams() {
 function AppRouter() {
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
-  const [myLogout, setMyLogout] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
+  // const [myLogout, setMyLogout] = useState(false);
+  // const [isLogged, setIsLogged] = useState(false);
   var idleTimer = null;
 
   useEffect(() => {       
     const chkLogStatus = async () => {
       let status = false;
-      let newLoginState = getCurrent();
-      // console.log(`original state is ${newLoginState}`);
       if (getCurrentuser() > 0) {
-        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${localStorage.getItem("uid")}`);
-        console.log(`islogged response`);
-        console.log(resp);
+        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${localStorage.getItem("csuid")}`);
+        // console.log(resp.data);
         if (resp.data.status) {
           status = true;
-          newLoginState = LOGINSTATE.loggedState;
         } else {
           localStorage.setItem("uid", "");
-          newLoginState = LOGINSTATE.unLoggedState;
+          localStorage.setItem("csuid", "");
         }
       } else {
         localStorage.setItem("uid", "");
-        newLoginState = LOGINSTATE.unLoggedState;
+        localStorage.setItem("csuid", "");
       }
-      // console.log(`islogged status ${status}`)
-      // console.log(`modified state is ${newLoginState}`)
-      setIsLogged(status);
-      setCurrent(newLoginState);
     }
-    // console.log(`Menu value is ${localStorage.getItem("menuValue")}`);
-    // console.log(`Gid is ${localStorage.getItem("uid")}  just before checking is logged`);
     chkLogStatus();
 }, []);
 
 
   function DispayTabs() {
-    if (getCurrent() === LOGINSTATE.loggedState)
+    if (getCurrentuser() > 0)
       return (
       <div>
         <CricDreamTabs/>
@@ -131,10 +87,8 @@ function AppRouter() {
       /> */}
       </div>
       )  
-    else if (getCurrent() === LOGINSTATE.unLoggedState)
+    else 
       return (<SignIn/>);
-    else
-        return(<div><h3>Transcient state</h3></div>);
   }
       // if (localStorage.getItem("currentLogin") === "SIGNUP")
       //   return (<SignUp/>)
@@ -187,9 +141,9 @@ function AppRouter() {
     // }
   }
 
-  console.log("in Main APP");
+  // console.log("in Main APP");
 //  localStorage.setItem("uid", 4);
-  console.log(`isLOgged is ${isLogged}`);
+  // console.log(`isLOgged is ${isLogged}`);
 return (
     <Router history={hist}> 
     <UserContext.Provider value={value}>

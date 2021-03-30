@@ -40,6 +40,8 @@ router.get('/xxxxalluser', async function (req, res, next) {
     uRec.email = dbencrypt(uRec.email);
     uRec.password = dbencrypt(uRec.password);
     uRec.save();
+
+
   })
   sendok("Done");
 });
@@ -210,39 +212,70 @@ router.get('/login/:uName/:uPassword', async function (req, res, next) {
   CricRes = res;
   setHeader();
   var {uName, uPassword } = req.params;
-  var isValid = false;
-  //let lName = dbencrypt(getLoginName(uName));
+
+  // confirm user name okay
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
-  console.log(uRec)
-  let tmp = dbencrypt(uPassword);
-  console.log(tmp);
-  if (await userAlive(uRec)) 
-    isValid = (tmp === uRec.password);
-  console.log("Valid State ", isValid);
-  if (isValid) {
-    addActiveUser(uRec.uid);
-    sendok(uRec);
-  } else
+  if (!uRec) {
     senderr(602, "Invalid User name or password");
+    return;
+  }
+
+  // confirm password okay
+  let tmp = dbencrypt(uPassword);
+  if (tmp !== uRec.password) {
+    senderr(602, "Invalid User name or password");
+    return;
+  }
+
+  // for paid user check if validity still present
+  tmp = await userAlive(uRec);
+  if (!tmp) {
+    senderr(602, "Invalid User name or password");
+    return;
+  }
+
+  let csuid = addActiveUser(uRec.uid);
+  console.log(`New csuid: ${csuid}`);
+  if (csuid.length === 0) {
+    senderr(603, "User already logged in");
+    return;
+  }
+
+  sendok({csuid: csuid, userRec: uRec});
 });
 
-router.get('/islogged/:uid', async function (req, res, next) {
-  UserRes = res;
-  var {uid } = req.params;
-  let status = false;
 
-  let uRec = User.find({uid: uid});
-  let cActive = activeUserList.find(x => x.uid == uid);
-  if (cActive) {
-    if (cActive.time <= 100000000000)
-      status = true;
-  }
-  status = true;
+router.get('/logout/:myUid/', async function (req, res, next) {
+  CricRes = res;
+  setHeader();
+
+  var {myUid } = req.params;
+  delActiveUser(myUid);
+  sendok("OK");
+});
+
+router.get('/islogged/:mycsuid', async function (req, res, next) {
+  CricRes = res;
+  setHeader();
+
+  var {mycsuid } = req.params;
+  // let uRec = await User.find({uid: uid});
+  // let cActive = activeUserList.find(x => x.uid == uid);
+  // if (cActive) {
+  //   if (cActive.time <= 100000000000)
+  //     status = true;
+  // }
+  // status = true;
+
+  let cActive = activeUserList.find(x => x.csuid === mycsuid);
+  let status = true;   //(cActive) ? true : false;
   sendok({status: status});
 });
 
 router.get('/heartbeat/:uid', async function (req, res, next) {
-  UserRes = res;
+  CricRes = res;
+  setHeader();
+
   var {uid } = req.params;
 
   resetActiveUserTimer(parseInt(uid));
@@ -250,8 +283,9 @@ router.get('/heartbeat/:uid', async function (req, res, next) {
 });
 
 router.get('/criclogout/:uid', async function (req, res, next) {
-  UserRes = res;
+  CricRes = res;
   setHeader();
+
   var {uid } = req.params;
   let myRec = await User.findOne({uid: uid});
   console.log(myRec);

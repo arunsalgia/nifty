@@ -117,6 +117,7 @@ async function processConnection(i) {
       (connectionArray[i].page.length  <= 0)) return;
 
   console.log(`Process connection of ${connectionArray[i].page} for user ${connectionArray[i].uid}`);
+  console.log(connectionArray[i]);
   var myDate1 = new Date();
   var myData;
   //console.log(connectionArray[i])
@@ -145,25 +146,32 @@ async function processConnection(i) {
     */
     let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
     //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
-    //console.log(`Fetched nseata: ${latestData.length}`);
+    console.log(`Fetched nsedata: ${latestData.length}`);
     if (latestData.length === 0) return;  // no data
 
     let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    //console.log(tmp);
-    if (!tmp) return; // error. no data
+    // console.log(tmp);
+    if (!tmp) {
+      return; // error. no data
+    }
+    // console.log("Found expirty date");
 
     let myUnderlyingValue = parseFloat(tmp.underlyingValue);
     let myTimeStamp = tmp.timestamp;
+    console.log(`About to send ULV ${myUnderlyingValue}`)
     io.to(connectionArray[i].socketId).emit('NSEUNDERLYINGVALUE', myUnderlyingValue);
 
     let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
-
+    console.log(`About to send display ${myDisplayString}`)
     io.to(connectionArray[i].socketId).emit('NSEDISPLAYSTRING', myDisplayString);
 
     //myData = {stockName: connectionArray[i].stockName, stockData: latestData.niftyData, dispString: "heelo", underlyingValue: 11.0 }
     let minSP = myUnderlyingValue - connectionArray[i].margin;
     let maxSP = myUnderlyingValue + connectionArray[i].margin;
+    console.log(`MIn ${minSP}  and Max ${maxSP}`);
     tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
+    //tmp = latestData;
+    console.log(`Length after min/max ${tmp.length}`);
     io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
   } else {
 
@@ -195,14 +203,14 @@ cron.schedule('*/1 * * * * *', async () => {
     return;
   }   
   // increment counter of each active user
-  activeUserList.forEach(x => { ++x.timer; });
+  // activeUserList.forEach(x => { ++x.timer; });
   
   //let currtime = getISTtime();
   //let myMinutes = currtime.getMinutes()
   if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
     console.log("======== client update"); 
     clientUpdateCount = 0; 
-    console.log(activeUserList);
+    // console.log(activeUserList);
     //console.log(masterConnectionArray);
     sendClientData(); 
   }

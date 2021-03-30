@@ -96,20 +96,24 @@ export default function SignIn() {
     let response = ""
     try { 
       let encpassword = encrypt(password);
-      
-      response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/login/${userName}/${encpassword}`); 
-
+      console.log("about to  sed acios");
+      let myUrl=`${process.env.REACT_APP_AXIOS_BASEPATH}/user/login/${userName}/${encpassword}`;
+      console.log(myUrl);
+      response = await axios.get(myUrl); 
       setErrorMessage("");
       if (response.status === 200) {
         console.log(response.data);
         // SAMPLE OUTPUT
         // {"uid":"8","gid":2,"displayName":"Salgia Super Stars",
         // "groupName":"Happy Home Society Grp 2","tournament":"ENGAUST20","ismember":true,"admin":true}
-        window.localStorage.setItem("uid", response.data.uid)
-        window.localStorage.setItem("displayName", response.data.displayName);
-        window.localStorage.setItem("userName", response.data.userName);
-        window.localStorage.setItem("userPlan", response.data.userPlan);
-        //setTab(1);  // show NIFTY be default
+        window.localStorage.setItem("uid", response.data.userRec.uid)
+        window.localStorage.setItem("displayName", response.data.userRec.displayName);
+        window.localStorage.setItem("userName", response.data.userRec.userName);
+        window.localStorage.setItem("userPlan", response.data.userRec.userPlan);
+        window.localStorage.setItem("csuid", response.data.csuid);
+        console.log(window.localStorage.getItem("csuid"));
+        console.log(window.localStorage.getItem("uid"));
+        setTab(1);  // show NIFTY be default
         setLoggedState(1)
       }
     } catch (err) {

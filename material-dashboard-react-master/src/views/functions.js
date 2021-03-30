@@ -58,28 +58,26 @@ export function decrypt(hash) {
   return decrpyted.toString();
 };
 
+//let USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2, OPERATOR: 3}
+export function getUserType() {
+  let uType = "";
+  switch(localStorage.getItem("userPlan")) {
+    case "0" : uType = "TRIAL"; break;
+    case "1" : uType = "SUPERUSER"; break;
+    case "2" : uType = "PAID"; break;
+    case "3" : uType = "OPERATOR"; break;
+  }
+  return(uType);
+}
 
-// export function hasGroup() {
-//   var sts = false;
-//     if (localStorage.getItem("gid") !== null) 
-//     if (localStorage.getItem("gid") !== "") 
-//     if (localStorage.getItem("gid") !== "0")
-//       sts = true;
-//   return sts;
-// }
+export async function sendHeartBeat() {
+  try {
+   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+  } catch(e) {
+    console.log(e);
+  }
+}
 
-
-
-// export async function getUserBalance() {
-//   let myBalance = 0;
-//   try {
-//     let response = await axios.get(`/wallet/balance/${localStorage.getItem("uid")}`);
-//     myBalance = (await response).data.balance;
-//   } catch(err) {
-//     myBalance = 0;
-//   }
-//   return myBalance;
-// }
 
 export function specialSetPos() {
   //console.log(`in SSP: ${localStorage.getItem("joinGroupCode")}`)

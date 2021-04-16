@@ -85,7 +85,7 @@ export default function Admin({ ...rest }) {
       document.body.style.overflow = "hidden";
     }
     // set user name
-    // localStorage.setItem("currentUser", "CricDream");
+    // sessionStorage.setItem("currentUser", "CricDream");
     window.addEventListener("resize", resizeFunction);
     // Specify how to clean up after this effect:
     return function cleanup() {
@@ -99,7 +99,7 @@ export default function Admin({ ...rest }) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={localStorage.getItem("userName")}           //{"CricDream"}
+        logoText={sessionStorage.getItem("userName")}           //{"CricDream"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}

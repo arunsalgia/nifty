@@ -124,6 +124,7 @@ export function DisplayPageHeader (props) {
     // let msg = props.groupName + '-' + props.tournament;
     return (
     <div>
+      <BlankArea />
       <Typography align="center" component="h1" variant="h5">{props.headerName}</Typography>
       {/* <DisplayGroupName groupName={msg}/> */}
     </div>

@@ -61,7 +61,7 @@ export default function ContactUs() {
     console.log(tmp1);
 
     try {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/feedback/${localStorage.getItem("uid")}/${tmp1}`);
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/feedback/${sessionStorage.getItem("uid")}/${tmp1}`);
       setFeedbackCode(response.data);
       //console.log(response);
       setRegisterStatus(200);

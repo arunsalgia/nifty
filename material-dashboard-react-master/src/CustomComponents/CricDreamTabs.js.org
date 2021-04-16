@@ -68,16 +68,16 @@ var myTabPosition = 0;
 
 export function setTab(num) {
   //myTabPosition = num;
-  localStorage.setItem("tabpos", num);
+  sessionStorage.setItem("tabpos", num);
   cdRefresh();
 }
 
 function Logout() {
   console.log("In LOGOUT------")
   const history = useHistory();
-  localStorage.setItem("uid", "");
-  // localStorage.setItem("newTabPos", "0)
-  localStorage.setItem("currentLogin", "");
+  sessionStorage.setItem("uid", "");
+  // sessionStorage.setItem("newTabPos", "0)
+  sessionStorage.setItem("currentLogin", "");
   cdRefresh();  
   return (<div></div>);
 }
@@ -85,15 +85,15 @@ function Logout() {
 
 function getTabPos() {
   let pos = 0;
-  //console.log(`My tab position is ${localStorage.getItem("tabpos")}`)
-  if ((localStorage.getItem("tabpos") === null)  ||
-        (localStorage.getItem("tabpos") === "") ||
-        (localStorage.getItem("tabpos") === "0")) {
+  //console.log(`My tab position is ${sessionStorage.getItem("tabpos")}`)
+  if ((sessionStorage.getItem("tabpos") === null)  ||
+        (sessionStorage.getItem("tabpos") === "") ||
+        (sessionStorage.getItem("tabpos") === "0")) {
         //console.log("Setting TABPOS to 0")
         pos = 0;  
   } else {
-    //console.log(`Settab as per setting which is ${localStorage.getItem("tabpos")}`)
-    pos = parseInt(localStorage.getItem("tabpos"));
+    //console.log(`Settab as per setting which is ${sessionStorage.getItem("tabpos")}`)
+    pos = parseInt(sessionStorage.getItem("tabpos"));
   }
   //console.log(`Tab position ${pos}`);
   return pos;
@@ -103,10 +103,10 @@ export function CricDreamTabs() {
   const classes = useStyles();
   //console.log("in Cric Dream Tabs");
   const [value, setValue] = React.useState(getTabPos());
-  // localStorage.setItem("tabpos", "0");
+  // sessionStorage.setItem("tabpos", "0");
   const handleChange = (event, newValue) => {
     if (newValue !== value) {
-      localStorage.setItem("tabpos", newValue);
+      sessionStorage.setItem("tabpos", newValue);
       setValue(newValue);
     }
   };

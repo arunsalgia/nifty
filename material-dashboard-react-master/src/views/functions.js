@@ -61,7 +61,7 @@ export function decrypt(hash) {
 //let USERTYPE = { TRIAL: 0, SUPERUSER: 1, PAID: 2, OPERATOR: 3}
 export function getUserType() {
   let uType = "";
-  switch(localStorage.getItem("userPlan")) {
+  switch(sessionStorage.getItem("userPlan")) {
     case "0" : uType = "TRIAL"; break;
     case "1" : uType = "SUPERUSER"; break;
     case "2" : uType = "PAID"; break;
@@ -72,7 +72,7 @@ export function getUserType() {
 
 export async function sendHeartBeat() {
   try {
-   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+   await axios.get(`/user/heartbeat/${sessionStorage.getItem("uid")}`);
   } catch(e) {
     console.log(e);
   }
@@ -80,9 +80,9 @@ export async function sendHeartBeat() {
 
 
 export function specialSetPos() {
-  //console.log(`in SSP: ${localStorage.getItem("joinGroupCode")}`)
+  //console.log(`in SSP: ${sessionStorage.getItem("joinGroupCode")}`)
   let retval = 0;
-  // if (localStorage.getItem("joinGroupCode").length > 0)
+  // if (sessionStorage.getItem("joinGroupCode").length > 0)
   //   retval = 105;
   // //console.log(`in SSP: ${retval}`)
   return retval;
@@ -119,8 +119,8 @@ export function validateEmail(sss) {
 
 export function getCurrentuser() {
   let myUid = 0;
-  if (localStorage.getItem("uid") !== null)
-  if (localStorage.getItem("uid").length > 0)
-    myUid = parseInt(localStorage.getItem("uid"))
+  if (sessionStorage.getItem("uid") !== null)
+  if (sessionStorage.getItem("uid").length > 0)
+    myUid = parseInt(sessionStorage.getItem("uid"))
   return myUid;
 }

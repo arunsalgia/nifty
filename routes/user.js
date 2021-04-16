@@ -216,28 +216,64 @@ router.get('/login/:uName/:uPassword', async function (req, res, next) {
   // confirm user name okay
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
   if (!uRec) {
-    senderr(602, "Invalid User name or password");
+    senderr(601, "Invalid User name or password");
     return;
   }
 
   // confirm password okay
   let tmp = dbencrypt(uPassword);
   if (tmp !== uRec.password) {
-    senderr(602, "Invalid User name or password");
+    senderr(601, "Invalid User name or password");
     return;
   }
 
   // for paid user check if validity still present
   tmp = await userAlive(uRec);
   if (!tmp) {
-    senderr(602, "Invalid User name or password");
+    senderr(601, "Invalid User name or password");
     return;
   }
 
   let csuid = addActiveUser(uRec.uid);
   console.log(`New csuid: ${csuid}`);
   if (csuid.length === 0) {
-    senderr(603, "User already logged in");
+    senderr(602, "User already logged in");
+    return;
+  }
+
+  sendok({csuid: csuid, userRec: uRec});
+});
+
+router.get('/confirmlogin/:uName/:uPassword', async function (req, res, next) {
+  CricRes = res;
+  setHeader();
+  var {uName, uPassword } = req.params;
+
+  // confirm user name okay
+  let uRec = await User.findOne({ userName:  getLoginName(uName)});
+  if (!uRec) {
+    senderr(601, "Invalid User name or password");
+    return;
+  }
+
+  // confirm password okay
+  let tmp = dbencrypt(uPassword);
+  if (tmp !== uRec.password) {
+    senderr(601, "Invalid User name or password");
+    return;
+  }
+
+  // for paid user check if validity still present
+  tmp = await userAlive(uRec);
+  if (!tmp) {
+    senderr(601, "Invalid User name or password");
+    return;
+  }
+
+  let csuid = addActiveUser(uRec.uid, true);
+  console.log(`New csuid: ${csuid}`);
+  if (csuid.length === 0) {
+    senderr(602, "User already logged in");
     return;
   }
 

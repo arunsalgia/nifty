@@ -82,7 +82,8 @@ export default function Holiday() {
       // border: 5,
       // align: "center",
       padding: "none",
-      fontSize: theme.typography.pxToRem(14),
+      fontSize: theme.typography.pxToRem(18),
+      height: 50,
       // fontWeight: theme.typography.fontWeightBold,
     },
     visuallyHidden: {
@@ -187,7 +188,7 @@ export default function Holiday() {
 
   const handleSelectedYear = async (event) => {
     setCurrYear(parseInt(event.target.value));
-    console.log(`Selecyed year ${event.target.value}`);
+    // console.log(`Selecyed year ${event.target.value}`);
     await readHolidays(parseInt(event.target.value));
   }
 
@@ -210,7 +211,7 @@ export default function Holiday() {
         {yearList.map(x =><MenuItem key={x} value={x}>{x}</MenuItem>)}
       </Select>
       </Grid>
-  </Grid>
+      </Grid>
     )
   }
 
@@ -460,8 +461,28 @@ export default function Holiday() {
     }
   }
 
+  function DisplayDeleteButton(props) {
+    // console.log(`Date is ${props.date}`);
+    if (generalUser)
+      return (
+        <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
+       </TableCell>
+      )
+    else 
+      return (
+        <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
+        <IconButton key={props.date} id={props.date} aria-label="delete" className={classes.delete}
+          onClick={ () => deleteDate(props.date) }
+          >
+            <DeleteIcon />
+          </IconButton>
+       </TableCell>
+      )
+  }
+
   function DisplayHolidayList() {
     // console.log(myGroupTableData);
+    let delText = (generalUser) ? " " : "Delete"
     return (
       <TableContainer>
       <Table
@@ -476,7 +497,7 @@ export default function Holiday() {
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Date</TableCell>
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Start Time</TableCell>
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">End Time</TableCell>
-          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Delete</TableCell>
+          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">{delText}</TableCell>
         </TableRow>
         </TableHead>
         <TableBody>
@@ -506,13 +527,7 @@ export default function Holiday() {
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {myEndTime}
                </TableCell>
-               <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
-                <IconButton disabled={generalUser} key={x.date} id={x.date} aria-label="delete" className={classes.delete}
-                  onClick={ () => deleteDate(x.date) }
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-               </TableCell>
+               <DisplayDeleteButton date={x.date}/>
               </TableRow>
             );
             })
@@ -523,6 +538,21 @@ export default function Holiday() {
     )
   }
     
+  function DisplayAddButton() {
+    if (generalUser)
+      return <BlankArea />
+    else
+      return (
+        <Button
+        variant="contained"
+        size="small"
+        color="primary" 
+        // disabled={generalUser} 
+        onClick={openModal}>Add New Holiday
+      </Button>
+      )
+  }
+
 
   return (
     <div align = "center" className={classes.root}>
@@ -532,16 +562,21 @@ export default function Holiday() {
         <DisplayHolidayList />
         <Typography className={classes.error} align="left">{errorMessage}</Typography>
         <br/>
-        <button disabled={generalUser} onClick={openModal}>Add New Holiday</button>
+        <DisplayAddButton />
         <Modal
+            // autoFocus={true}
+            // disableEscapeKeyDown={true}
+            // disableBackdropClick
+            // keyboard
             isOpen={modalIsOpen}
             onAfterOpen={afterOpenModal}
             onRequestClose={closeModal}
             style={customStyles}
+            aria-labelledby="modalTitle"
             contentLabel="Example Modal"
           >
-            <Typography className={classes.title} align="center">
-              New Holiday
+            <Typography id="modalTitle" className={classes.title} align="center">
+            New Holiday
             </Typography>
             <BlankArea/>
             <GetNewHoliday holidayType="new"/>

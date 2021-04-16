@@ -20,11 +20,11 @@ const LOGINSTATE = {transientState: -1, unLoggedState: 0, loggedState: 1}
 
 export function setLoggedState(num) {
   if (num > 0) {
-    localStorage.getItem("menuValue", num);
+    sessionStorage.getItem("menuValue", num);
   } else if (num < 0) {
-    localStorage.setItem("uid", "");
+    sessionStorage.setItem("uid", "");
   } else {
-    localStorage.setItem("uid", "");
+    sessionStorage.setItem("uid", "");
   }
 }
 
@@ -33,13 +33,13 @@ const hist = createBrowserHistory();
 
 function initCdParams() {
   let ipos = 0;
-  if ((localStorage.getItem("tabpos") !== null) &&
-  (localStorage.getItem("tabpos") !== "") ) {
-    ipos = parseInt(localStorage.getItem("tabpos"));
-    if (ipos >= process.env.REACT_APP_BASEPOS) localStorage.setItem("tabpos", ipos-process.env.REACT_APP_BASEPOS);
+  if ((sessionStorage.getItem("tabpos") !== null) &&
+  (sessionStorage.getItem("tabpos") !== "") ) {
+    ipos = parseInt(sessionStorage.getItem("tabpos"));
+    if (ipos >= process.env.REACT_APP_BASEPOS) sessionStorage.setItem("tabpos", ipos-process.env.REACT_APP_BASEPOS);
   } else
-    localStorage.setItem("tabpos", 0);
-  console.log(`ipos: ${ipos}   Tabpos ${localStorage.getItem("tabpos")}`)
+  sessionStorage.setItem("tabpos", 0);
+  console.log(`ipos: ${ipos}   Tabpos ${sessionStorage.getItem("tabpos")}`)
 }
 
 
@@ -55,17 +55,17 @@ function AppRouter() {
     const chkLogStatus = async () => {
       let status = false;
       if (getCurrentuser() > 0) {
-        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${localStorage.getItem("csuid")}`);
+        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${sessionStorage.getItem("csuid")}`);
         // console.log(resp.data);
         if (resp.data.status) {
           status = true;
         } else {
-          localStorage.setItem("uid", "");
-          localStorage.setItem("csuid", "");
+          sessionStorage.setItem("uid", "");
+          sessionStorage.setItem("csuid", "");
         }
       } else {
-        localStorage.setItem("uid", "");
-        localStorage.setItem("csuid", "");
+        sessionStorage.setItem("uid", "");
+        sessionStorage.setItem("csuid", "");
       }
     }
     chkLogStatus();
@@ -90,17 +90,17 @@ function AppRouter() {
     else 
       return (<SignIn/>);
   }
-      // if (localStorage.getItem("currentLogin") === "SIGNUP")
+      // if (sessionStorage.getItem("currentLogin") === "SIGNUP")
       //   return (<SignUp/>)
-      // else if (localStorage.getItem("currentLogin") === "RESET")
+      // else if (sessionStorage.getItem("currentLogin") === "RESET")
       //   return (<ForgotPassword/>)
       // else
 
 
-  // localStorage.clear()
+  // sessionStorage.clear()
   window.onbeforeunload = () => Router.refresh();
   console.log("in before unload");
-  // localStorage.clear();
+  // sessionStorage.clear();
   // console.log("clearing local storage");
     initCdParams();
 
@@ -120,29 +120,29 @@ function AppRouter() {
   async function handleOnActive (event) {
     console.log('user is active', event);
     // console.log('time remaining', idleTimer.getRemainingTime());
-    //console.log(localStorage.getItem("uid"));
-    // if (localStorage.getItem("uid").length > 0)
-    //   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+    //console.log(sessionStorage.getItem("uid"));
+    // if (sessionStorage.getItem("uid").length > 0)
+    //   await axios.get(`/user/heartbeat/${sessionStorage.getItem("uid")}`);
   }
 
   async function handleOnAction (event) {
-    console.log(`Action from user ${localStorage.getItem("uid")}`);
-    // if (localStorage.getItem("uid").length > 0)
-    //   await axios.get(`/user/heartbeat/${localStorage.getItem("uid")}`);
+    console.log(`Action from user ${sessionStorage.getItem("uid")}`);
+    // if (sessionStorage.getItem("uid").length > 0)
+    //   await axios.get(`/user/heartbeat/${sessionStorage.getItem("uid")}`);
   }
 
 
   async function handleOnIdle (event) {
     console.log('user is idle', event);
     console.log('last active', idleTimer.getLastActiveTime());
-    // if (localStorage.getItem("uid").length > 0) {
+    // if (sessionStorage.getItem("uid").length > 0) {
     //   setMyLogout(true);
-    //   await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    //   await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${sessionStorage.getItem("uid")}`);
     // }
   }
 
   // console.log("in Main APP");
-//  localStorage.setItem("uid", 4);
+//  sessionStorage.setItem("uid", 4);
   // console.log(`isLOgged is ${isLogged}`);
 return (
     <Router history={hist}> 

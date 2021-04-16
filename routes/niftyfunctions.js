@@ -370,16 +370,21 @@ function checkActiveUser(userId) {
 
 function delActiveUser(userId) {
   let userPortion = makeCSUid(userId);
-  activeUserList = activeUserList.filter(x => !x.csuid.startsWith(userPortion));
+  // console.log("Before Del=============", activeUserList);
+  activeUserList = _.filter(activeUserList, x => !x.csuid.startsWith(userPortion));
+  // console.log("after =============", activeUserList);
 }
 
-function addActiveUser(userId) {
+function addActiveUser(userId, forcefully = false) {
+  // console.log("Force----------------", forcefully);
   let userPortion = makeCSUid(userId);
-  // temporary allow user to login 
-  activeUserList = activeUserList.filter(x => x.csuid.startsWith(userPortion));
-  // check if any user already connected
-  let tmp = activeUserList.find(x => x.csuid.startsWith(userPortion));
-  if (tmp) return "";  // user already exists
+  let tmp = _.find(activeUserList, x => x.csuid.startsWith(userPortion));
+  if (tmp) {
+    if (!forcefully) return "";  // user already exists
+    // console.log("Forcefilly true");
+    activeUserList = _.filter(activeUserList, x => !x.csuid.startsWith(userPortion))
+  }
+  // console.log("Before Add=============", activeUserList);
   // new user. Make correct id
   let myDate = new Date();
   let newId = userPortion + 
@@ -392,6 +397,7 @@ function addActiveUser(userId) {
     ("00" + myDate.getMinutes()).slice(-2) +
     ("00" + myDate.getSeconds()).slice(-2);
   activeUserList.push({csuid: newId});
+  // console.log("After Add=============", activeUserList);
   return (newId);
 }
 

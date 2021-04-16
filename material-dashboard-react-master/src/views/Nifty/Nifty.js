@@ -39,6 +39,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { useHistory } from "react-router-dom";
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
+import { BlankArea } from 'CustomComponents/CustomComponents';
 
 
 
@@ -82,7 +83,7 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { id: 'ce_openInterest', numeric: true, disablePadding: true, label: 'OI' },
-  { id: 'ce_changeinOpenInterest', numeric: true, disablePadding: true, label: 'Chng in OI' },
+  { id: 'ce_changeinOpenInterest', numeric: true, disablePadding: true, label: 'OI Change' },
   { id: 'ce_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
   { id: 'ce_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
   { id: 'ce_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
@@ -90,7 +91,7 @@ const headCells = [
   { id: 'pe_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
   { id: 'pe_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
   { id: 'pe_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
-  { id: 'pe_changeinOpenInterest', numeric: true, disablePadding: true, label: 'Chng in OI' },
+  { id: 'pe_changeinOpenInterest', numeric: true, disablePadding: true, label: 'OI Change' },
   { id: 'pe_openInterest', numeric: true, disablePadding: true, label: 'OI' },
 ];
 
@@ -99,9 +100,10 @@ function EnhancedTableHead(props) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
+  // border:"1px solid black"
   const THColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black" };
-  const THColumnStyleBorderTop= { backgroundColor: '#EEEEEE', borderTop: "1px solid black" };
-  const THColumnStyleBorderBottom= { backgroundColor: '#EEEEEE', borderBottom: "1px solid black" };
+  // const THColumnStyleBorderTop= { backgroundColor: '#EEEEEE', borderBottom: 0,  };
+  // const THColumnStyleBorderBottom= { backgroundColor: '#EEEEEE', borderTop: 1,  };
   return (
     <TableHead>
       <TableRow borderBottom="none" align="center">
@@ -117,7 +119,8 @@ function EnhancedTableHead(props) {
           <TableCell
             style={THColumnStyle} 
             key={headCell.id}
-            align="center" colSpan={1}
+            align="center" 
+            colSpan={1}
             //padding={headCell.disablePadding ? 'none' : 'default'}
             padding="none"
             sortDirection={orderBy === headCell.id ? order : false}
@@ -258,6 +261,7 @@ const useStyles = makeStyles((theme) => ({
   },
   dispString:  {
     // right: 0,
+    margin: theme.spacing(0, 1, 0),
     fontSize: '18px',
     color: blue[900],
     // // position: 'absolute',
@@ -290,13 +294,13 @@ const [userMessage, setUserMessage] = React.useState("");
 const [nseNameList, setNseNameList] = React.useState([]);
 const [selectedNseName, setselectedNseName] = React.useState("");
 const [expiryDateList, setExpiryDateList] = React.useState([]);
-const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("31-Dec-2020");
+const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("");
 const [displayString, setDisplayString] = React.useState("");
 const [underlyingValue, setUnderlyingValue] = React.useState(0);
 const [margin, setMargin] = React.useState(2000);
 const [nextSP, setNextSP] = React.useState(0);
 
-var sendMessage = {page: "NSEDATA", uid: localStorage.getItem("uid")};
+var sendMessage = {page: "NSEDATA", uid: sessionStorage.getItem("uid")};
 
 useEffect(() => {       
 
@@ -315,9 +319,6 @@ useEffect(() => {
         //console.log("In NSEDATA");
         setNiftyDataArray(mynsedata);
         setmasterData(mynsedata);
-        //setNextSP(getNextSP(mynsedata, underlyingValue));
-        // get 1st SP greate than 
-        // setDisplayString(response.data.dispString);
       });
 
       sockConn.on("NSEDISPLAYSTRING", (dispStr) => {
@@ -346,26 +347,40 @@ useEffect(() => {
       }
       return myTable[myTable.length - 1].sp;
     }
+
+
     const fetchnifty = async () => {
       let response, response1;
       try {
         response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/list`);
         setNseNameList(response.data);
-        setselectedNseName(response.data[0].niftyName);
-        //console.log(`LIst success ${response.data[0].niftyName}`);
-        response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${response.data[0].niftyName}`);
-        // console.log(response1.data);
-        setExpiryDateList(response1.data);
-        setSelectedExpiryDate(response1.data[0].expiryDate);
+        if (response.data.length > 0) {
+          setselectedNseName(response.data[0].niftyName);
+          let myDates = await getExiryDates(response.data[0].niftyName)
+          if (myDates.length > 0) {
+            console.log(myDates.length);
+            setExpiryDateList(myDates);
+            setSelectedExpiryDate(myDates[0].expiryDate);
+            sendMessage["uid"] = sessionStorage.getItem("uid");
+            sendMessage["stockName"] = response.data[0].niftyName;
+            sendMessage["expiryDate"] = myDates[0].expiryDate;
+            sendMessage["margin"] = margin;
+            // console.log(sendMessage);
+            // console.log("Now making connection");
+            sockConn.emit("page", sendMessage);
+          }  
+          else
+            setSelectedExpiryDate("");
+    
+  
+        }
+        // //console.log(`LIst success ${response.data[0].niftyName}`);
+        // response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${response.data[0].niftyName}`);
+        // // console.log(response1.data);
+        // setExpiryDateList(response1.data);
+        // setSelectedExpiryDate(response1.data[0].expiryDate);
         //console.log(`expiry success ${response1.data[0].expiryDate}`)
 
-        sendMessage["uid"] = localStorage.getItem("uid");
-        sendMessage["stockName"] = response.data[0].niftyName;
-        sendMessage["expiryDate"] = response1.data[0].expiryDate;
-        sendMessage["margin"] = margin;
-        //console.log(sendMessage);
-        //console.log("Now making correction");
-        sockConn.emit("page", sendMessage);
       } catch (e) {
             console.log(e)
       }
@@ -386,19 +401,29 @@ useEffect(() => {
   const [orderBy, setOrderBy] = React.useState('StationName');
   const [selected, setSelected] = React.useState([]);
 
+  async function getExiryDates(niftyName) {
+    let myDates = [];
+    try {
+      let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${niftyName}`);
+
+      //setExpiryDateList(resp.data);
+      myDates = resp.data;
+      // console.log(`expiry success ${resp.data[0].expiryDate}`)
+    } catch (e) {
+      console.log(e)
+    }
+    // console.log(myDates);
+    return myDates;
+  }
+
   async function readNSEData(nseName, expiryDate) {
     try {
-      sendMessage["uid"] = localStorage.getItem("uid");
+      sendMessage["uid"] = sessionStorage.getItem("uid");
       sendMessage["stockName"] = nseName;
       sendMessage["expiryDate"] = expiryDate;
       sendMessage["margin"] = margin;
       //console.log(sendMessage);
       sockConn.emit("page", sendMessage);
-
-      // var response = await axios.get(`/nifty/getnsedata/${nseName}/${expiryDate}`);
-      // setNiftyDataArray(response.data.niftyData);
-      // setmasterData(response.data.niftyData);
-      // setDisplayString(response.data.dispString);
     } catch (e) {
         console.log(e)
     }
@@ -414,7 +439,18 @@ useEffect(() => {
   const handleSelectedNseName = async (event) => {
     setselectedNseName(event.target.value);
     //console.log(`Selecyed nse name ${event.target.value}`);
-    await readNSEData(event.target.value, selectedExpiryDate);
+    let myDates = await getExiryDates(event.target.value);
+    if (myDates.length > 0) {
+      setExpiryDateList(myDates);
+      if (myDates.length > 0) {
+        // check if current expiry data is there
+        let currExpiryDate = selectedExpiryDate;
+        let tmp = myDates.find(x => x.expiryDate === selectedExpiryDate);
+        if (!tmp) currExpiryDate = myDates[0].expiryDate;
+        setSelectedExpiryDate(currExpiryDate)
+        await readNSEData(event.target.value, currExpiryDate);
+      }
+    }
   }
 
   const handleRequestSort = (event, property) => {
@@ -437,7 +473,7 @@ const handleClick = (event, myUid) => {
     event.preventDefault();
     // console.log(myUid);
     // cannot remove admin from the member list
-    if (localStorage.getItem("uid") == myUid) return;
+    if (sessionStorage.getItem("uid") == myUid) return;
 
     // take care of non admin member to add/remove
     let tmp = [].concat(masterData);
@@ -506,7 +542,7 @@ const handleClick = (event, myUid) => {
     }
     // console.log(addMember);
     for(uidx=0; uidx<addMember.length; ++uidx) {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/add/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${addMember[uidx]}`)
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/add/${sessionStorage.getItem("gdGid")}/${sessionStorage.getItem("uid")}/${addMember[uidx]}`)
     }
 
     let delMember = [];
@@ -516,11 +552,11 @@ const handleClick = (event, myUid) => {
     }
     // console.log(delMember);
     for(uidx=0; uidx<delMember.length; ++uidx) {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/delete/${localStorage.getItem("gdGid")}/${localStorage.getItem("uid")}/${delMember[uidx]}`)
+      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/delete/${sessionStorage.getItem("gdGid")}/${sessionStorage.getItem("uid")}/${delMember[uidx]}`)
       // console.log(response);
     }
-    // setErrorMessage(`Successfully added and/or removed members of group ${localStorage.getItem("gdName")}`)
-    setUserMessage(`Successfully added and/or removed members of group ${localStorage.getItem("gdName")}`);
+    // setErrorMessage(`Successfully added and/or removed members of group ${sessionStorage.getItem("gdName")}`)
+    setUserMessage(`Successfully added and/or removed members of group ${sessionStorage.getItem("gdName")}`);
     setBackDropOpen(true);
     setTimeout(() => setBackDropOpen(false), process.env.REACT_APP_MESSAGE_TIME);
 }
@@ -530,7 +566,7 @@ function ShowGmButtons() {
     return (
     <div align="center">
         {/* <Button variant="contained" color="primary" size="small"
-            // disabled={tournamentStated || (localStorage.getItem("gdAdmin").length === 0)}
+            // disabled={tournamentStated || (sessionStorage.getItem("gdAdmin").length === 0)}
             className={classes.button} onClick={UpdateMemberList}>Update List
         </Button> */}
         {/* <Button variant="contained" color="primary" size="small"
@@ -608,8 +644,8 @@ function DisplayTimeStamp() {
 function DisplaySelection() {
   return(
     <Grid container>
-      <Grid justify="right" item xs="2" >
-        <Typography align="right" className={classes.dispString} >NSE Name</Typography>
+      <Grid align="right" item xs="2" >
+        <Typography className={classes.dispString} >NSE Name</Typography>
       </Grid>
       <Grid justify="right" item xs>
         <Select labelId='nsename' id='nsename' variant="outlined" required 
@@ -674,9 +710,8 @@ function DisplayTableCell(props) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <DisplayPageHeader headerName="NSE India" groupName="" tournament="gdTournament"/>
+        <BlankArea />
         <DisplaySelection />
-        {/* <ShowFilters/> */}
-        {/* <Typography align="right" className={classes.dispString} >{displayString}</Typography> */}
         <TableContainer>
           <Table
             className={classes.table}

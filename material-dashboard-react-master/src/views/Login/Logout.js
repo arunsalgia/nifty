@@ -2,8 +2,8 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 export default function Logout() {
-localStorage.clear();
-localStorage.setItem("logout",true);
+    sessionStorage.clear();
+    sessionStorage.setItem("logout",true);
 const history = useHistory();
 history.push("/signIn")
 

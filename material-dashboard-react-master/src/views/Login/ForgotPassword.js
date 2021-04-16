@@ -103,7 +103,7 @@ export default function ForgotPassword() {
   function handleLogin() {
     // console.log("Call for login here");
     // history.push("/signin")
-    localStorage.setItem("currentLogin", "SIGNIN");
+    sessionStorage.setItem("currentLogin", "SIGNIN");
     cdRefresh();
   }
 

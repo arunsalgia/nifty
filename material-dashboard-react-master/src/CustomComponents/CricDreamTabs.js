@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
 export function setTab(num) {
   //myTabPosition = num;
   console.log(`Menu pos ${num}`);
-  localStorage.setItem("menuValue", num);
+  sessionStorage.setItem("menuValue", num);
   cdRefresh();
 }
 
@@ -104,10 +104,10 @@ export function CricDreamTabs() {
   const [grpAuth, setGrpAuth] = React.useState(true);
   const [grpAnchorEl, setGrpAnchorEl] = React.useState(null);
   const grpOpen = Boolean(grpAnchorEl);
-  const [value, setValue] = React.useState(parseInt(localStorage.getItem("menuValue")));
+  const [value, setValue] = React.useState(parseInt(sessionStorage.getItem("menuValue")));
 
   
-  console.log(`in Tab function  ${localStorage.getItem("menuValue")}`);
+  console.log(`in Tab function  ${sessionStorage.getItem("menuValue")}`);
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -132,7 +132,7 @@ export function CricDreamTabs() {
   function setMenuValue(num) {
     setValue(num);
     handleClose();
-    localStorage.setItem("menuValue", num);
+    sessionStorage.setItem("menuValue", num);
   }
 
   const handleNifty = () => { setMenuValue(1);  }
@@ -142,12 +142,12 @@ export function CricDreamTabs() {
 
   async function handleLogout() {
     console.log("in logout");
-    await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${localStorage.getItem("uid")}`);
+    await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${sessionStorage.getItem("uid")}`);
     console.log("just given logout axios call");
     setLoggedState(-1);  // in unlogged state
     handleClose();
-    localStorage.setItem("uid", "");
-    //localStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
+    sessionStorage.setItem("uid", "");
+    //sessionStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
     cdRefresh();  
   };
 

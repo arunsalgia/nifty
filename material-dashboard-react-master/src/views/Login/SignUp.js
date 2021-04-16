@@ -106,7 +106,7 @@ export default function SignUp() {
     if (response.status === 200) {
       let setemailresp = await fetch(`/user/emailwelcome/${email}`);
       // history.push("/signin");
-      localStorage.setItem("currentLogin", "SIGNIN");
+      localSession.setItem("currentLogin", "SIGNIN");
       cdRefresh();
 
     } else {
@@ -119,7 +119,7 @@ export default function SignUp() {
   function handleLogin() {
     // console.log("Call for login here");
     // history.push("/signin")
-    localStorage.setItem("currentLogin", "SIGNIN");
+    localSession.setItem("currentLogin", "SIGNIN");
     cdRefresh();
 
   }

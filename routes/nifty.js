@@ -148,12 +148,12 @@ async function processConnection(i) {
     //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
     console.log(`Fetched nsedata: ${latestData.length}`);
     if (latestData.length === 0) return;  // no data
-
+    latestData = _.sortBy(latestData, 'strikePrice');
     let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
     // console.log(tmp);
-    if (!tmp) {
-      return; // error. no data
-    }
+    // if (!tmp) {
+    //   return; // error. no data
+    // }
     // console.log("Found expirty date");
 
     let myUnderlyingValue = parseFloat(tmp.underlyingValue);
@@ -182,6 +182,7 @@ async function processConnection(i) {
 async function sendClientData() {
   let T1 = new Date();
   //console.log("---------------------");
+  console.log(masterConnectionArray);
   connectionArray = [].concat(masterConnectionArray)
   nseData = [];
   for(i=0; i<connectionArray.length; ++i)  {
@@ -197,23 +198,27 @@ async function sendClientData() {
 // schedule task
 
 
+let scheduleSemaphore = false;
 cron.schedule('*/1 * * * * *', async () => {
   if (!db_connection) {
     console.log("============= No mongoose connection");
     return;
   }   
-  // increment counter of each active user
-  // activeUserList.forEach(x => { ++x.timer; });
-  
-  //let currtime = getISTtime();
-  //let myMinutes = currtime.getMinutes()
-  if (++clientUpdateCount > CLIENTUPDATEINTERVAL) {
+  // console.log("in schedule");
+  ++clientUpdateCount;
+  if (scheduleSemaphore) return;
+  scheduleSemaphore = true;
+  // console.log(clientUpdateCount);
+
+  if (clientUpdateCount >= CLIENTUPDATEINTERVAL) {
     console.log("======== client update"); 
     clientUpdateCount = 0; 
     // console.log(activeUserList);
     //console.log(masterConnectionArray);
-    sendClientData(); 
+    await sendClientData(); 
   }
+
+  scheduleSemaphore = false;
 });
 
 

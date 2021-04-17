@@ -1,26 +1,26 @@
 //const { default: axios } = require('axios');
 const { getISTtime, nseWorkingTime } = require('./niftyfunctions'); 
 var router = express.Router();
-let NiftyRes;
+// let // NiftyRes;
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
-  NiftyRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+  // NiftyRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
   next('route');
 });
 
 
 
 router.get('/addnifty/:name/:code', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
 
   var { name, code } = req.params;
 
   let niftyRec = await NiftyNames.findOne({niftyName: name});
-  if (niftyRec) { senderr(601, `Nifty ${name} already configured`); return; }
+  if (niftyRec) { senderr(res, 601, `Nifty ${name} already configured`); return; }
   
   let nRec = await NiftyNames.find().limit(1).sort({ "nid": -1 });
   let newNid = 0
@@ -34,69 +34,69 @@ router.get('/addnifty/:name/:code', async function (req, res, next) {
     enable: true,
   });
   niftyRec.save();
-  sendok("ok");
+  sendok(res, "ok");
 }); 
 
 
 router.get('/list', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
   let allNiftyRec = await NiftyNames.find({enable: true});
-  sendok(allNiftyRec);
+  sendok(res, allNiftyRec);
 }); 
 
 router.get('/testtime/:timevalue', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
   var { timevalue } = req.params;
   let myDate = new Date(parseInt(timevalue));
   // myDate.setTime(myDate);
   // console.log(finalDate);
-  sendok(myDate);
+  sendok(res, myDate);
 });
 
 
 /**
 router.get('/getnsedata/:nseName/:expiryDate/:myRange', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
   let {nseName, expiryDate} = req.params;
 
   let myRange = DEFAULTRANGE;
 
   let nameRec = await NiftyNames.findOne({niftyName: nseName, enable: true});
   if (!nameRec) {
-    senderr(601, "Invalid NSE name");
+    senderr(res, 601, "Invalid NSE name");
     return;
   }
   let latestData = await read_nse_data(nameRec);
   latestData.niftyData = _.filter(latestData.niftyData, x => x.expiryDate === expiryDate);
-  sendok({dispString: latestData.dispString, niftyData: latestData.niftyData});
+  sendok(res, {dispString: latestData.dispString, niftyData: latestData.niftyData});
 }); 
  */
 
 router.get('/getexpirydate/:nseName', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
   let {nseName} = req.params;
 
   let myData = await CurrExpiryDate.find({nseName: nseName});
   myData = _.sortBy(myData, 'revDate');
   console.log(`Expiry date length: ${myData.length}`);
-  sendok(myData);
+  sendok(res, myData);
 }); 
 
 router.get('/listholiday/:myYear', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
   let {myYear} = req.params;
 
   publishHolidays(myYear);
 }); 
 
 router.get('/currentyearholiday', async function (req, res, next) {
-  NiftyRes = res;
-  setHeader();
+  // NiftyRes = res;
+  setHeader(res);
 
   // provide list of holidays for current year
   let tmp = new Date();
@@ -106,7 +106,7 @@ router.get('/currentyearholiday', async function (req, res, next) {
 async function publishHolidays(year) {
   let myData = await Holiday.find({year: year});
   myData = _.sortBy(myData, x => x.yearMonthDay);
-  sendok(myData);
+  sendok(res, myData);
 }
 
 async function processConnection(i) {
@@ -222,11 +222,11 @@ cron.schedule('*/1 * * * * *', async () => {
 });
 
 
-function sendok(usrmsg) { NiftyRes.send(usrmsg); }
-function senderr(errcode, errmsg) { NiftyRes.status(errcode).send(errmsg); }
-function setHeader() {
-  NiftyRes.header("Access-Control-Allow-Origin", "*");
-  NiftyRes.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+function sendok(res, usrmsg) { res.send(usrmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function setHeader(res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
 
 module.exports = router;

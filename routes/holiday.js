@@ -1,73 +1,73 @@
 //const { default: axios } = require('axios');
 const { getISTtime, nseWorkingTime } = require('./niftyfunctions'); 
 var router = express.Router();
-let HolidayRes;
+// let HolidayRes;
 
 /* GET users listing. */
 router.use('/', function(req, res, next) {
-  HolidayRes = res;
-  setHeader();
-  if (!db_connection) { senderr(DBERROR, ERR_NODB); return; }
+  // HolidayRes = res;
+  setHeader(res);
+  if (!db_connection) { senderr(res, DBERROR, ERR_NODB); return; }
   next('route');
 });
 
 
 
 router.get('/year/:myYear', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
 
   var { myYear} = req.params;
   console.log(`Year is ${myYear}`);
   let myRecList = await Holiday.find({year: myYear});
   myRecList = _.sortBy(myRecList, 'date');
-  sendok(myRecList);
+  sendok(res, myRecList);
 }); 
 
 router.get('/delete/:myDate', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
 
   var { myDate} = req.params;
   console.log(`date is ${myDate}`);
   let sts = await Holiday.deleteOne({date: myDate});
   console.log(sts.deletedCount);
   if (sts.deletedCount > 0)
-    sendok("OK");
+    sendok(res, "OK");
   else
-    senderr(601, "Unable to delete the holiday record");
+    senderr(res, 601, "Unable to delete the holiday record");
 }); 
 
 router.get('/delall', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
 
   let myRecList = await Holiday.deleteMany({});
-  sendok("OK");
+  sendok(res, "OK");
 }); 
 
 router.get('/list', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   let allData = await Holiday.find({});
   allData = _.sortBy(allData, 'date');
   console.log(allData);
-  sendok(allData);
+  sendok(res, allData);
 }); 
 
 router.get('/testtime/:timevalue', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   var { timevalue } = req.params;
   let myDate = new Date(parseInt(timevalue));
   // myDate.setTime(myDate);
   // console.log(finalDate);
-  sendok(myDate);
+  sendok(res, myDate);
 });
 
 router.get('/add/:hType/:desc/:myDate/:sTime/:eTime', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   var { hType, desc, myDate, sTime, eTime } = req.params;
 
   console.log("add holiday");
@@ -82,54 +82,54 @@ router.get('/add/:hType/:desc/:myDate/:sTime/:eTime', async function (req, res, 
     hRec.year = myDate.substring(0,4);
     console.log(hRec.year);
     hRec.save();
-    sendok(hRec);
+    sendok(res, hRec);
   } else {
-    senderr(601, "Date already configured");
+    senderr(res, 601, "Date already configured");
   }
 });
 
 
 /**
 router.get('/getnsedata/:nseName/:expiryDate/:myRange', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   let {nseName, expiryDate} = req.params;
 
   let myRange = DEFAULTRANGE;
 
   let nameRec = await NiftyNames.findOne({niftyName: nseName, enable: true});
   if (!nameRec) {
-    senderr(601, "Invalid NSE name");
+    senderr(res, 601, "Invalid NSE name");
     return;
   }
   let latestData = await read_nse_data(nameRec);
   latestData.niftyData = _.filter(latestData.niftyData, x => x.expiryDate === expiryDate);
-  sendok({dispString: latestData.dispString, niftyData: latestData.niftyData});
+  sendok(res, {dispString: latestData.dispString, niftyData: latestData.niftyData});
 }); 
  */
 
 router.get('/getexpirydate/:nseName', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   let {nseName} = req.params;
 
   let myData = await CurrExpiryDate.find({nseName: nseName});
   myData = _.sortBy(myData, 'revDate');
   //console.log(myData);
-  sendok(myData);
+  sendok(res, myData);
 }); 
 
 router.get('/listholiday/:myYear', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
   let {myYear} = req.params;
 
   publishHolidays(myYear);
 }); 
 
 router.get('/currentyearholiday', async function (req, res, next) {
-  HolidayRes = res;
-  setHeader();
+  // HolidayRes = res;
+  setHeader(res);
 
   // provide list of holidays for current year
   let tmp = new Date();
@@ -139,7 +139,7 @@ router.get('/currentyearholiday', async function (req, res, next) {
 async function publishHolidays(year) {
   let myData = await Holiday.find({year: year});
   myData = _.sortBy(myData, x => x.yearMonthDay);
-  sendok(myData);
+  sendok(res, myData);
 }
 
 async function processConnection(i) {
@@ -258,11 +258,11 @@ async function sendClientData() {
 }
 
 
-function sendok(usrmsg) { HolidayRes.send(usrmsg); }
-function senderr(errcode, errmsg) { HolidayRes.status(errcode).send(errmsg); }
-function setHeader() {
-  HolidayRes.header("Access-Control-Allow-Origin", "*");
-  HolidayRes.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+function sendok(res, usrmsg) { res.send(usrmsg); }
+function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }
+function setHeader(res) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 }
 
 module.exports = router;

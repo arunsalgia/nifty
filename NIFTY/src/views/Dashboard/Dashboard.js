@@ -87,6 +87,7 @@ function getDateTime(myTime) {
     ("0" + myDate.getHours()).slice(-2) + ":" +
     ("0" + myDate.getMinutes()).slice(-2) + ":" +
     ("0" + myDate.getSeconds()).slice(-2);
+    console.log(xxx);
     return (xxx);
 }
 

@@ -76,13 +76,13 @@ function leavingDashboard(myConn) {
 
 const Months = ["Jan", "Feb", "Mar", "Apr",
                 "May", "Jun", "Jul", "Aug", 
-                "Sep", "Oct", "Nov", "Dec"]
+                "Sep", "Oct", "Nov", "Dec"];
 
 function getDateTime(myTime) {
   let myDate = new Date(myTime);
   let xxx = ("0" + myDate.getDate()).slice(-2) + "-" +
     // ("0" + (myDate.getMonth()+1)).slice(-2) + "/" +
-    Months[myDate.getMonth()] + "-"
+    Months[myDate.getMonth()] + "-" +
     myDate.getFullYear() + ' ' +
     ("0" + myDate.getHours()).slice(-2) + ":" +
     ("0" + myDate.getMinutes()).slice(-2) + ":" +

@@ -23,7 +23,7 @@ const {getLoginName, getDisplayName, cricDate,
   getISTtime, nseWorkingTime,
   checkActiveUser, addActiveUser, delActiveUser,
 } = require("./routes/niftyfunctions")
-PRODUCTION=false;
+PRODUCTION=true;
 
 PORT = process.env.PORT || 1965;
 console.log(`Port is ${PORT}`);

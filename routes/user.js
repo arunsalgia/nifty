@@ -281,12 +281,12 @@ router.get('/confirmlogin/:uName/:uPassword', async function (req, res, next) {
 });
 
 
-router.get('/logout/:myUid/', async function (req, res, next) {
+router.get('/logout/:myCsuid/', async function (req, res, next) {
   // CricRes = res;
   setHeader(res);
 
-  var {myUid } = req.params;
-  delActiveUser(myUid);
+  var {myCsuid } = req.params;
+  delActiveUser(myCsuid);
   sendok(res, "OK");
 });
 

@@ -59,14 +59,9 @@ clientData = [];
 nseData = [];
 
 activeUserList = [];
-READNSEINTERVAL=900;    // 900 seconds in 15 minues
+///READNSEINTERVAL=900;    // 900 seconds in 15 minues
 CLIENTUPDATEINTERVAL=10; //
 
-if (PRODUCTION)
-READNSEINTERVALMINUTES=15;
-else
-READNSEINTERVALMINUTES=1;
-CLIENTUPDATEINTERVALMINUTES=1;
 
 readNseTimer = 0;
 clientUpdateCount=0;
@@ -80,25 +75,47 @@ io.on('connect', socket => {
     var myClient = _.find(masterConnectionArray, x => x.socketId === socket.id);
     // console.log("Current clinet is");
     //console.log(myClient);
-    if (myClient) { //(checkActiveUser(parseInt(pageMessage.uid))) {
+    if (myClient) { 
       if (pageMessage.page.toUpperCase().includes("NSEDATA")) {
         // console.log("----Updatig page message");
         // console.log(pageMessage);
         myClient.page = "NSEDATA";
-        myClient.uid = parseInt(pageMessage.uid);
+        myClient.csuid = pageMessage.csuid;
+        myClient.stockName = pageMessage.stockName;
+        myClient.expiryDate = pageMessage.expiryDate;
+        myClient.margin = pageMessage.margin;
+        myClient.firstTime = true;
+        clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+      }
+      if (pageMessage.page.toUpperCase().includes("GREEKDATA")) {
+        // console.log("----Updatig page message");
+        // console.log(pageMessage);
+        myClient.page = "GREEKDATA";
+        myClient.csuid = pageMessage.csuid;
         myClient.stockName = pageMessage.stockName;
         myClient.expiryDate = pageMessage.expiryDate;
         myClient.margin = pageMessage.margin;
         myClient.firstTime = true;
         clientUpdateCount = CLIENTUPDATEINTERVAL+1;
       } 
+      if (pageMessage.page.toUpperCase().includes("DASH")) {
+        // console.log("----Updatig page message");
+        // console.log(pageMessage);
+        myClient.page = "DASHBOARD";
+        myClient.csuid = pageMessage.csuid;
+        // myClient.stockName = pageMessage.stockName;
+        // myClient.expiryDate = pageMessage.expiryDate;
+        // myClient.margin = pageMessage.margin;
+        myClient.firstTime = true;
+        clientUpdateCount = CLIENTUPDATEINTERVAL+1;
+      }
     }
   });
 });
 
 io.sockets.on('connection', function(socket){
   // console.log("Connected Socket = " + socket.id)
-  masterConnectionArray.push({socketId: socket.id, page: "", uid: 0});
+  masterConnectionArray.push({socketId: socket.id, page: "", csuid: ""});
   socket.on('disconnect', function(){
     console.log("---------------------disconnect")
     _.remove(masterConnectionArray, {socketId: socket.id});
@@ -218,6 +235,64 @@ HolidaySchema = mongoose.Schema({
   //yearMonthDay: String, /// string in YYYYMMDD format. It can be used for sorting
 });
 
+NseGreekSchema = mongoose.Schema({
+  // common data
+  nseName: String,
+  expiryDate: String,
+  strikePrice: Number,
+  time: Number,
+  underlyingValue: Number,
+  diffDays: Number,
+  diffDaysPercent: Number,
+  // implied Volatility
+  ce_impliedVolatility: Number,
+  pe_impliedVolatility: Number,
+  // CALLS
+  ce_LnUlBySp: Number,
+  ce_trqs2: Number,
+  ce_IvSqrtDayExpir: Number,
+  ce_d1: Number,
+  ce_d2: Number,
+  ce_normDistD1: Number,
+  ce_normDistMinusD1: Number,
+  ce_normDistD2: Number,
+  ce_normDistMinusD2: Number,
+  ce_ePowMinusRT: Number,
+  ce_SpTimesePowMinusRT: Number,
+  ce_ePowMinusQT: Number,
+  ce_UlTimesePowMinusQT: Number,
+  // PUTS
+  pe_LnUlBySp: Number,
+  pe_trqs2: Number,
+  pe_IvSqrtDayExpir: Number,
+  pe_d1: Number,
+  pe_d2: Number,
+  pe_normDistD1: Number,
+  pe_normDistMinusD1: Number,
+  pe_normDistD2: Number,
+  pe_normDistMinusD2: Number,
+  pe_ePowMinusRT: Number,
+  pe_SpTimesePowMinusRT: Number,
+  pe_ePowMinusQT: Number,
+  pe_UlTimesePowMinusQT: Number,
+  // CALLS alhpa beta gamma
+  ce_greekPrice: Number,
+  ce_greekDelta: Number,
+  ce_greekGamma: Number,
+  ce_greekTheta: Number,
+  ce_greekVega: Number,
+  ce_greekRho: Number,
+  // PUTS alhpa beta gamma
+  pe_greekPrice: Number,
+  pe_greekDelta: Number,
+  pe_greekGamma: Number,
+  pe_greekTheta: Number,
+  pe_greekVega: Number,
+  pe_greekRho: Number
+})
+
+
+
 // models
 MasterData = mongoose.model("MasterSettings", MasterSettingsSchema)
 User = mongoose.model("users", UserSchema);
@@ -230,6 +305,7 @@ ExpiryDate = mongoose.model("expirydate", ExpiryDateSchema)
 CurrNSEData = mongoose.model("curr_nse_data", NSEDataSchema);
 CurrExpiryDate = mongoose.model("curr_expirydate", ExpiryDateSchema)
 
+NseGreekData = mongoose.model("curr_nseGreekdata", NseGreekSchema);
 
 
 router = express.Router();
@@ -245,6 +321,8 @@ SENDSOCKET = 2;     // send data on socket
 DBERROR = 990;
 DBFETCHERR = 991;
 CRICFETCHERR = 992;
+INACTIVEERR = 993;
+
 ERR_NODB = "No connection to CricDream database";
 
 

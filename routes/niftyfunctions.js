@@ -367,11 +367,17 @@ function checkActiveUser(userId) {
   return sts;
 }
 
+function checkActiveCsuid(myCsuid) {
+  //let userPortion = makeCSUid(userId);
+  let tmp = activeUserList.find(x => x.csuid === myCsuid);
+  let sts = (tmp) ? true : false;
+  return sts;
+}
 
-function delActiveUser(userId) {
-  let userPortion = makeCSUid(userId);
+function delActiveUser(userCsuid) {
+  //let userPortion = makeCSUid(userId);
   // console.log("Before Del=============", activeUserList);
-  activeUserList = _.filter(activeUserList, x => !x.csuid.startsWith(userPortion));
+  activeUserList = _.filter(activeUserList, x => x.csuid !== userCsuid);
   // console.log("after =============", activeUserList);
 }
 
@@ -380,11 +386,14 @@ function addActiveUser(userId, forcefully = false) {
   let userPortion = makeCSUid(userId);
   let tmp = _.find(activeUserList, x => x.csuid.startsWith(userPortion));
   if (tmp) {
+    // if user found and request is not to force fully add then return
     if (!forcefully) return "";  // user already exists
+
     // console.log("Forcefilly true");
     activeUserList = _.filter(activeUserList, x => !x.csuid.startsWith(userPortion))
   }
   // console.log("Before Add=============", activeUserList);
+
   // new user. Make correct id
   let myDate = new Date();
   let newId = userPortion + 
@@ -395,8 +404,10 @@ function addActiveUser(userId, forcefully = false) {
     "-" +
     ("00" + myDate.getHours()).slice(-2) +
     ("00" + myDate.getMinutes()).slice(-2) +
-    ("00" + myDate.getSeconds()).slice(-2);
-  activeUserList.push({csuid: newId});
+    ("00" + myDate.getSeconds()).slice(-2) +
+    ("000" + myDate.getMilliseconds()).slice(-3);
+    
+    activeUserList.push({csuid: newId});
   // console.log("After Add=============", activeUserList);
   return (newId);
 }
@@ -421,5 +432,6 @@ module.exports = {
   revDate, datePriceKey,
   getISTtime, nseWorkingTime,
   checkActiveUser, addActiveUser, delActiveUser, resetActiveUserTimer,
+  checkActiveCsuid,
 }; 
 

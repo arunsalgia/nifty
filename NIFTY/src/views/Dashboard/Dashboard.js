@@ -6,7 +6,6 @@ import { makeStyles } from "@material-ui/core/styles";
 // import GroupIcon from '@material-ui/icons/Group';
 // import Update from "@material-ui/icons/Update";
 // import Accessibility from "@material-ui/icons/Accessibility";
-
 // core components
 import clsx from 'clsx';
 import Grid from "@material-ui/core/Grid";
@@ -75,7 +74,16 @@ function leavingDashboard(myConn) {
   myConn.disconnect();
 }
 
-
+function getDateTime(myTime) {
+  let myDate = new Date(myTime);
+  let xxx = ("0" + myDate.getDate()).slice(-2) + "/" +
+    ("0" + (myDate.getMonth()+1)).slice(-2) + "/" +
+    myDate.getFullYear() + ' ' +
+    ("0" + myDate.getHours()).slice(-2) + ":" +
+    ("0" + myDate.getMinutes()).slice(-2) + ":" +
+    ("0" + myDate.getSeconds()).slice(-2);
+    return (xxx);
+}
 
 export default function Dashboard() {
   const [dashData, setDashData] = useState([]);
@@ -229,8 +237,8 @@ export default function Dashboard() {
 
   function ShowSingleNseCard(props) {
     // console.log(props);
-    let myTime = new Date(props.data.time);
-    let myTimeString = myTime.toString().split("GMT");
+    // let myTime = new Date(props.data.time);
+    let myTimeString = getDateTime(props.data.time);
     return (
         <GridItem key={props.data.name+"GI"} xs={6} sm={6} md={6} lg={6}>
         <Card key={props.data.name+"Card"}>
@@ -240,7 +248,7 @@ export default function Dashboard() {
             </CardIcon>
         </CardHeader>
         <CardBody>
-        <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue + "  ( " + myTimeString[0] + " )"}</h3>
+        <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue + "  (" + myTimeString + ")"}</h3>
         </CardBody>
         <CardFooter key={props.data.name+"F"} stats>
         <Typography>{props.data.name + " Expiry Dates"}</Typography>

@@ -1,44 +1,47 @@
 import React, { useEffect } from 'react';
 import axios from "axios"; // 
 import socketIOClient from "socket.io-client";
-import Link from '@material-ui/core/Link';
-import Modal from 'react-modal';
+// import Link from '@material-ui/core/Link';
+// import Modal from 'react-modal';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import Box from '@material-ui/core/Box';
+// import InputLabel from '@material-ui/core/InputLabel';
+// import Box from '@material-ui/core/Box';
 import Grid from "@material-ui/core/Grid";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
+// import Table from '@material-ui/core/Table';
+// import TableBody from '@material-ui/core/TableBody';
+// import TableCell from '@material-ui/core/TableCell';
+// import TableContainer from '@material-ui/core/TableContainer';
+// import TableHead from '@material-ui/core/TableHead';
+// import TablePagination from '@material-ui/core/TablePagination';
+// import TableRow from '@material-ui/core/TableRow';
+// import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 // import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 // import Checkbox from '@material-ui/core/Checkbox';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import Radio from '@material-ui/core/Radio';
+// import Button from '@material-ui/core/Button';
+// import Checkbox from '@material-ui/core/Checkbox';
+// import Radio from '@material-ui/core/Radio';
 import { red, blue } from '@material-ui/core/colors';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
+// import IconButton from '@material-ui/core/IconButton';
+// import Tooltip from '@material-ui/core/Tooltip';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
 // import Switch from '@material-ui/core/Switch';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
-import { useHistory } from "react-router-dom";
+// import DeleteIcon from '@material-ui/icons/Delete';
+// import FilterListIcon from '@material-ui/icons/FilterList';
+// import { useHistory } from "react-router-dom";
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
-import {setTab} from "CustomComponents/CricDreamTabs.js"
+// import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
 import { generateUnderlyingIndexString } from "views/functions"
 import { func } from 'prop-types';
 //import DeleteIcon from '@material-ui/icons/Delete';
+
+import Zoom1 from "./chart1"
+
 
 
 function leavingGreek(myConn) {
@@ -340,6 +343,7 @@ export default function Greek() {
         <DisplayPageHeader headerName="Greek" />      
         <BlankArea />
         <DisplaySelection />
+        <Zoom1 />
       </Paper>
     </div> 
   );

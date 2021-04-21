@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-// import react from 'react'
-// import { IsEmpty, Map } from "react-lodash"
 import axios from "axios";
 import socketIOClient from "socket.io-client";
 import { Switch, Route } from 'react-router-dom';
@@ -9,8 +7,8 @@ import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import Select from "@material-ui/core/Select";
 import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import Box from '@material-ui/core/Box';
+// import InputLabel from '@material-ui/core/InputLabel';
+// import Box from '@material-ui/core/Box';
 import Grid from "@material-ui/core/Grid";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -41,8 +39,7 @@ import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponent
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
 import { generateUnderlyingIndexString } from "views/functions"
-
-
+ 
 
 function leavingNifty(myConn) {
   console.log("Leaving Nifty wah wah ");
@@ -813,6 +810,6 @@ function DisplayTableCell(props) {
       <br/>
       {/* <ShowGmButtons/> */}
       {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
-    </div>
+    </div> 
 );
 }

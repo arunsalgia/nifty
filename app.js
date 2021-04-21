@@ -244,10 +244,19 @@ NseGreekSchema = mongoose.Schema({
   underlyingValue: Number,
   diffDays: Number,
   diffDaysPercent: Number,
-  // implied Volatility
+  // data from NSE 
   ce_impliedVolatility: Number,
+  ce_openInterest: Number,
+  ce_changeinOpenInterest: Number,
+  ce_totalTradedVolume: Number,
+  ce_lastPrice: Number,
+
   pe_impliedVolatility: Number,
-  // CALLS
+  pe_openInterest: Number,        
+  pe_changeinOpenInterest: Number,
+  pe_totalTradedVolume: Number,
+  pe_lastPrice: Number,
+  // Greek CALLS
   ce_LnUlBySp: Number,
   ce_trqs2: Number,
   ce_IvSqrtDayExpir: Number,
@@ -261,7 +270,7 @@ NseGreekSchema = mongoose.Schema({
   ce_SpTimesePowMinusRT: Number,
   ce_ePowMinusQT: Number,
   ce_UlTimesePowMinusQT: Number,
-  // PUTS
+  // Greek PUTS
   pe_LnUlBySp: Number,
   pe_trqs2: Number,
   pe_IvSqrtDayExpir: Number,

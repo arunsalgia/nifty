@@ -309,15 +309,18 @@ cron.schedule('*/1 * * * * *', async () => {
   if (scheduleSemaphore) return;
   scheduleSemaphore = true;
   // console.log(clientUpdateCount);
-
-  if (clientUpdateCount >= CLIENTUPDATEINTERVAL) {
-    console.log("======== client update"); 
-    clientUpdateCount = 0; 
-    // console.log(activeUserList);
-    //console.log(masterConnectionArray);
-    await sendClientData(); 
+  try {
+    if (clientUpdateCount >= CLIENTUPDATEINTERVAL) {
+      console.log("======== client update"); 
+      clientUpdateCount = 0; 
+      // console.log(activeUserList);
+      //console.log(masterConnectionArray);
+      await sendClientData(); 
+    }
+  } catch(e) {
+    console.log("Error in sendClientData");
+    console.log(e);    
   }
-
   scheduleSemaphore = false;
 });
 

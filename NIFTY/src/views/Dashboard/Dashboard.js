@@ -246,7 +246,7 @@ export default function Dashboard() {
     // let myTime = new Date(props.data.time);
     let myTimeString = getDateTime(props.data.time);
     return (
-        <GridItem key={props.data.name+"GI"} xs={6} sm={6} md={6} lg={6}>
+        <GridItem key={props.data.name+"GI"} xs={12} sm={6} md={6}>
         <Card key={props.data.name+"Card"}>
         <CardHeader key={props.data.name+"CH"} color="success" stats icon>
             <CardIcon color="success">

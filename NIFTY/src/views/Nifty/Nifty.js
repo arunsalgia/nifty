@@ -48,6 +48,15 @@ function leavingNifty(myConn) {
 
 var sockConn; 
 
+function currency(num) {
+  let myStr = (num) ? num.toFixed(2) : "-";
+  return myStr;
+}
+
+function noncurrency(num) {
+  let myStr = (num) ? num.toString() : "-";
+  return myStr;
+}  
 export default function Nifty() {
 
   // const history = useHistory();
@@ -333,7 +342,8 @@ useEffect(() => {
           setDisplayString(myStr);
         } else {
           setUnderlyingValue(0);
-          setDisplayString("");
+          let myStr = generateUnderlyingIndexString(selectedNseName, 0, "");
+          setDisplayString(myStr);
         }
 
 
@@ -819,17 +829,17 @@ function DisplayTableCell(props) {
                   <TableRow
                     tabIndex={-1}
                     key={row.strikePrice}>
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_openInterest} />
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_changeinOpenInterest} />
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_totalTradedVolume} />
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_impliedVolatility} />
-                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={row.ce_lastPrice} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_openInterest)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_changeinOpenInterest)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_totalTradedVolume)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_impliedVolatility)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_lastPrice)} />
                   <DisplayTableCell dataType="SP" sp={row.strikePrice} data={row.strikePrice} />
-                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_lastPrice} />
-                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_impliedVolatility} />
-                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_totalTradedVolume} />
-                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_changeinOpenInterest} />
-                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={row.pe_openInterest} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_lastPrice)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_impliedVolatility)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_totalTradedVolume)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_changeinOpenInterest)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_openInterest)} />
                   </TableRow>
                 );
                 })

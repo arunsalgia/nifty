@@ -496,11 +496,11 @@ export default function Holiday() {
       >
         <TableHead>
         <TableRow align="center">
-          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Type</TableCell>
+          {/* <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Type</TableCell> */}
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="left">Description</TableCell>
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Date</TableCell>
-          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Start Time</TableCell>
-          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">End Time</TableCell>
+          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Time</TableCell>
+          {/* <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">End Time</TableCell> */}
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">{delText}</TableCell>
         </TableRow>
         </TableHead>
@@ -512,25 +512,26 @@ export default function Holiday() {
             let tmp1 = tmp[2] + "-" + tmp[1] + "-" + tmp[0];
             let myStartTime = (x.type.includes("CUSTOM")) ? x.startTime : "-";
             let myEndTime = (x.type.includes("CUSTOM")) ? x.endTime : "-";
+            let myTime = (myStartTime === "-") ? "-" : myStartTime + "-" + myEndTime;
             return (
               <TableRow
                 tabIndex={-1}
                 key={x.date}>
-               <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
+               {/* <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {x.type}
-               </TableCell>
+               </TableCell> */}
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="left" >
-                  {x.desc}
+                  {x.desc + "(" + x.type[0] + ")"}
                </TableCell>
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {tmp1}
                </TableCell>
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
-                  {myStartTime}
+                  {myTime}
                </TableCell>
-               <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
+               {/* <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {myEndTime}
-               </TableCell>
+               </TableCell> */}
                <DisplayDeleteButton date={x.date}/>
               </TableRow>
             );

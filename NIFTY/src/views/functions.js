@@ -126,8 +126,12 @@ export function getCurrentuser() {
 }
 
 export function generateUnderlyingIndexString(nsename, ulvalue, myTime) {
-  let myTimeStamp = myTime.toString().split("GMT");
-  return `Underlying Index: ${nsename} ${ulvalue} at ${myTimeStamp[0].trim()}`;
+  let myStr = `Underlying Index: ${nsename} - `;
+  if (ulvalue) {
+    let myTimeStamp = myTime.toString().split("GMT");
+    myStr = `Underlying Index: ${nsename} ${ulvalue} at ${myTimeStamp[0].trim()}`;
+  }
+  return myStr;
 }
 
 export function getAxiosUrl(myurl) {

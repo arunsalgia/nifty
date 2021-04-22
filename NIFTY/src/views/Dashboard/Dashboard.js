@@ -251,7 +251,7 @@ export default function Dashboard() {
           </CardIcon>
       </CardHeader>
       <CardBody>
-      <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue}</h3>
+      <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue.toFixed(2)}</h3>
       <h3 align="center" className={classes.cardTitle}>{"(" + myTimeString + ")"}</h3>
       </CardBody>
       <CardFooter key={props.data.name+"F"} stats>

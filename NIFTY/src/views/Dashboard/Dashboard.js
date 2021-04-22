@@ -87,7 +87,7 @@ function getDateTime(myTime) {
     ("0" + myDate.getHours()).slice(-2) + ":" +
     ("0" + myDate.getMinutes()).slice(-2) + ":" +
     ("0" + myDate.getSeconds()).slice(-2);
-    console.log(xxx);
+    // console.log(xxx);
     return (xxx);
 }
 
@@ -152,9 +152,9 @@ export default function Dashboard() {
     sessionStorage.setItem("dashNseExpiryDate", myDate);
     // console.log(expanded);
     let myTab = parseInt(process.env.REACT_APP_GREEK_TAB);
-    console.log(sessionStorage.getItem("dashNseName"), " was clicked")
-    console.log(sessionStorage.getItem("dashNseExpiryDate"));
-    console.log("Button tab is ", myTab);
+    // console.log(sessionStorage.getItem("dashNseName"), " was clicked")
+    // console.log(sessionStorage.getItem("dashNseExpiryDate"));
+    // console.log("Button tab is ", myTab);
     setTab(parseInt(myTab));
   }
 
@@ -167,9 +167,9 @@ export default function Dashboard() {
     sessionStorage.setItem("dashNseExpiryDate", myDate);
     // console.log(expanded);
     let myTab = parseInt(process.env.REACT_APP_NSE_TAB);
-    console.log(sessionStorage.getItem("dashNseName"), " was clicked")
-    console.log(sessionStorage.getItem("dashNseExpiryDate"));
-    console.log("Button tab is ", myTab);
+    // console.log(sessionStorage.getItem("dashNseName"), " was clicked")
+    // console.log(sessionStorage.getItem("dashNseExpiryDate"));
+    // console.log("Button tab is ", myTab);
     setTab(parseInt(myTab));
   }
 
@@ -177,7 +177,6 @@ export default function Dashboard() {
   function ShowExpiryDates(props) {
     let myExpiryDates = props.data.expiryDate;
     myExpiryDates = myExpiryDates.map( x => x.expiryDate);
-    // console.log(myExpiryDates);
     let defValue = "";
     if (myExpiryDates.length > 0) {
       defValue = myExpiryDates[0];
@@ -185,18 +184,15 @@ export default function Dashboard() {
         let tmp = document.getElementById(expanded+"Expiry");
         if (tmp) {
           let currSelection =  tmp.innerText;
-          // let currSelection = "06-May-2021";
           if (myExpiryDates.find(x => x === currSelection));
             defValue = currSelection;
         }
       }
     }
-    // console.log(expanded);
-    // console.log("Current date is ", defValue)
     return (
       <Collapse in={expanded === props.data.name} timeout="auto" unmountOnExit>
         <Grid container alignItems="center" className={classesLocal.cardFooter}  spacing={3}>
-          <GridItem key={props.data.name+"GI1"} xs={3} sm={3} md={3} lg={3} /> 
+          {/* <GridItem key={props.data.name+"GI1"} xs={3} sm={3} md={3} lg={3} />  */}
           <GridItem key={props.data.name+"GISELECT"} xs={3} sm={3} md={3} lg={3}>
             {/* <Typography className={classesLocal.expiryDate} >{props.data.expiryDate}</Typography> */}
             <Select 
@@ -213,6 +209,7 @@ export default function Dashboard() {
               {myExpiryDates.map(x =><MenuItem key={x} value={x}>{x}</MenuItem>)}
             </Select>
           </GridItem>
+          <GridItem key={props.data.name+"GI2"} xs={2} sm={2} md={2} lg={2} /> 
           <GridItem key={props.data.name+"GINSE"} xs={1} sm={1} md={1} lg={1}>
           <Button
               variant="contained"
@@ -224,7 +221,7 @@ export default function Dashboard() {
               NSE
           </Button>
           </GridItem>
-          <GridItem key={props.data.name+"GI2"} xs={1} sm={1} md={1} lg={1} /> 
+          <GridItem key={props.data.name+"GI3"} xs={1} sm={1} md={1} lg={1} /> 
           <GridItem key={props.data.name+"GIGREEK"} xs={1} sm={1} md={1} lg={1}>
           <Button
               variant="contained"
@@ -246,54 +243,53 @@ export default function Dashboard() {
     // let myTime = new Date(props.data.time);
     let myTimeString = getDateTime(props.data.time);
     return (
-        <GridItem key={props.data.name+"GI"} xs={12} sm={6} md={6}>
-        <Card key={props.data.name+"Card"}>
-        <CardHeader key={props.data.name+"CH"} color="success" stats icon>
-            <CardIcon color="success">
-            <Avatar className={classesLocal.orange}>{props.data.name[0]}</Avatar>
-            </CardIcon>
-        </CardHeader>
-        <CardBody>
-        <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue + "  (" + myTimeString + ")"}</h3>
-        </CardBody>
-        <CardFooter key={props.data.name+"F"} stats>
-        <Typography>{props.data.name + " Expiry Dates"}</Typography>
-        <IconButton
-          className={clsx(classesLocal.expand, 
-            (expanded === props.data.name) && classesLocal.expandOpen
-          )}
-          onClick={handleCardChange(props.data.name)}
-          aria-expanded={expanded === props.data.name}
-          aria-label="show more"
-        >
-          <ExpandMoreIcon />
-        </IconButton>
-        </CardFooter>
-        <ShowExpiryDates data={props.data} />
-        </Card>
-        </GridItem>
+      <GridItem key={props.data.name+"GI"} xs={12} sm={6} md={6}>
+      <Card key={props.data.name+"Card"}>
+      <CardHeader key={props.data.name+"CH"} color="success" stats icon>
+          <CardIcon color="success">
+          <Avatar className={classesLocal.orange}>{props.data.name[0]}</Avatar>
+          </CardIcon>
+      </CardHeader>
+      <CardBody>
+      <h3 align="center" className={classes.cardTitle}>{props.data.name + " - " + props.data.underlyingValue}</h3>
+      <h3 align="center" className={classes.cardTitle}>{"(" + myTimeString + ")"}</h3>
+      </CardBody>
+      <CardFooter key={props.data.name+"F"} stats>
+      <Typography>{props.data.name + " Expiry Dates"}</Typography>
+      <IconButton
+        className={clsx(classesLocal.expand, 
+          (expanded === props.data.name) && classesLocal.expandOpen
+        )}
+        onClick={handleCardChange(props.data.name)}
+        aria-expanded={expanded === props.data.name}
+        aria-label="show more"
+      >
+        <ExpandMoreIcon />
+      </IconButton>
+      </CardFooter>
+      <ShowExpiryDates data={props.data} />
+      </Card>
+      </GridItem>
     );
   }
 
   function ShowAllNseCard() {
     return(
-        <GridContainer key="db_gc_ub">
-        {dashData.map( (x) => <ShowSingleNseCard data={x} />)}
-        </GridContainer>
+      <GridContainer key="showallnsecard">
+      {dashData.map( (x) => <ShowSingleNseCard key={x.name} data={x} />)}
+      </GridContainer>
     );
   } 
 
   function ShowUpdateTime() {
     return(
     <Card key="db_card">
-        <CardHeader key="db_cheader" color="warning">
-            <Grid container spacing={3}>
-                <Grid item align="right" item xs="2">
-                <Typography className={classes.dispString} >DashBoard</Typography>
-                </Grid>
-                <Grid item align="left" item xs="10">
-                <p className={classes.cardCategoryWhite}>{`Updated as of ${updateTime}`}</p>
-                </Grid> 
+        <CardHeader key="db_header" color="warning">
+        <Grid container spacing={3}>
+            <Grid item align="left" item>
+              <Typography className={classes.dispString} >DashBoard</Typography> 
+              <Typography className={classes.dispString} >{`Updated as of ${updateTime}`}</Typography>
+            </Grid>
             </Grid>
         </CardHeader>
         <CardBody key="db_cbody">

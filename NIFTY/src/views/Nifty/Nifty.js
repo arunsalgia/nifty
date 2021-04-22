@@ -374,9 +374,9 @@ useEffect(() => {
         setNseNameList(response.data);
         if (response.data.length > 0) {
           let currNse = getSessionStorage("dashNseName");
-          console.log(currNse);
+          // console.log(currNse);
           if (currNse === "") currNse = response.data[0].niftyName;
-          console.log(currNse);
+          // console.log(currNse);
           sessionStorage.setItem("dashNseName", "");
           setselectedNseName(currNse);
           let myDates = await getExiryDates(currNse)
@@ -673,7 +673,7 @@ function DisplayTimeStamp() {
 }
 
 
-function DisplaySelection() {
+function org_DisplaySelection() {
   return(
     <Grid container
       direction="row"
@@ -718,6 +718,49 @@ function DisplaySelection() {
       </Grid>
       <Grid  item xs></Grid>
       </Grid>
+  );
+}
+
+function DisplaySelection() {
+  return(
+    <Grid container direction="row" alignItems="center" justify="flex-end" >
+      {/* <Grid item xs="1"/> */}
+      <Grid item xs={2} sm={2} md={1} lg={1} >
+        <Typography align="right" className={classes.dispString} >NSE Name</Typography>
+      </Grid>
+      <Grid item xs>
+        <Select labelId='nsename' id='nsename' variant="outlined" required 
+        style={ {padding: "0px"} }
+        size="small"
+        // label="NSE Name"
+        // name="nsename"
+        // id="nsenameList"
+        value={selectedNseName}
+        onChange={handleSelectedNseName}>
+        {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
+      </Select>
+      </Grid>
+      <Grid item xs={2} sm={2} md={2} lg={2}>
+        <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
+      </Grid>
+      <Grid item xs>
+        <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
+        style={ {padding: "0px"} }
+        // fullWidth
+        size="small"
+        label="Expiry Date"
+        name="expirydate"
+        id="expirydateList"
+        value={selectedExpiryDate}
+        onChange={handleSelectedExpiryDate}>
+        {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
+        </Select>
+      </Grid>
+      <Grid  item>
+          <Typography align="center" className={classes.dispString} >{displayString}</Typography>
+      </Grid>
+      {/* <Grid  item xs></Grid> */}
+    </Grid>
   );
 }
 

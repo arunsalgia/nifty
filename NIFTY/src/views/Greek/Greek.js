@@ -39,7 +39,8 @@ import { BlankArea } from 'CustomComponents/CustomComponents';
 import { generateUnderlyingIndexString } from "views/functions"
 import { func } from 'prop-types';
 //import DeleteIcon from '@material-ui/icons/Delete';
-
+import * as zoom from "chartjs-plugin-zoom";
+import Hammer from "hammerjs";
 import Zoom1 from "./chart1"
 
 
@@ -208,13 +209,13 @@ export default function Greek() {
         setNseNameList(response.data);
         if (response.data.length > 0) {
           let currNse = getSessionStorage("dashNseName");
-          console.log(currNse);
+          // console.log(currNse);
           if (currNse === "") currNse = response.data[0].niftyName;
-          console.log(currNse);
+          // console.log(currNse);
           sessionStorage.setItem("dashNseName", "");
           setselectedNseName(currNse);
           let myDates = await getExiryDates(currNse);
-          console.log(myDates);
+          // console.log(myDates);
           if (myDates.length > 0) {
             setExpiryDateList(myDates);
             let currExpiryDate = getSessionStorage("dashNseExpiryDate");
@@ -289,19 +290,18 @@ export default function Greek() {
   }
 
 
-  function DisplaySelection() {
+  function org_DisplaySelection() {
     return(
       <Grid container
         direction="row"
         alignItems="center"
         justify="flex-end"
       >
-        <Grid item 
-          xs="2" 
-        >
+        {/* <Grid item xs={1} /> */}
+        <Grid item xs={1} sm={1} md={1} lg={1}  >
           <Typography className={classes.dispString} >NSE Name</Typography>
         </Grid>
-        <Grid item xs>
+        <Grid item xs={1} sm={1} md={1} lg={1}>
           <Select labelId='nsename' id='nsename' variant="outlined" required 
           style={ {padding: "0px"} }
           size="small"
@@ -312,10 +312,10 @@ export default function Greek() {
           {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
         </Select>
         </Grid>
-        <Grid justify="right" item xs="2">
+        <Grid justify="right" item xs={2} sm={2} md={2} lg={2}>
           <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
         </Grid>
-        <Grid justify="right" item xs>
+        <Grid justify="right" item xs={1} sm={1} md={1} lg={1}>
           <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
           style={ {padding: "0px"} }
           // fullWidth
@@ -328,15 +328,57 @@ export default function Greek() {
           {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
           </Select>
         </Grid>
-        <Grid  item xs={5}>
-            <Typography align="right" className={classes.dispString} >{displayString}</Typography>
+        <Grid  item xs={12} sm={12} md={7} lg={7}>
+            <Typography align="left" className={classes.dispString} >{displayString}</Typography>
         </Grid>
-        <Grid  item xs></Grid>
+        {/* <Grid  item xs></Grid> */}
         </Grid>
     );
   }
   
-
+  function DisplaySelection() {
+    return(
+      <Grid container direction="row" alignItems="center" justify="flex-end" >
+        {/* <Grid item xs="1"/> */}
+        <Grid item xs={2} sm={2} md={1} lg={1} >
+          <Typography align="right" className={classes.dispString} >NSE Name</Typography>
+        </Grid>
+        <Grid item xs>
+          <Select labelId='nsename' id='nsename' variant="outlined" required 
+          style={ {padding: "0px"} }
+          size="small"
+          // label="NSE Name"
+          // name="nsename"
+          // id="nsenameList"
+          value={selectedNseName}
+          onChange={handleSelectedNseName}>
+          {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
+        </Select>
+        </Grid>
+        <Grid item xs={2} sm={2} md={2} lg={2}>
+          <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
+        </Grid>
+        <Grid item xs>
+          <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
+          style={ {padding: "0px"} }
+          // fullWidth
+          size="small"
+          label="Expiry Date"
+          name="expirydate"
+          id="expirydateList"
+          value={selectedExpiryDate}
+          onChange={handleSelectedExpiryDate}>
+          {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
+          </Select>
+        </Grid>
+        <Grid  item>
+            <Typography align="center" className={classes.dispString} >{displayString}</Typography>
+        </Grid>
+        {/* <Grid  item xs></Grid> */}
+      </Grid>
+    );
+  }
+  
   return (
     <div align = "center" className={classes.root}>
       <Paper className={classes.paper}>

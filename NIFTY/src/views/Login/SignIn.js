@@ -185,19 +185,17 @@ export default function SignIn() {
   function ReConfirm() {
     return (
     <form>
-      <Typography id="modalTitle" className={classes.title} align="center">Alreday logged in</Typography>
+      <Typography id="modalTitle" className={classes.title} align="center">CadSys says</Typography>
       <BlankArea />
-      <Typography id="modalDescription" align="center">Confirm Logout old connection?</Typography>
+      <Typography id="modalDescription" align="center">The other user will be logged off from the system. Are you sure you want to cotinue?</Typography>
       <BlankArea />
       <div align="center">
-        <Button key="newHoliday" variant="contained" color="primary" size="small"
-            className={classes.modalbutton} onClick={handleConfirmReLogin}>Confirm
-        </Button>
-        <Button key={"cancelHoilday"} variant="contained" color="primary" size="small"
+      <Button key={"cancelHoilday"} variant="contained" color="primary" size="small"
           className={classes.modalbutton} onClick={closeModal}>Cancel
         </Button>
-        {/* <button>the modal</button>
-        <button onClick={closeModal}>close</button> */}
+        <Button key="newHoliday" variant="contained" color="primary" size="small"
+            className={classes.modalbutton} onClick={handleConfirmReLogin}>Ok
+        </Button>
       </div>
     </form>  
     )}

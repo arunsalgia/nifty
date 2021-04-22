@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
 import { Line } from "react-chartjs-2";
-// import * as zoom from "chartjs-plugin-zoom";
-// import Hammer from "hammerjs";
+import * as zoom from "chartjs-plugin-zoom";
+import Hammer from "hammerjs";
 
 import _ from "lodash";
 import moment from "moment";
@@ -203,7 +203,7 @@ export default function AnkitZoom() {
         });
         const min = _.minBy(myData.currentData, "y").y;
         const max = _.maxBy(myData.currentData, "y").y;
-        console.log(min, max);
+        // console.log(min, max);
         // console.log(max);
         // setState({ domain: [min, max], currentPosition });
         setState(myData);

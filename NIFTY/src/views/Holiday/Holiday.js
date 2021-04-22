@@ -195,12 +195,12 @@ export default function Holiday() {
 
 
   function DisplayYear() {
-    return (
+    return ( 
       <Grid key="gr-group" container justify="center" alignItems="center" >
-      <Grid align="right" m={2} item xs={6} sm={6} md={6} lg={6} >
+      <Grid align="right" m={2} item xs={8} sm={8} md={6} lg={6} >
       <Typography className={classes.title}>Custom days of year </Typography>
       </Grid>
-      <Grid item padding={10} align="left" xs={6} sm={6} md={6} lg={6} >
+      <Grid item padding={10} align="left" xs={4} sm={4} md={6} lg={6} >
       <Select  labelId='year' id='year' variant="outlined" required 
         // fullWidth
         //size="small"

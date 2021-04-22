@@ -1,8 +1,8 @@
 import React from 'react';
 import './App.css';
 import {
-  BrowserRouter as Router,
-  Route
+  //BrowserRouter as Router,
+  Route 
 } from "react-router-dom"
 import Grid from "@material-ui/core/Grid";
 import HomePage from "./pages/HomePage";

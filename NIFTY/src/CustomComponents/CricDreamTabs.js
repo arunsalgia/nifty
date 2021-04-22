@@ -2,20 +2,20 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import { Swipeable } from "react-swipeable";
-import Typography from '@material-ui/core/Typography';
+// import { Swipeable } from "react-swipeable";
+// import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import GroupIcon from '@material-ui/icons/Group';
+// import IconButton from '@material-ui/core/IconButton';
+// import MenuIcon from '@material-ui/icons/Menu';
+// import GroupIcon from '@material-ui/icons/Group';
 import Button from '@material-ui/core/Button'; 
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
+// import AccountCircle from '@material-ui/icons/AccountCircle';
+// import Switch from '@material-ui/core/Switch';
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
-import {red, blue, green} from '@material-ui/core/colors';
+import {red, blue, deepOrange} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
 import {cdRefresh, specialSetPos} from "views/functions.js"
 /// cd items import
@@ -24,12 +24,11 @@ import Nifty from "views/Nifty/Nifty"
 import Holiday from "views/Holiday/Holiday"
 import Greek from "views/Greek/Greek"
 import ContactUs from "views/CadSys/ContactUs"
+import Profile from "views/Login/Profile";
+import ChangePassword from "views/Login/ChangePassword"
+
 import axios from 'axios';
 import { setLoggedState } from 'App';
-//import Profile from "views/Profile/Profile.js"
-//import ChangePassword from "views/Login/ChangePassword.js"
-//import About from "views/APL/About.js"
-//import ContactUs from "views/APL/ContactUs.js"
 
 const RIGHT = "-1";
 const LEFT = "+1";
@@ -82,10 +81,15 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0),
     // backgroundColor: theme.palette.secondary.main,
     // width: theme.spacing(10),
-    // height: theme.spacing(10),
-  
+    // height: theme.spacing(10),  
   },
-
+  avatar1: {
+    margin: theme.spacing(0),
+    backgroundColor: deepOrange[500],
+    color: theme.palette.getContrastText(deepOrange[500]), 
+    // width: theme.spacing(10),
+    // height: theme.spacing(10),  
+  },
 }));
 
 export function setTab(num) {
@@ -98,37 +102,40 @@ export function setTab(num) {
 export function CricDreamTabs() {
   const classes = useStyles();
   // for menu 
-  const [auth, setAuth] = React.useState(true);
+  // const [auth, setAuth] = React.useState(true);
+  
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  // for group menu
-  const [grpAuth, setGrpAuth] = React.useState(true);
-  const [grpAnchorEl, setGrpAnchorEl] = React.useState(null);
-  const grpOpen = Boolean(grpAnchorEl);
-  const [value, setValue] = React.useState(parseInt(sessionStorage.getItem("menuValue")));
-
-  
-  console.log(`in Tab function  ${sessionStorage.getItem("menuValue")}`);
-
-  const handleChange = (event) => {
-    setAuth(event.target.checked);
-  };
-
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
-  const handleGrpMenu = (event) => {
-    setGrpAnchorEl(event.currentTarget);
-  };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const handleGrpClose = () => {
-    setGrpAnchorEl(null);
+  const [userAnchorEl, setUserAnchorEl] = React.useState(null);
+  const userOpen = Boolean(userAnchorEl);
+  const handleUserMenu = (event) => {
+    setUserAnchorEl(event.currentTarget);
   };
+  const handleUserClose = () => {
+    setUserAnchorEl(null);
+  };
+
+  // for group menu
+  // const [grpAuth, setGrpAuth] = React.useState(true);
+  const [value, setValue] = React.useState(parseInt(sessionStorage.getItem("menuValue")));
+
+  
+  // console.log(`in Tab function  ${sessionStorage.getItem("menuValue")}`);
+
+  // const handleChange = (event) => {
+  //   setAuth(event.target.checked);
+  // };
+
+
+
+
 
   function setMenuValue(num) {
     setValue(num);
@@ -139,8 +146,12 @@ export function CricDreamTabs() {
   const handleDashBoard = () => { setMenuValue(1);  }
   const handleNifty = () => { setMenuValue(2);  }
   const handleGreek = () => { setMenuValue(3);  }
-  const handleHoliday = () => { setMenuValue(4);  }
-  const handleContactUs = () => { setMenuValue(5);  }
+
+  const handleHoliday = () => { handleClose(); setMenuValue(101);  }
+  const handleContactUs = () => { handleClose(); setMenuValue(102);  }
+
+  const handleProfile = () => { handleUserClose(); setMenuValue(201);  }
+  const handleChangePassword = () => { handleUserClose(); setMenuValue(202);  }
 
   async function handleLogout() {
     console.log("in logout");
@@ -159,8 +170,10 @@ export function CricDreamTabs() {
       case 1: return <Dashboard/>; 
       case 2: return <Nifty/>; 
       case 3: return <Greek/>; 
-      case 4: return <Holiday/>; 
-      case 5: return <ContactUs/>; 
+      case 101: return <Holiday/>; 
+      case 102: return <ContactUs/>; 
+      case 201: return <Profile />;
+      case 202: return <ChangePassword />;
       default: return  <div></div>;
     }
   }
@@ -181,17 +194,84 @@ export function CricDreamTabs() {
   // }
 
   let mylogo = `${process.env.PUBLIC_URL}/CS3.ICO`;
+  let myName = sessionStorage.getItem("displayName");
   return (
     <div className={classes.root}>
       <AppBar position="static">
       <Toolbar>
-        <Avatar variant="square" className={classes.avatar}  src={mylogo}/>
+        <div>
+        <Avatar 
+        aria-label="account of current user"
+        aria-controls="menu-appbar"
+        aria-haspopup="true"
+        onClick={handleMenu}
+        color="inherit"
+        variant="square" className={classes.avatar}  src={mylogo}/>
+          {/* <IconButton
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            color="inherit"
+          >
+            {/* <MenuIcon className={classes.icon}/>
+            <Avatar variant="square" className={classes.avatar}  src={mylogo}/>
+          </IconButton> */}
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
+              onClose={handleClose}
+            >
+            <MenuItem onClick={handleHoliday}>Custom Days</MenuItem>
+            <MenuItem onClick={handleContactUs}>Contact Us</MenuItem>
+          </Menu>
+        </div>
         <Button color="inherit" className={classes.dashButton} onClick={handleDashBoard}>Dashboard</Button>
         <Button color="inherit" className={classes.dashButton} onClick={handleNifty}>Nifty</Button>
         <Button color="inherit" className={classes.dashButton} onClick={handleGreek}>Greek</Button>
-        <Button color="inherit" className={classes.dashButton} onClick={handleHoliday}>Custom Days</Button>
+        {/* <Button color="inherit" className={classes.dashButton} onClick={handleHoliday}>Custom Days</Button>
         <Button color="inherit" className={classes.dashButton} onClick={handleContactUs}>Contact Us</Button>
-        <Button color="inherit" className={classes.dashButton} onClick={handleLogout}>Logout</Button>
+        <Button color="inherit" className={classes.dashButton} onClick={handleLogout}>Logout</Button> */}
+        <div>
+          <Avatar 
+            aria-label="account of current user"
+            aria-controls="user-appbar"
+            aria-haspopup="true"
+            onClick={handleUserMenu}
+            color="inherit"
+            variant="circle" className={classes.avatar1}>{myName[0]}
+          </Avatar>
+          <Menu
+            id="user-appbar"
+            anchorEl={userAnchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={userOpen}
+            onClose={handleUserClose}
+          >
+            <MenuItem onClick={handleProfile}>Profile</MenuItem>
+            <MenuItem onClick={handleChangePassword}>Change Password</MenuItem>
+            <Divider />
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+        </div>
       </Toolbar>
       </AppBar>
       <DisplayCdItems/>

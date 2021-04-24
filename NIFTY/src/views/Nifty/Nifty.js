@@ -239,11 +239,12 @@ const useStyles = makeStyles((theme) => ({
   table: {
     //minWidth: 750,
   },
-  th : { 
+  th: { 
     backgroundColor: '#EEEEEE', 
     color: deepOrange[700], 
     border: "1px solid black",
     fontWeight: theme.typography.fontWeightBold,
+    align: "center",
   },
   td : {
     border: 5,

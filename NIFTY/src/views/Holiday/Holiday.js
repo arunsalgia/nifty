@@ -42,7 +42,10 @@ import { getAxiosUrl, validateSpecialCharacters, getUserType, sendHeartBeat } fr
 
 const yearList = ["2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"];
 const holidayTypeList = ["HOLIDAY", "CUSTOMDAY"]
-
+const Month = {"01": "Jan", "02": "Feb", "03": "Mar", 
+               "04": "Apr", "05": "May", "06": "Jun", 
+               "07": "Jul", "08": "Aug", "09": "Sep", 
+               "10": "Oct", "11": "Nov", "12": "Dec"};
 const customStyles = {
   content : {
     top                   : '50%',
@@ -67,6 +70,11 @@ export default function Holiday() {
     title: {
       fontSize: theme.typography.pxToRem(20),
       fontWeight: theme.typography.fontWeightBold,
+    },
+    desc: {
+      fontSize: theme.typography.pxToRem(20),
+      fontWeight: theme.typography.fontWeightBold,
+      paddingRight: 10,
     },
     table: {
       //minWidth: 750,
@@ -199,7 +207,7 @@ export default function Holiday() {
     return ( 
       <Grid key="gr-group" container justify="center" alignItems="center" >
       <Grid align="right" m={2} item xs={8} sm={8} md={6} lg={6} >
-      <Typography className={classes.title}>Custom days of year </Typography>
+      <Typography className={classes.desc}>Custom days of year </Typography>
       </Grid>
       <Grid item padding={10} align="left" xs={4} sm={4} md={6} lg={6} >
       <Select  labelId='year' id='year' variant="outlined" required 
@@ -510,7 +518,8 @@ export default function Holiday() {
             const labelId = `enhanced-table-checkbox-${index}`;
             //console.log(`${row.ce_openInterest}`)
             let tmp = x.date.split("-");
-            let tmp1 = tmp[2] + "-" + tmp[1] + "-" + tmp[0];
+            // let tmp1 = tmp[2] + "-" + tmp[1] + "-" + tmp[0];
+            let tmp1 = tmp[2] + "/" + Month[tmp[1]];
             let myStartTime = (x.type.includes("CUSTOM")) ? x.startTime : "-";
             let myEndTime = (x.type.includes("CUSTOM")) ? x.endTime : "-";
             let myTime = (myStartTime === "-") ? "-" : myStartTime + "-" + myEndTime;

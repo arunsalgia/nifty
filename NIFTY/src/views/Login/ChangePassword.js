@@ -1,16 +1,24 @@
 import React, { useState ,useContext} from 'react';
+//import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
+// import TextField from '@material-ui/core/TextField';
+//import Link from '@material-ui/core/Link';
+//import { Switch, Route } from 'react-router-dom';
+// import Grid from '@material-ui/core/Grid';
+// import Box from '@material-ui/core/Box';
+//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+//import { UserContext } from "../../UserContext";
+//import axios from "axios";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import red from '@material-ui/core/colors/red';
 import { useHistory } from "react-router-dom";
-import {ValidComp, BlankArea} from "CustomComponents/CustomComponents.js"
-import {encrypt} from "views/functions.js"
-import { SettingsCellOutlined } from '@material-ui/icons';
-import axios from "axios";
+import { cdRefresh, encrypt} from "views/functions.js";
+import { BlankArea, ValidComp } from 'CustomComponents/CustomComponents.js';
+import { setTab } from "CustomComponents/CricDreamTabs.js"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -39,76 +47,170 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       marginTop: '0px',
   },
-  textData: {
-    fontSize: '14px',
-    margin: theme.spacing(0),
-  },
 }));
 
+/***
+class ChildComp extends React.Component {
 
-export default function Profile() {
-  const classes = useStyles();
-  // const history = useHistory();
-  const [feedback, setFeedback] = useState("");
-  const [feedbackCode, setFeedbackCode] = useState("");
-  const [registerStatus, setRegisterStatus] = useState(0);
+  componentDidMount()  {
+    // custom rule will have name 'isPasswordMatch'
+    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+      return (value === this.props.p1)
+    });
 
-  const handleSubmit = async() => {
-    setRegisterStatus(9999);
-    return;
-    
-    let tmp1 = feedback; //encrypt(feedback);
-    console.log(tmp1);
+    ValidatorForm.addValidationRule('minLength', (value) => {
+      return (value.length >= 6)
+    });
 
-    try {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/apl/feedback/${sessionStorage.getItem("uid")}/${tmp1}`);
-      setFeedbackCode(response.data);
-      //console.log(response);
-      setRegisterStatus(200);
-    } catch (e) {
-      // console.log(response.status);
-      console.log(e);
-      setRegisterStatus(1001);
-    }
+    ValidatorForm.addValidationRule('noSpecialCharacters', (value) => {
+      return validateSpecialCharacters(value);
+    });
 
-    
+    ValidatorForm.addValidationRule('isEmailOK', (value) => {
+      return validateEmail(value);
+    });
   }
 
   
+  componentWillUnmount() {
+    // remove rule when it is not needed
+    ValidatorForm.removeValidationRule('isPasswordMatch');
+    ValidatorForm.removeValidationRule('isEmailOK');
+    ValidatorForm.removeValidationRule('minLength');
+    ValidatorForm.removeValidationRule('noSpecialCharacters');   
+  }
+
+  render() {
+    return <br/>;
+  }
+
+}
+***/
+
+
+
+export default function ChangePassword() {
+  const classes = useStyles();
+//  const history = useHistory();
+  // const [userName, setUserName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [registerStatus, setRegisterStatus] = useState(199);
+
+  // const { setUser } = useContext(UserContext);
+
+  // const handleChange = (event) => {
+  //   const { user } = this.state;
+  //   user[event.target.name] = event.target.value;
+  //   this.setState({ user });
+  // }
+
+  const handleSubmit = async() => {
+    console.log("Submit command provided");
+    if (currentPassword !== newPassword) {
+      let tmp1 = encrypt(currentPassword);
+      let tmp2 = encrypt(newPassword);
+      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/reset/${sessionStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+      if (response.status === 200) {
+        setTab(1);
+      } else {
+        // error
+        setRegisterStatus(response.status);
+        console.log(`Status is ${response.status}`);
+      }
+    } else {
+      setRegisterStatus(611);
+    }
+  }
+
+
   function ShowResisterStatus() {
+    // console.log(`Status is ${registerStatus}`);
     let myMsg;
     switch (registerStatus) {
-      case 0:
+      case 199:
         myMsg = ``;
         break;
       case 200:
-        myMsg = `Reference code ${feedbackCode}`;
+        myMsg = `Updated Password successfully.`;
         break;
-      case 1001:
-        myMsg = `Error sending feedback`;
+      case 601:
+        myMsg = "Invalid Current password";
         break;
-      case 9999:
-        myMsg = `Contact Us is yet to be implemented`;
+      case 611:
+        myMsg = "New password cannot be same as Current Password";
         break;
       default:
         myMsg = "Unknown Error";
         break;
-  }
-  return(
-    <div>
+    }
+    return(
       <Typography className={(registerStatus === 200) ? classes.root : classes.error}>{myMsg}</Typography>
-    </div>
-  )}
+    )
+}
 
-
+  
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-      <Typography component="h1" variant="h5">Change Password</Typography>
-      <br/>
-      <Typography component="h1" variant="h5">TO be implemented</Typography>
-      </div>
+      <Typography component="h1" variant="h5">
+        Change Password
+      </Typography>
+      <ValidatorForm className={classes.form} onSubmit={handleSubmit}>
+      <TextValidator
+          variant="outlined"
+          required
+          fullWidth      
+          label="Current Password"
+          onChange={(event) => setCurrentPassword(event.target.value)}
+          name="currentpassword"
+          type="password"
+          validators={['required', 'noSpecialCharacters']}
+          errorMessages={['Current Password to be provided', 'Special characters not permitted']}
+          value={currentPassword}
+      />
+      <BlankArea/>
+      <TextValidator
+          variant="outlined"
+          required
+          fullWidth      
+          label="Password"
+          onChange={(event) => setNewPassword(event.target.value)}
+          name="password"
+          type="password"
+          validators={['required', 'minLength', 'noSpecialCharacters']}
+          errorMessages={['Password to be provided', 'Mimumum 6 characters required', 'Special characters not permitted']}
+          value={newPassword}
+      />
+      <BlankArea/>
+      <TextValidator
+          variant="outlined"
+          required
+          fullWidth      
+          label="Repeat password"
+          onChange={(event) => setRepeatPassword(event.target.value)}
+          name="repeatPassword"
+          type="password"
+          validators={['isPasswordMatch', 'required']}
+          errorMessages={['password mismatch', 'this field is required']}
+          value={repeatPassword}
+      />
+      <ShowResisterStatus/>
+      <BlankArea/>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        color="primary"
+        className={classes.submit}
+      >
+        Update
+    </Button>
+    </ValidatorForm>
+    </div>
+    <ValidComp p1={newPassword}/>    
     </Container>
   );
 }

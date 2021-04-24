@@ -175,7 +175,9 @@ router.get('/reset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
   setHeader(res);
   var {userId, oldPwd, newPwd } = req.params;
 
+  console.log(userId);
   var uDoc = await User.findOne({uid: userId});
+  console.log(uDoc);
   if (uDoc) { 
     if (uDoc.password === dbencrypt(oldPwd)) {
       uDoc.password = dbencrypt(newPwd);
@@ -184,7 +186,7 @@ router.get('/reset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
       return;
     }
   }
-  senderr(res, 602, "Invalid user Name or Password"); 
+  senderr(res, 601, "Invalid Password"); 
 });
 
 router.get('/// CricReset/:userId/:oldPwd/:newPwd', async function (req, res, next) {
@@ -215,6 +217,7 @@ router.get('/login/:uName/:uPassword', async function (req, res, next) {
 
   // confirm user name okay
   let uRec = await User.findOne({ userName:  getLoginName(uName)});
+  console.log(uRec);
   if (!uRec) {
     senderr(res, 601, "Invalid User name or password");
     return;

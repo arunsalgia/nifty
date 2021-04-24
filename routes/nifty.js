@@ -82,9 +82,9 @@ router.get('/getexpirydate/:nseName', async function (req, res, next) {
 
   let myData = await CurrExpiryDate.find({nseName: nseName});
   myData = _.sortBy(myData, 'revDate');
-  console.log(myData);
-  console.log(nseName);
-  console.log(`Expiry date length: ${myData.length}`);
+  // console.log(myData);
+  // console.log(nseName);
+  // console.log(`Expiry date length: ${myData.length}`);
   sendok(res, myData);
 }); 
 

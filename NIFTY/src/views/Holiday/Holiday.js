@@ -26,7 +26,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
-import { red, blue } from '@material-ui/core/colors';
+import { red, blue, orange } from '@material-ui/core/colors';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -73,8 +73,9 @@ export default function Holiday() {
     },
     th : {
       //border: 5,
-      //align: "center",
+      align: "center",
       padding: "none",
+      color: orange[700],
       fontSize: theme.typography.pxToRem(14),
       fontWeight: theme.typography.fontWeightBold,
     },
@@ -83,7 +84,7 @@ export default function Holiday() {
       // align: "center",
       padding: "none",
       fontSize: theme.typography.pxToRem(18),
-      height: 50,
+      height: 40,
       // fontWeight: theme.typography.fontWeightBold,
     },
     visuallyHidden: {
@@ -497,7 +498,7 @@ export default function Holiday() {
         <TableHead>
         <TableRow align="center">
           {/* <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Type</TableCell> */}
-          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="left">Description</TableCell>
+          <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Description</TableCell>
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Date</TableCell>
           <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">Time</TableCell>
           {/* <TableCell className={classes.th} component="th" scope="row"  padding="none" align="center">End Time</TableCell> */}
@@ -520,7 +521,7 @@ export default function Holiday() {
                {/* <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {x.type}
                </TableCell> */}
-               <TableCell className={classes.td} component="td" scope="row"  padding="none" align="left" >
+               <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >
                   {x.desc + "(" + x.type[0] + ")"}
                </TableCell>
                <TableCell className={classes.td} component="td" scope="row"  padding="none" align="center" >

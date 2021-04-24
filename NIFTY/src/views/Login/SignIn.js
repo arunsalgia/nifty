@@ -31,6 +31,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: theme.typography.pxToRem(20),
     fontWeight: theme.typography.fontWeightBold,
   },
+  modalMessage: {
+    //color: blue[700],
+    fontSize: theme.typography.pxToRem(14),
+    //fontWeight: theme.typography.fontWeightBold,
+  },
+
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -63,13 +69,15 @@ const useStyles = makeStyles((theme) => ({
 
 const modelStyles = {
   content : {
-    top                   : '50%',
+    top                   : '25%',
     left                  : '50%',
     right                 : 'auto',
     bottom                : 'auto',
     marginRight           : '-50%',
     marginBottom          : '-50%',
-    transform             : 'translate(-50%, -50%)'
+    transform             : 'translate(-50%, -50%)',
+    background            : '#000000',
+    color                 : '#FFFFFF' 
   }
 };
 
@@ -185,9 +193,11 @@ export default function SignIn() {
   function ReConfirm() {
     return (
     <form>
-      <Typography id="modalTitle" className={classes.title} align="center">CadSys says</Typography>
+      <Typography id="modalTitle" className={classes.title} align="center">CadSys says:</Typography>
       <BlankArea />
-      <Typography id="modalDescription" align="center">The other user will be logged off from the system. Are you sure you want to cotinue?</Typography>
+      <Typography className={classes.modalMessage} align="center">The other user will be logged off from the system.</Typography>
+      {/* <h5></h5> */}
+      <Typography className={classes.modalMessage} align="center">Are you sure you want to cotinue?</Typography>
       <BlankArea />
       <div align="center">
       <Button key={"cancelHoilday"} variant="contained" color="primary" size="small"

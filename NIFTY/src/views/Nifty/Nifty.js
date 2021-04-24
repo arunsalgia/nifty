@@ -27,7 +27,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
-import { red, blue } from '@material-ui/core/colors';
+import { red, blue, orange, deepOrange } from '@material-ui/core/colors';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -108,23 +108,23 @@ function EnhancedTableHead(props) {
     onRequestSort(event, property);
   };
   // border:"1px solid black"
-  const THColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black" };
+  //const THColumnStyle= { backgroundColor: '#EEEEEE', color: orange[700], border: "1px solid black" };
   // const THColumnStyleBorderTop= { backgroundColor: '#EEEEEE', borderBottom: 0,  };
   // const THColumnStyleBorderBottom= { backgroundColor: '#EEEEEE', borderTop: 1,  };
   return (
     <TableHead>
       <TableRow align="center">
-        <TableCell style={THColumnStyle} align="center"
+        <TableCell className={classes.th} align="center"
             padding='none' colSpan={5}>CALLS</TableCell>
-        <TableCell style={THColumnStyle} align="center"
+        <TableCell className={classes.th} align="center"
             padding='none' colSpan={1}></TableCell>      
-        <TableCell style={THColumnStyle} align="center"
+        <TableCell className={classes.th} align="center"
             padding='none' colSpan={5}>PUTS</TableCell>            
       </TableRow>
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell
-            style={THColumnStyle} 
+          className={classes.th} 
             key={headCell.id}
             align="center" 
             colSpan={1}
@@ -238,6 +238,12 @@ const useStyles = makeStyles((theme) => ({
   },
   table: {
     //minWidth: 750,
+  },
+  th : { 
+    backgroundColor: '#EEEEEE', 
+    color: deepOrange[700], 
+    border: "1px solid black",
+    fontWeight: theme.typography.fontWeightBold,
   },
   td : {
     border: 5,

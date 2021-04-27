@@ -17,14 +17,8 @@ router.get('/year/:myYear/:myCsuid', async function (req, res, next) {
 
   var { myYear, myCsuid} = req.params;
 
-  if (!checkActiveCsuid(myCsuid)) {
-    senderr(res, INACTIVEERR, "Inactive error");
-    return;
-  }
+  if (!isUserActive(res, myCsuid )) return;
 
-  // let myRecList = await Holiday.find({year: myYear});
-  // myRecList = _.sortBy(myRecList, 'date');
-  // sendok(res, myRecList);
   publishHolidays(res, myYear);
 }); 
 
@@ -33,10 +27,7 @@ router.get('/add/:hType/:desc/:myDate/:sTime/:eTime/:myCsuid', async function (r
   setHeader(res);
   var { hType, desc, myDate, sTime, eTime, myCsuid } = req.params;
 
-  if (!checkActiveCsuid(myCsuid)) {
-    senderr(res, INACTIVEERR, "Inactive error");
-    return;
-  }
+  if (!isUserActive(res, myCsuid )) return;
 
   console.log("add holiday");
   let hRec = await Holiday.findOne({date: myDate});
@@ -62,10 +53,7 @@ router.get('/delete/:myDate/:myCsuid', async function (req, res, next) {
 
   var { myDate, myCsuid} = req.params;
 
-  if (!checkActiveCsuid(myCsuid)) {
-    senderr(res, INACTIVEERR, "Inactive error");
-    return;
-  }
+  if (!isUserActive(res, myCsuid )) return;
 
   console.log(`date is ${myDate}`);
   let sts = await Holiday.deleteOne({date: myDate});
@@ -76,17 +64,25 @@ router.get('/delete/:myDate/:myCsuid', async function (req, res, next) {
     senderr(res, 601, "Unable to delete the holiday record");
 }); 
 
-router.get('/delall', async function (req, res, next) {
+router.get('/delall/:myCsuid', async function (req, res, next) {
   // HolidayRes = res;
   setHeader(res);
 
-  let myRecList = await Holiday.deleteMany({});
+  var { myCsuid} = req.params;
+
+  if (!isUserActive(res, myCsuid )) return;
+
+  await Holiday.deleteMany({});
   sendok(res, "OK");
 }); 
 
-router.get('/list', async function (req, res, next) {
+router.get('/list/:myCsuid', async function (req, res, next) {
   // HolidayRes = res;
   setHeader(res);
+
+  var { myCsuid} = req.params;
+  
+  if (!isUserActive(res, myCsuid )) return;
 
   // let allData = await Holiday.find({});
   // allData = _.sortBy(allData, 'date');
@@ -122,6 +118,14 @@ async function publishHolidays(res, year) {
   sendok(res, myData);
 }
 
+function isUserActive(res, myCsuid) {
+  let sts = true;
+  if (!checkActiveCsuid(myCsuid)) {
+    senderr(res, INACTIVEERR, "Inactive error");
+    sts = false;
+  }
+  return sts;
+}
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }

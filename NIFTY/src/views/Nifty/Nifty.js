@@ -38,7 +38,7 @@ import { useHistory } from "react-router-dom";
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
-import { generateUnderlyingIndexString } from "views/functions"
+import { generateUnderlyingIndexString, getAxiosUrl } from "views/functions"
  
 
 function leavingNifty(myConn) {
@@ -387,7 +387,7 @@ useEffect(() => {
     const fetchnifty = async () => {
       let response, response1;
       try {
-        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/list`);
+        response = await axios.get(getAxiosUrl('/nifty/list'));
         setNseNameList(response.data);
         if (response.data.length > 0) {
           let currNse = getSessionStorage("dashNseName");
@@ -416,13 +416,6 @@ useEffect(() => {
           else
             setSelectedExpiryDate("");
         }
-        // //console.log(`LIst success ${response.data[0].niftyName}`);
-        // response1 = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${response.data[0].niftyName}`);
-        // // console.log(response1.data);
-        // setExpiryDateList(response1.data);
-        // setSelectedExpiryDate(response1.data[0].expiryDate);
-        //console.log(`expiry success ${response1.data[0].expiryDate}`)
-
       } catch (e) {
             console.log(e)
       }
@@ -446,7 +439,7 @@ useEffect(() => {
   async function getExiryDates(niftyName) {
     let myDates = [];
     try {
-      let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${niftyName}`);
+      let resp = await axios.get(getAxiosUrl(`/nifty/getexpirydate/${niftyName}`));
 
       //setExpiryDateList(resp.data);
       myDates = resp.data;
@@ -570,56 +563,7 @@ const handleClick = (event, myUid) => {
     );
   }
 
-  async function UpdateMemberList() {
-    // make list of fresh member list (select existing members as well as selected new memebrs)
-    var newMebmerList = masterData.filter(x => x.isMember === true);
-    // console.log(newMebmerList);
-    
-
-    let uidx = 0;
-    let addMember = [];
-    for(uidx=0; uidx<newMebmerList.length; ++uidx) {
-      let tmp = originalData.find(x => x.uid === newMebmerList[uidx].uid)
-      if (!tmp) addMember.push(newMebmerList[uidx].uid);
-    }
-    // console.log(addMember);
-    for(uidx=0; uidx<addMember.length; ++uidx) {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/add/${sessionStorage.getItem("gdGid")}/${sessionStorage.getItem("uid")}/${addMember[uidx]}`)
-    }
-
-    let delMember = [];
-    for(uidx=0; uidx<originalData.length; ++uidx) {
-      let tmp = newMebmerList.find(x => x.uid === originalData[uidx].uid);
-      if (!tmp) delMember.push(originalData[uidx].uid);
-    }
-    // console.log(delMember);
-    for(uidx=0; uidx<delMember.length; ++uidx) {
-      let response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/group/delete/${sessionStorage.getItem("gdGid")}/${sessionStorage.getItem("uid")}/${delMember[uidx]}`)
-      // console.log(response);
-    }
-    // setErrorMessage(`Successfully added and/or removed members of group ${sessionStorage.getItem("gdName")}`)
-    setUserMessage(`Successfully added and/or removed members of group ${sessionStorage.getItem("gdName")}`);
-    setBackDropOpen(true);
-    setTimeout(() => setBackDropOpen(false), process.env.REACT_APP_MESSAGE_TIME);
-}
-
-
-function ShowGmButtons() {
-    return (
-    <div align="center">
-        {/* <Button variant="contained" color="primary" size="small"
-            // disabled={tournamentStated || (sessionStorage.getItem("gdAdmin").length === 0)}
-            className={classes.button} onClick={UpdateMemberList}>Update List
-        </Button> */}
-        {/* <Button variant="contained" color="primary" size="small"
-            className={classes.button} onClick={() => { setTab(0) }}>Done
-        </Button> */}
-        {/* <Switch>
-            <Route  path='/admin/groupmember' component={GroupMember} key="MemberList"/>
-            <Route  path='/admin/newgroup' component={NewGroup} key="NewGroup"></Route>
-        </Switch> */}
-    </div>)
-}
+ 
 
 function DisplayNse() {
   return (
@@ -651,92 +595,6 @@ function DisplayNse() {
   )
 }
 
-function DisplayExpiry() {
-  return (
-    <Grid container spacing={3}>
-      <Grid item xs>
-        <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
-        // fullWidth
-        size="small"
-        label="Expiry Date"
-        name="expirydate"
-        id="expirydateList"
-        value={selectedExpiryDate}
-        // displayEmpty 
-        // inputProps={{
-        //   name: 'age',
-        //   id: 'outlined-age-native-simple',
-        // }}
-        onChange={handleSelectedExpiryDate}>
-        {expiryDateList.map(x =><MenuItem key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
-        </Select>
-      </Grid>
-      <Grid item xs></Grid>
-    </Grid>
-  )
-}
-
-function DisplayTimeStamp() {
-  return (
-    <Grid container spacing={1}>
-      <Grid item xs>
-        <Typography align="right" className={classes.dispString} >{displayString}</Typography>
-      </Grid>
-    </Grid>
-  )
-}
-
-
-function org_DisplaySelection() {
-  return(
-    <Grid container
-      direction="row"
-      alignItems="center"
-      justify="flex-end"
-    >
-      <Grid item xs="1"/>
-      <Grid item xs="1"
-      >
-        <Typography className={classes.dispString} >NSE Name</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='nsename' id='nsename' variant="outlined" required 
-        style={ {padding: "0px"} }
-        size="small"
-        // label="NSE Name"
-        // name="nsename"
-        // id="nsenameList"
-        value={selectedNseName}
-        onChange={handleSelectedNseName}>
-        {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
-      </Select>
-      </Grid>
-      <Grid item xs="2">
-        <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
-        style={ {padding: "0px"} }
-        // fullWidth
-        size="small"
-        label="Expiry Date"
-        name="expirydate"
-        id="expirydateList"
-        value={selectedExpiryDate}
-        onChange={handleSelectedExpiryDate}>
-        {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
-        </Select>
-      </Grid>
-      <Grid  item xs={5}>
-          <Typography className={classes.dispString} >{displayString}</Typography>
-      </Grid>
-      <Grid  item xs></Grid>
-      </Grid>
-  );
-}
 
 function DisplaySelection() {
   return(
@@ -807,7 +665,7 @@ function DisplayTableCell(props) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <DisplayPageHeader headerName="NSE India" groupName="" tournament="gdTournament"/>
+        <DisplayPageHeader headerName="NSE India" />
         <BlankArea />
         <DisplaySelection />
         <TableContainer>

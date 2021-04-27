@@ -16,7 +16,7 @@ import Container from '@material-ui/core/Container';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import red from '@material-ui/core/colors/red';
 import { useHistory } from "react-router-dom";
-import { cdRefresh, encrypt} from "views/functions.js";
+import { cdRefresh, encrypt, getAxiosUrl} from "views/functions.js";
 import { BlankArea, ValidComp } from 'CustomComponents/CustomComponents.js';
 import { setTab } from "CustomComponents/CricDreamTabs.js"
 
@@ -111,7 +111,7 @@ export default function ChangePassword() {
     if (currentPassword !== newPassword) {
       let tmp1 = encrypt(currentPassword);
       let tmp2 = encrypt(newPassword);
-      let response = await fetch(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/reset/${sessionStorage.getItem("uid")}/${tmp1}/${tmp2}`);
+      let response = await fetch(getAxiosUrl(`/user/reset/${sessionStorage.getItem("uid")}/${tmp1}/${tmp2}`));
       if (response.status === 200) {
         setTab(1);
       } else {

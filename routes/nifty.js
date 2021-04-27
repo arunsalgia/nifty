@@ -13,11 +13,13 @@ router.use('/', function(req, res, next) {
 
 
 
-router.get('/addnifty/:name/:code', async function (req, res, next) {
+router.get('/addnifty/:name/:code/:myCsuid', async function (req, res, next) {
   // NiftyRes = res;
   setHeader(res);
 
-  var { name, code } = req.params;
+  var { name, code, myCsuid } = req.params;
+
+  if (!isUserActive(res, myCsuid)) return;
 
   let niftyRec = await NiftyNames.findOne({niftyName: name});
   if (niftyRec) { senderr(res, 601, `Nifty ${name} already configured`); return; }
@@ -38,9 +40,14 @@ router.get('/addnifty/:name/:code', async function (req, res, next) {
 }); 
 
 
-router.get('/list', async function (req, res, next) {
+router.get('/list/:myCsuid', async function (req, res, next) {
   // NiftyRes = res;
   setHeader(res);
+
+  var {myCsuid} = req.params;
+
+  if (!isUserActive(res, myCsuid)) return;
+
   let allNiftyRec = await NiftyNames.find({enable: true});
   sendok(res, allNiftyRec);
 }); 
@@ -56,29 +63,13 @@ router.get('/testtime/:timevalue', async function (req, res, next) {
 });
 
 
-/**
-router.get('/getnsedata/:nseName/:expiryDate/:myRange', async function (req, res, next) {
+
+router.get('/getexpirydate/:nseName/:myCsuid', async function (req, res, next) {
   // NiftyRes = res;
   setHeader(res);
-  let {nseName, expiryDate} = req.params;
+  let {nseName, myCsuid} = req.params;
 
-  let myRange = DEFAULTRANGE;
-
-  let nameRec = await NiftyNames.findOne({niftyName: nseName, enable: true});
-  if (!nameRec) {
-    senderr(res, 601, "Invalid NSE name");
-    return;
-  }
-  let latestData = await read_nse_data(nameRec);
-  latestData.niftyData = _.filter(latestData.niftyData, x => x.expiryDate === expiryDate);
-  sendok(res, {dispString: latestData.dispString, niftyData: latestData.niftyData});
-}); 
- */
-
-router.get('/getexpirydate/:nseName', async function (req, res, next) {
-  // NiftyRes = res;
-  setHeader(res);
-  let {nseName} = req.params;
+  if (!isUserActive(res, myCsuid)) return;
 
   let myData = await CurrExpiryDate.find({nseName: nseName});
   myData = _.sortBy(myData, 'revDate');
@@ -88,28 +79,7 @@ router.get('/getexpirydate/:nseName', async function (req, res, next) {
   sendok(res, myData);
 }); 
 
-router.get('/listholiday/:myYear', async function (req, res, next) {
-  // NiftyRes = res;
-  setHeader(res);
-  let {myYear} = req.params;
 
-  publishHolidays(myYear);
-}); 
-
-router.get('/currentyearholiday', async function (req, res, next) {
-  // NiftyRes = res;
-  setHeader(res);
-
-  // provide list of holidays for current year
-  let tmp = new Date();
-  publishHolidays(tmp.getFullYear());
-}); 
-
-async function publishHolidays(year) {
-  let myData = await Holiday.find({year: year});
-  myData = _.sortBy(myData, x => x.yearMonthDay);
-  sendok(res, myData);
-}
 
 async function processConnection(i) {
   // just simple connection then nothing to do
@@ -127,153 +97,153 @@ async function processConnection(i) {
   console.log(`Process connection of ${connectionArray[i].page} for user ${connectionArray[i].csuid}`);
 
   try {
-  if (connectionArray[i].page === "NSEDATA") {
-    /**  find the latest data
-    const filter = { age: { $gte: 30 } };
-    let docs = await Character.aggregate([
-      { $match: filter }
-    ]);
-    ***/
-    /**
-      * This is good example of aggregate. 
-      * Not usefull since nse data will be archived every 5/15 minues
-      * and need to update web site every 10 seconds.
-    */
-    /**
-      let docs = await NSEData.aggregate([
-        { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
-        { "$group": {
-          "_id": null,
-          "MaximumValue": { "$max": "$time" },
-          "MinimumValue": { "$min": "$time" }
-      }}
+    if (connectionArray[i].page === "NSEDATA") {
+      /**  find the latest data
+      const filter = { age: { $gte: 30 } };
+      let docs = await Character.aggregate([
+        { $match: filter }
       ]);
-      console.log(docs);
-    */
-    let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
-    // console.log(`Fetched nsedata: ${latestData.length}`);
-    if (latestData.length === 0) return;  // no data
-    latestData = _.sortBy(latestData, 'strikePrice');
-    let myUnderlyingValue = latestData[0].underlyingValue;
+      ***/
+      /**
+        * This is good example of aggregate. 
+        * Not usefull since nse data will be archived every 5/15 minues
+        * and need to update web site every 10 seconds.
+      */
+      /**
+        let docs = await NSEData.aggregate([
+          { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
+          { "$group": {
+            "_id": null,
+            "MaximumValue": { "$max": "$time" },
+            "MinimumValue": { "$min": "$time" }
+        }}
+        ]);
+        console.log(docs);
+      */
+      let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
+      //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
+      // console.log(`Fetched nsedata: ${latestData.length}`);
+      if (latestData.length === 0) return;  // no data
+      latestData = _.sortBy(latestData, 'strikePrice');
+      let myUnderlyingValue = latestData[0].underlyingValue;
 
-    /***
-    let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    // console.log(tmp);
-    // if (!tmp) {
-    //   return; // error. no data
-    // }
-    // console.log("Found expirty date");
+      /***
+      let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
+      // console.log(tmp);
+      // if (!tmp) {
+      //   return; // error. no data
+      // }
+      // console.log("Found expirty date");
 
-    let myUnderlyingValue = parseFloat(tmp.underlyingValue);
-    let myTimeStamp = tmp.timestamp;
-    console.log(`About to send ULV ${myUnderlyingValue}`)
-    io.to(connectionArray[i].socketId).emit('NSEUNDERLYINGVALUE', myUnderlyingValue);
+      let myUnderlyingValue = parseFloat(tmp.underlyingValue);
+      let myTimeStamp = tmp.timestamp;
+      console.log(`About to send ULV ${myUnderlyingValue}`)
+      io.to(connectionArray[i].socketId).emit('NSEUNDERLYINGVALUE', myUnderlyingValue);
 
-    let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
-    console.log(`About to send display ${myDisplayString}`)
-    io.to(connectionArray[i].socketId).emit('NSEDISPLAYSTRING', myDisplayString);
-    ***/
+      let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
+      console.log(`About to send display ${myDisplayString}`)
+      io.to(connectionArray[i].socketId).emit('NSEDISPLAYSTRING', myDisplayString);
+      ***/
 
-    let minSP = myUnderlyingValue - connectionArray[i].margin;
-    let maxSP = myUnderlyingValue + connectionArray[i].margin;
-    // console.log(`MIn ${minSP}  and Max ${maxSP}`);
-    tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
-    //tmp = latestData;
-    console.log(`Length after min/max ${tmp.length}`);
-    io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
+      let minSP = myUnderlyingValue - connectionArray[i].margin;
+      let maxSP = myUnderlyingValue + connectionArray[i].margin;
+      // console.log(`MIn ${minSP}  and Max ${maxSP}`);
+      tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
+      //tmp = latestData;
+      console.log(`Length after min/max ${tmp.length}`);
+      io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
 
-  } else if (connectionArray[i].page === "GREEKDATA") {
-    /**  find the latest data
-    const filter = { age: { $gte: 30 } };
-    let docs = await Character.aggregate([
-      { $match: filter }
-    ]);
-    ***/
-    /**
-      * This is good example of aggregate. 
-      * Not usefull since nse data will be archived every 5/15 minues
-      * and need to update web site every 10 seconds.
-    */
-    /**
-      let docs = await NSEData.aggregate([
-        { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
-        { "$group": {
-          "_id": null,
-          "MaximumValue": { "$max": "$time" },
-          "MinimumValue": { "$min": "$time" }
-      }}
+    } else if (connectionArray[i].page === "GREEKDATA") {
+      /**  find the latest data
+      const filter = { age: { $gte: 30 } };
+      let docs = await Character.aggregate([
+        { $match: filter }
       ]);
-      console.log(docs);
-    */
+      ***/
+      /**
+        * This is good example of aggregate. 
+        * Not usefull since nse data will be archived every 5/15 minues
+        * and need to update web site every 10 seconds.
+      */
+      /**
+        let docs = await NSEData.aggregate([
+          { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
+          { "$group": {
+            "_id": null,
+            "MaximumValue": { "$max": "$time" },
+            "MinimumValue": { "$min": "$time" }
+        }}
+        ]);
+        console.log(docs);
+      */
 
-    let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
-    // console.log(`Fetched nsedata: ${latestData.length}`);
-    if (latestData.length === 0) return;  // no data
-    latestData = _.sortBy(latestData, 'strikePrice');
-    let myUnderlyingValue = latestData[0].underlyingValue;
+      let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
+      //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
+      // console.log(`Fetched nsedata: ${latestData.length}`);
+      if (latestData.length === 0) return;  // no data
+      latestData = _.sortBy(latestData, 'strikePrice');
+      let myUnderlyingValue = latestData[0].underlyingValue;
 
-    /***
-    let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    let myUnderlyingValue = parseFloat(tmp.underlyingValue);
-    let myTimeStamp = tmp.timestamp;
-    console.log(`About to send ULV ${myUnderlyingValue}`)
-    io.to(connectionArray[i].socketId).emit('GREEKUNDERLYINGVALUE', myUnderlyingValue);
+      /***
+      let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
+      let myUnderlyingValue = parseFloat(tmp.underlyingValue);
+      let myTimeStamp = tmp.timestamp;
+      console.log(`About to send ULV ${myUnderlyingValue}`)
+      io.to(connectionArray[i].socketId).emit('GREEKUNDERLYINGVALUE', myUnderlyingValue);
 
 
-    let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
-    console.log(`About to send display ${myDisplayString}`)
-    io.to(connectionArray[i].socketId).emit('GREEKDISPLAYSTRING', myDisplayString);
-    ***/
+      let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
+      console.log(`About to send display ${myDisplayString}`)
+      io.to(connectionArray[i].socketId).emit('GREEKDISPLAYSTRING', myDisplayString);
+      ***/
 
-    let minSP = myUnderlyingValue - connectionArray[i].margin;
-    let maxSP = myUnderlyingValue + connectionArray[i].margin;
-    // console.log(`MIn ${minSP}  and Max ${maxSP}`);
-    tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
-    //tmp = latestData;
-    console.log(`Length after min/max ${tmp.length}`);
-    io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
+      let minSP = myUnderlyingValue - connectionArray[i].margin;
+      let maxSP = myUnderlyingValue + connectionArray[i].margin;
+      // console.log(`MIn ${minSP}  and Max ${maxSP}`);
+      tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
+      //tmp = latestData;
+      console.log(`Length after min/max ${tmp.length}`);
+      io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
 
-    let greekData = await NseGreekData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-    io.to(connectionArray[i].socketId).emit('GREEKDATA', greekData);
+      let greekData = await NseGreekData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
+      io.to(connectionArray[i].socketId).emit('GREEKDATA', greekData);
 
-  } else if (connectionArray[i].page === "DASHBOARD") {
-    console.log("Dash data to be sent");
-    let myData = [];
-    let myNames = ["NIFTY", "BANKNIFTY"];
-    for(let n=0; n<myNames.length; ++n) {
-      let niftyData = await CurrNSEData.findOne({nseName: myNames[n]});  
-      let ulValue = 0; 
-      let fetchTime = 0; 
-      let expirtyDates = [];
-      if (niftyData) {
-        ulValue = niftyData.underlyingValue;
-        fetchTime = niftyData.time;
-        expirtyDates = await CurrExpiryDate.find({nseName: myNames[n]});
-        expirtyDates = _.sortBy(expirtyDates, 'revDate');
+    } else if (connectionArray[i].page === "DASHBOARD") {
+      console.log("Dash data to be sent");
+      let myData = [];
+      let myNames = ["NIFTY", "BANKNIFTY"];
+      for(let n=0; n<myNames.length; ++n) {
+        let niftyData = await CurrNSEData.findOne({nseName: myNames[n]});  
+        let ulValue = 0; 
+        let fetchTime = 0; 
+        let expirtyDates = [];
+        if (niftyData) {
+          ulValue = niftyData.underlyingValue;
+          fetchTime = niftyData.time;
+          expirtyDates = await CurrExpiryDate.find({nseName: myNames[n]});
+          expirtyDates = _.sortBy(expirtyDates, 'revDate');
+        }
+        myData.push({name: myNames[n],  
+          underlyingValue: ulValue, 
+          time: fetchTime,
+          expiryDate: expirtyDates
+        });
       }
-      myData.push({name: myNames[n],  
-        underlyingValue: ulValue, 
-        time: fetchTime,
-        expiryDate: expirtyDates
-      });
-    }
-    // let niftyData = await CurrNSEData.findOne({nseName: 'NIFTY'});
-    // if (!niftyData) return;
-    // let bankniftyData = await CurrNSEData.findOne({nseName: 'BANKNIFTY'});
-    // if (!bankniftyData) return;
-    // let tmp = {
-    //   niftyValue: niftyData.underlyingValue,
-    //   niftyTime: niftyData.time,
-    //   bankNiftyValue: bankniftyData.underlyingValue,
-    //   bankNiftyTime: bankniftyData.time,
-    // }
-    // console.log(tmp);
-    io.to(connectionArray[i].socketId).emit('DASHBOARD', myData);
-  } else {
+      // let niftyData = await CurrNSEData.findOne({nseName: 'NIFTY'});
+      // if (!niftyData) return;
+      // let bankniftyData = await CurrNSEData.findOne({nseName: 'BANKNIFTY'});
+      // if (!bankniftyData) return;
+      // let tmp = {
+      //   niftyValue: niftyData.underlyingValue,
+      //   niftyTime: niftyData.time,
+      //   bankNiftyValue: bankniftyData.underlyingValue,
+      //   bankNiftyTime: bankniftyData.time,
+      // }
+      // console.log(tmp);
+      io.to(connectionArray[i].socketId).emit('DASHBOARD', myData);
+    } else {
 
-  }
+    }
   } catch(e) {
     console.log(e);
   } 
@@ -324,6 +294,14 @@ cron.schedule('*/1 * * * * *', async () => {
   scheduleSemaphore = false;
 });
 
+function isUserActive(res, myCsuid) {
+  let sts = true;
+  if (!checkActiveCsuid(myCsuid)) {
+    senderr(res, INACTIVEERR, "Inactive error");
+    sts = false;
+  }
+  return sts;
+}
 
 function sendok(res, usrmsg) { res.send(usrmsg); }
 function senderr(res, errcode, errmsg) { res.status(errcode).send(errmsg); }

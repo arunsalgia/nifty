@@ -160,8 +160,8 @@ export default function SignIn() {
       // console.log(err.status);
       console.log(err.response.status);
       if (err.response.status === 602) {
-        openModal();  
         setErrorMessage("User Already logged in.");
+        openModal();  
       } else {
         setErrorMessage("Invalid Username / Password");
         console.log(err);

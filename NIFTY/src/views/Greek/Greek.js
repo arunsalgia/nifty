@@ -36,7 +36,7 @@ import { red, blue } from '@material-ui/core/colors';
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
 // import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
-import { generateUnderlyingIndexString } from "views/functions"
+import { generateUnderlyingIndexString, getAxiosUrl } from "views/functions"
 import { func } from 'prop-types';
 //import DeleteIcon from '@material-ui/icons/Delete';
 import * as zoom from "chartjs-plugin-zoom";
@@ -205,7 +205,7 @@ export default function Greek() {
     const fetchGreek = async () => {
       let response, response1;
       try {
-        response = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/list`);
+        response = await axios.get(getAxiosUrl('/nifty/list'));
         setNseNameList(response.data);
         if (response.data.length > 0) {
           let currNse = getSessionStorage("dashNseName");
@@ -253,7 +253,7 @@ export default function Greek() {
   async function getExiryDates(niftyName) {
     let myDates = [];
     try {
-      let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/nifty/getexpirydate/${niftyName}`);
+      let resp = await axios.get(getAxiosUrl(`/nifty/getexpirydate/${niftyName}`));
       myDates = resp.data;
     } catch (e) {
       console.log(e)

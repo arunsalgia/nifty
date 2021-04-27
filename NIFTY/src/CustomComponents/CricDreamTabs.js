@@ -24,9 +24,9 @@ import Nifty from "views/Nifty/Nifty"
 import Holiday from "views/Holiday/Holiday"
 import Greek from "views/Greek/Greek"
 import ContactUs from "views/CadSys/ContactUs"
-import Profile from "views/Login/Profile";
-import ChangePassword from "views/Login/ChangePassword"
-
+// import Profile from "views/Login/Profile";
+import ChangePassword from "views/Login/ChangePassword";
+import Profile from "views/Profile/Profile";
 import axios from 'axios';
 import { setLoggedState } from 'App';
 

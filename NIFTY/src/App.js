@@ -47,33 +47,33 @@ function initCdParams() {
 function AppRouter() {
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
-  // const [myLogout, setMyLogout] = useState(false);
-  // const [isLogged, setIsLogged] = useState(false);
   var idleTimer = null;
 
   useEffect(() => {       
     const chkLogStatus = async () => {
-      let status = false;
-      if (getCurrentuser() > 0) {
-        let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${sessionStorage.getItem("csuid")}`);
-        // console.log(resp.data);
-        if (resp.data.status) {
-          status = true;
-        } else {
-          sessionStorage.setItem("uid", "");
-          sessionStorage.setItem("csuid", "");
-        }
-      } else {
-        sessionStorage.setItem("uid", "");
-        sessionStorage.setItem("csuid", "");
-      }
+      // let status = false;
+      // if (getCurrentuser() > 0) {
+      //   let resp = await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/islogged/${sessionStorage.getItem("csuid")}`);
+      //   // console.log(resp.data);
+      //   if (resp.data.status) {
+      //     status = true;
+      //   } else {
+      //     sessionStorage.setItem("uid", "");
+      //     sessionStorage.setItem("csuid", "");
+      //   }
+      // } else {
+      //   sessionStorage.setItem("uid", "");
+      //   sessionStorage.setItem("csuid", "");
+      // }
     }
     chkLogStatus();
 }, []);
 
 
   function DispayTabs() {
-    if (getCurrentuser() > 0)
+    let currUser = getCurrentuser();
+    console.log("UID is ",currUser);
+    if (currUser > 0)
       return (
       <div>
         <CricDreamTabs/>
@@ -142,7 +142,7 @@ function AppRouter() {
   }
 
   // console.log("in Main APP");
-//  sessionStorage.setItem("uid", 4);
+  //  sessionStorage.setItem("uid", 4);
   // console.log(`isLOgged is ${isLogged}`);
 return (
     <Router history={hist}> 

@@ -137,3 +137,17 @@ export function generateUnderlyingIndexString(nsename, ulvalue, myTime) {
 export function getAxiosUrl(myurl) {
   return (`${process.env.REACT_APP_AXIOS_BASEPATH}${myurl}/${sessionStorage.getItem("csuid")}`);
 }
+
+export async function logoutUser() {
+  console.log("in logout");
+  await axios.get(getAxiosUrl('/user/logout'));
+  console.log("just given logout axios call");
+  sessionStorage.setItem("uid", "");
+  sessionStorage.setItem('csuid', "");
+  cdRefresh();  
+}
+
+export function inactiveError() {
+  sessionStorage.setItem("uid", "");
+  sessionStorage.setItem("csuid", "");
+}

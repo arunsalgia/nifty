@@ -37,7 +37,7 @@ import { useHistory } from "react-router-dom";
 import {DisplayPageHeader, MessageToUser} from "CustomComponents/CustomComponents.js"
 import {setTab} from "CustomComponents/CricDreamTabs.js"
 import { BlankArea } from 'CustomComponents/CustomComponents';
-import { getAxiosUrl, validateSpecialCharacters, getUserType, sendHeartBeat } from "views/functions"
+import { getAxiosUrl, validateSpecialCharacters, getUserType, sendHeartBeat, inactiveError } from "views/functions"
 //import DeleteIcon from '@material-ui/icons/Delete';
 
 const yearList = ["2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"];
@@ -188,6 +188,8 @@ export default function Holiday() {
       //console.log(response.data);
     } catch (e) {
           console.log(e)
+          // if (e.response.status == process.env.REACT_APP_INACTIVEERR)
+          //   inactiveError();
     }
   }
 
@@ -283,6 +285,8 @@ export default function Holiday() {
     } catch (e) {
       console.log("error found");
       console.log(e);
+      // if (e.response.status == process.env.REACT_APP_INACTIVEERR)
+      //   inactiveError();
       setNhRegisterStatus(-5);
     }
   }
@@ -471,6 +475,9 @@ export default function Holiday() {
       setHolidayList(holidayList.filter(x => x.date != myDate));
     } catch (e) {
       cosole.log(e);
+      if (e.response.status == process.response.REACT_APP_INACTIVEERR) {
+        inactiveError();
+      }
     }
   }
 

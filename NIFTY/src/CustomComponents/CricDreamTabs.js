@@ -17,7 +17,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu'; 
 import {red, blue, deepOrange} from '@material-ui/core/colors';
 import Divider from '@material-ui/core/Divider';
-import {cdRefresh, specialSetPos} from "views/functions.js"
+import {cdRefresh, specialSetPos, logoutUser} from "views/functions.js"
 /// cd items import
 import Dashboard from "views/Dashboard/Dashboard"
 import Nifty from "views/Nifty/Nifty"
@@ -154,14 +154,15 @@ export function CricDreamTabs() {
   const handleChangePassword = () => { handleUserClose(); setMenuValue(202);  }
 
   async function handleLogout() {
-    console.log("in logout");
-    await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${sessionStorage.getItem("csuid")}`);
-    console.log("just given logout axios call");
     setLoggedState(-1);  // in unlogged state
     handleClose();
-    sessionStorage.setItem("uid", "");
-    //sessionStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
-    cdRefresh();  
+    await logoutUser();
+    // console.log("in logout");
+    // await axios.get(`${process.env.REACT_APP_AXIOS_BASEPATH}/user/logout/${sessionStorage.getItem("csuid")}`);
+    // console.log("just given logout axios call");
+    // sessionStorage.setItem("uid", "");
+    // //sessionStorage.setItem("menuValue", process.env.REACT_APP_DASHBOARD);
+    // cdRefresh();  
   };
 
 
@@ -195,6 +196,15 @@ export function CricDreamTabs() {
 
   let mylogo = `${process.env.PUBLIC_URL}/CS3.ICO`;
   let myName = sessionStorage.getItem("displayName");
+
+  (async () => {
+    let userLogged = false;
+    if (sessionStorage.getItem("csuid"));
+    if (sessionStorage.getItem("csuid") !== "")
+      userLogged = true;  
+    if (!userLogged) await logoutUser();
+  })();
+      
   return (
     <div className={classes.root}>
       <AppBar position="static">

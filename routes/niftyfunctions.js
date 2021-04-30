@@ -399,7 +399,7 @@ function addActiveUser(userId, forcefully = false) {
   let newId = userPortion + 
     "-" + 
     myDate.getFullYear().toString() +
-    ("00" + myDate.getMonth()).slice(-2) +
+    ("00" + (myDate.getMonth()+1)).slice(-2) +
     ("00" + myDate.getDate()).slice(-2) + 
     "-" +
     ("00" + myDate.getHours()).slice(-2) +

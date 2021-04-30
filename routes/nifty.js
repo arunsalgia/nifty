@@ -95,7 +95,7 @@ async function processConnection(i) {
   }
 
   console.log(`Process connection of ${connectionArray[i].page} for user ${connectionArray[i].csuid}`);
-
+  console.log(connectionArray[i]);
   try {
     if (connectionArray[i].page === "NSEDATA") {
       /**  find the latest data
@@ -154,57 +154,6 @@ async function processConnection(i) {
       io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
 
     } else if (connectionArray[i].page === "GREEKDATA") {
-      /**  find the latest data
-      const filter = { age: { $gte: 30 } };
-      let docs = await Character.aggregate([
-        { $match: filter }
-      ]);
-      ***/
-      /**
-        * This is good example of aggregate. 
-        * Not usefull since nse data will be archived every 5/15 minues
-        * and need to update web site every 10 seconds.
-      */
-      /**
-        let docs = await NSEData.aggregate([
-          { $match: {nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate} },
-          { "$group": {
-            "_id": null,
-            "MaximumValue": { "$max": "$time" },
-            "MinimumValue": { "$min": "$time" }
-        }}
-        ]);
-        console.log(docs);
-      */
-
-      let latestData = await CurrNSEData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-      //console.log(`${connectionArray[i].stockName}  ${connectionArray[i].expiryDate}`);
-      // console.log(`Fetched nsedata: ${latestData.length}`);
-      if (latestData.length === 0) return;  // no data
-      latestData = _.sortBy(latestData, 'strikePrice');
-      let myUnderlyingValue = latestData[0].underlyingValue;
-
-      /***
-      let tmp = await CurrExpiryDate.findOne({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
-      let myUnderlyingValue = parseFloat(tmp.underlyingValue);
-      let myTimeStamp = tmp.timestamp;
-      console.log(`About to send ULV ${myUnderlyingValue}`)
-      io.to(connectionArray[i].socketId).emit('GREEKUNDERLYINGVALUE', myUnderlyingValue);
-
-
-      let myDisplayString = `Underlying Index: ${connectionArray[i].stockName} ${myUnderlyingValue} at ${myTimeStamp}`
-      console.log(`About to send display ${myDisplayString}`)
-      io.to(connectionArray[i].socketId).emit('GREEKDISPLAYSTRING', myDisplayString);
-      ***/
-
-      let minSP = myUnderlyingValue - connectionArray[i].margin;
-      let maxSP = myUnderlyingValue + connectionArray[i].margin;
-      // console.log(`MIn ${minSP}  and Max ${maxSP}`);
-      tmp = _.filter(latestData, x => x.strikePrice >= minSP && x.strikePrice <= maxSP);
-      //tmp = latestData;
-      console.log(`Length after min/max ${tmp.length}`);
-      io.to(connectionArray[i].socketId).emit('NSEDATA', tmp);
-
       let greekData = await NseGreekData.find({nseName: connectionArray[i].stockName, expiryDate: connectionArray[i].expiryDate});
       io.to(connectionArray[i].socketId).emit('GREEKDATA', greekData);
 

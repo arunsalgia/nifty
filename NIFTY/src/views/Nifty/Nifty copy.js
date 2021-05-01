@@ -245,20 +245,11 @@ const useStyles = makeStyles((theme) => ({
     border: "1px solid black",
     fontWeight: theme.typography.fontWeightBold,
     align: "center",
-    padding: "1px 10px",
   },
   td : {
-    // border: 5,
-    border: "1px solid black",
+    border: 5,
     align: "center",
-    padding: "1px 10px",
-  },
-  tdyellow : {
-    // border: 5,
-    background: '#FFFF00',
-    border: "1px solid black",
-    align: "center",
-    padding: "1px 10px",
+    padding: "none",
   },
   visuallyHidden: {
     border: 0,
@@ -322,7 +313,6 @@ const [displayString, setDisplayString] = React.useState("");
 const [underlyingValue, setUnderlyingValue] = React.useState(0);
 const [margin, setMargin] = React.useState(2000);
 const [nextSP, setNextSP] = React.useState(0);
-const [callPut, setCallPut] = React.useState("CALL");
 
 var sendMessage = {page: "NSEDATA", csuid: sessionStorage.getItem("csuid")};
 
@@ -672,166 +662,72 @@ function DisplayTableCell(props) {
   );
 }
 
-  function OrgDisplayNiftyData() {
-    return (
-      <div className={classes.root}>
-          <TableContainer>
-            <Table
-              className={classes.table}
-              aria-labelledby="tableTitle"
-              size={dense ? 'small' : 'medium'}
-              aria-label="enhanced table"
-            >
-              <EnhancedTableHead
-                classes={classes}
-                numSelected={selected.length} 
-                order={order}
-                orderBy={orderBy}
-                // onSelectAllClick={handleSelectAllClick}
-                onRequestSort={handleRequestSort}
-                rowCount={rows.length}
-              />
-              <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
-                  //console.log(`${row.ce_openInterest}`)
-                  return (
-                    <TableRow
-                      tabIndex={-1}
-                      key={row.strikePrice}>
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_openInterest)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_changeinOpenInterest)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_totalTradedVolume)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_impliedVolatility)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_lastPrice)} />
-                    <DisplayTableCell dataType="SP" sp={row.strikePrice} data={row.strikePrice} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_lastPrice)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_impliedVolatility)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_totalTradedVolume)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_changeinOpenInterest)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_openInterest)} />
-                    </TableRow>
-                  );
-                  })
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[50, 75, 100, 150, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
-      </div> 
-    );
-  }
-
-  function DisplayNiftyData() {
-    let myData = (callPut === "CALL") ?
-      rows.filter(x => x.ce_openInterest || 
-        x.ce_changeinOpenInterest ||
-        x.ce_changeinOpenInterest ||
-        x.ce_totalTradedVolume ||
-        x.ce_impliedVolatility ||
-        x.ce_lastPrice) :
-      rows.filter(x => x.pe_openInterest || 
-        x.pe_changeinOpenInterest ||
-        x.pe_changeinOpenInterest ||
-        x.pe_totalTradedVolume ||
-        x.pe_impliedVolatility ||
-        x.pe_lastPrice);
-    return (
-      <div className={classes.root}>
-          <TableContainer>
-            <Table className={classes.table} aria-labelledby="tableTitle" size='small' aria-label="enhanced table" >
-              <TableHead>
-                <TableRow align="center">
-                  <TableCell className={classes.th} colSpan="6" align="center">{callPut} Data</TableCell>
-                </TableRow> 
-                <TableRow align="center">
-                  <TableCell className={classes.th} align="center">Strike Price</TableCell>
-                  <TableCell className={classes.th} align="center">LTP</TableCell>
-                  <TableCell className={classes.th} align="center">IV</TableCell>
-                  <TableCell className={classes.th} align="center">Volume</TableCell>
-                  <TableCell className={classes.th} align="center">OI Change</TableCell>
-                  <TableCell className={classes.th} align="center">OI</TableCell>
-                </TableRow> 
-              </TableHead>
-              <TableBody>
-                {myData.map((item) => {
-                  // const labelId = `enhanced-table-checkbox-${index}`;
-                  //console.log(`${item.ce_openInterest}`)
-                  return (
-                    <TableRow key={item.strikePrice}>
-                      <TableCell className={(item.strikePrice < underlyingValue) ? classes.td : classes.tdyellow} 
-                        align="center">{item.strikePrice}
-                      </TableCell>
-                      <TableCell className={classes.td} align="center">
-                        {currency((callPut === "CALL") ? item.ce_lastPrice : item.pe_lastPrice)}
-                      </TableCell>      
-                      <TableCell className={classes.td} align="center">
-                        {currency((callPut === "CALL") ? item.ce_impliedVolatility : item.pe_impliedVolatility)}
-                      </TableCell>      
-                      <TableCell className={classes.td} align="center">
-                        {noncurrency((callPut === "CALL") ? item.ce_totalTradedVolume : item.pe_totalTradedVolume)}
-                      </TableCell>      
-                      <TableCell className={classes.td} align="center">
-                        {noncurrency((callPut === "CALL") ? item.ce_changeinOpenInterest : item.pe_changeinOpenInterest)}
-                      </TableCell>      
-                      <TableCell className={classes.td} align="center">
-                        {noncurrency((callPut === "CALL") ? item.ce_openInterest : item.pe_openInterest)}
-                      </TableCell>      
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          {/* <TablePagination
-            rowsPerPageOptions={[50, 75, 100, 150, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          /> */}
-      </div> 
-    );
-  }
-
-  function CallPutButton() {
-    return (
-      <div align="left">
-        <Button variant="contained" color="primary" size="small"
-          disabled={callPut === "CALL"}
-          className={classes.button} onClick={() => { setCallPut("CALL")}}>Call
-        </Button>
-        <Button variant="contained" color="primary" size="small"
-          disabled={callPut === "PUT"}
-          className={classes.button} onClick={() => { setCallPut("PUT")}}>Put
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <Paper className={classes.paper}>
-      <DisplayPageHeader headerName="NSE India" />
-      <BlankArea />
-      <DisplaySelection />
-      <CallPutButton />
-      <DisplayNiftyData />
-      <Typography className={classes.error} align="left">{errorMessage}</Typography>
+    <div className={classes.root}>
+      <Paper className={classes.paper}>
+        <DisplayPageHeader headerName="NSE India" />
+        <BlankArea />
+        <DisplaySelection />
+        <TableContainer>
+          <Table
+            className={classes.table}
+            aria-labelledby="tableTitle"
+            size={dense ? 'small' : 'medium'}
+            aria-label="enhanced table"
+          >
+            <EnhancedTableHead
+              classes={classes}
+              numSelected={selected.length} 
+              order={order}
+              orderBy={orderBy}
+              // onSelectAllClick={handleSelectAllClick}
+              onRequestSort={handleRequestSort}
+              rowCount={rows.length}
+            />
+            <TableBody>
+              {stableSort(rows, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => {
+                const labelId = `enhanced-table-checkbox-${index}`;
+                //console.log(`${row.ce_openInterest}`)
+                return (
+                  <TableRow
+                    tabIndex={-1}
+                    key={row.strikePrice}>
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_openInterest)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_changeinOpenInterest)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_totalTradedVolume)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_impliedVolatility)} />
+                  <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_lastPrice)} />
+                  <DisplayTableCell dataType="SP" sp={row.strikePrice} data={row.strikePrice} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_lastPrice)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_impliedVolatility)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_totalTradedVolume)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_changeinOpenInterest)} />
+                  <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_openInterest)} />
+                  </TableRow>
+                );
+                })
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[50, 75, 100, 150, 200]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </Paper>
+      <div>
+        <Typography className={classes.error} align="left">{errorMessage}</Typography>
+      </div>
       <br/>
       {/* <ShowGmButtons/> */}
       {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
-    </Paper>
-  );
+    </div> 
+);
 }

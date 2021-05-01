@@ -27,7 +27,7 @@ import Paper from '@material-ui/core/Paper';
 // import Button from '@material-ui/core/Button';
 // import Checkbox from '@material-ui/core/Checkbox';
 // import Radio from '@material-ui/core/Radio';
-import { red, blue, deepOrange } from '@material-ui/core/colors';
+import { red, blue, yellow, deepOrange } from '@material-ui/core/colors';
 import IconButton from '@material-ui/core/IconButton';
 // import Tooltip from '@material-ui/core/Tooltip';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -79,14 +79,6 @@ const useStyles = makeStyles((theme) => ({
   table: {
     //minWidth: 750,
   },
-  thm: { 
-    backgroundColor: '#EEEEEE', 
-    color: deepOrange[700], 
-    border: "1px solid black",
-    fontWeight: theme.typography.fontWeightBold,
-    align: "center",
-    padding: "1px 10px",
-  },
   th: { 
     backgroundColor: '#EEEEEE', 
     color: deepOrange[700], 
@@ -97,6 +89,13 @@ const useStyles = makeStyles((theme) => ({
   },
   td : {
     // border: 5,
+    border: "1px solid black",
+    align: "center",
+    padding: "1px 10px",
+  },
+  tdyellow : {
+    // border: 5,
+    background: '#FFFF00',
     border: "1px solid black",
     align: "center",
     padding: "1px 10px",
@@ -157,12 +156,12 @@ export default function Greek() {
 
   const [niftyDataArray, setNiftyDataArray] = React.useState([]);
   const [masterData, setmasterData] = React.useState([]);
-  const [greekData, setGreekData] = React.useState([]);
 
   const [nseNameList, setNseNameList] = React.useState([]);
   const [selectedNseName, setselectedNseName] = React.useState("");
   const [expiryDateList, setExpiryDateList] = React.useState([]);
   const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("");
+  const [greekData, setGreekData] = React.useState([]);
   const [displayString, setDisplayString] = React.useState("");
   const [underlyingValue, setUnderlyingValue] = React.useState(0);
   const [margin, setMargin] = React.useState(2000);
@@ -208,7 +207,7 @@ export default function Greek() {
       sockConn.on("GREEKDATA", (mygreekdata) => {
         // console.log("In GREEKDATA");
         setGreekData(mygreekdata);
-        console.log("rcvd Greek data of length", mygreekdata.length);
+        //console.log("rcvd Greek data of length", mygreekdata.length);
         if (mygreekdata.length > 0) {
           let ulvalue = mygreekdata[0].underlyingValue
           setUnderlyingValue(ulvalue);
@@ -225,7 +224,7 @@ export default function Greek() {
         // console.log(`Length is ${mygreekdata.length}`);
       });
 
-      sockConn.on("GREEKDISPLAYSTRING", (dispStr) => {
+      sockConn.on("NOTSENT_GREEKDISPLAYSTRING", (dispStr) => {
         // console.log("In DISPLAY STRING");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
@@ -233,7 +232,7 @@ export default function Greek() {
         //setDisplayString(dispStr);
       });
 
-      sockConn.on("GREEKUNDERLYINGVALUE", (ulvalue) => {
+      sockConn.on("NOTSENT_GREEKUNDERLYINGVALUE", (ulvalue) => {
         // console.log("In uderlying value");
         // setNiftyDataArray(mynsedata);
         // setmasterData(mynsedata);
@@ -441,7 +440,7 @@ export default function Greek() {
     )
   }
 
-  function DisplayGreekData() {
+  function Org_DisplayGreekData() {
     if (callPut === "CALL") {
       let myData = greekData.filter(x => x.ce_impliedVolatility !== 0)
       return (
@@ -511,6 +510,51 @@ export default function Greek() {
         </Table>
       );
     }
+  }
+
+
+  function DisplayGreekData() {
+    let myData = (callPut === "CALL") ?
+      greekData.filter(x => x.ce_impliedVolatility !== 0) :
+      greekData.filter(x => x.pe_impliedVolatility !== 0);
+    return (
+      <Table>
+        <TableHead>
+          <TableRow align="center">
+            <TableCell className={classes.th} colSpan="6" align="center">{callPut} Data</TableCell>
+          </TableRow> 
+          <TableRow align="center">
+          <TableCell className={classes.th} align="center">Strike Price</TableCell>
+            <TableCell className={classes.th} align="center">{callPut} LTP</TableCell>      
+            <TableCell className={classes.th} align="center">IV</TableCell>      
+            <TableCell className={classes.th} align="center">Call Delta</TableCell>      
+            <TableCell className={classes.th} align="center">Call Price</TableCell>      
+            {/* <TableCell className={classes.th} align="center"></TableCell>       */}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {myData.map(item => {
+          return(
+            <TableRow onClick={() => selectData(item)} key={item.strikePrice} align="center">
+            <TableCell className={(item.strikePrice < underlyingValue) ? classes.td : classes.tdyellow} 
+              align="center">{item.strikePrice}</TableCell>
+            <TableCell className={classes.td} align="center">
+              {currency((callPut === "CALL") ? item.ce_lastPrice : item.pe_lastPrice)}
+            </TableCell>      
+            <TableCell className={classes.td} align="center">
+              {currency((callPut === "CALL") ? item.ce_impliedVolatility : item.pe_impliedVolatility)}
+            </TableCell>      
+            <TableCell className={classes.td} align="center">
+              {currency((callPut === "CALL") ? item.ce_greekDelta : item.pe_greekDelta)}
+            </TableCell>      
+            <TableCell className={classes.td} align="center">
+              {currency((callPut === "CALL") ? item.ce_greekPrice : item.pe_greekPrice)}
+            </TableCell>      
+            </TableRow>
+          )})}
+        </TableBody>
+      </Table>
+    );
   }
 
 

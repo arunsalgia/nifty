@@ -56,177 +56,7 @@ function currency(num) {
 function noncurrency(num) {
   let myStr = (num) ? num.toString() : "-";
   return myStr;
-}  
-export default function Nifty() {
-
-  // const history = useHistory();
-
-  function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
 }
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
-
-
-const headCells = [
-  { id: 'ce_openInterest', numeric: true, disablePadding: true, label: 'OI' },
-  { id: 'ce_changeinOpenInterest', numeric: true, disablePadding: true, label: 'OI Change' },
-  { id: 'ce_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
-  { id: 'ce_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
-  { id: 'ce_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
-  { id: 'strikePrice', numeric: true, disablePadding: true, label: 'Strike Price' },
-  { id: 'pe_lastPrice', numeric: true, disablePadding: true, label: 'LTP' },
-  { id: 'pe_impliedVolatility', numeric: true, disablePadding: true, label: 'IV' },
-  { id: 'pe_totalTradedVolume', numeric: true, disablePadding: true, label: 'Volume' },
-  { id: 'pe_changeinOpenInterest', numeric: true, disablePadding: true, label: 'OI Change' },
-  { id: 'pe_openInterest', numeric: true, disablePadding: true, label: 'OI' },
-];
-
-function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-  // border:"1px solid black"
-  //const THColumnStyle= { backgroundColor: '#EEEEEE', color: orange[700], border: "1px solid black" };
-  // const THColumnStyleBorderTop= { backgroundColor: '#EEEEEE', borderBottom: 0,  };
-  // const THColumnStyleBorderBottom= { backgroundColor: '#EEEEEE', borderTop: 1,  };
-  return (
-    <TableHead>
-      <TableRow align="center">
-        <TableCell className={classes.th} align="center"
-            padding='none' colSpan={5}>CALLS</TableCell>
-        <TableCell className={classes.th} align="center"
-            padding='none' colSpan={1}></TableCell>      
-        <TableCell className={classes.th} align="center"
-            padding='none' colSpan={5}>PUTS</TableCell>            
-      </TableRow>
-      <TableRow>
-        {headCells.map((headCell) => (
-          <TableCell
-          className={classes.th} 
-            key={headCell.id}
-            align="center" 
-            colSpan={1}
-            //padding={headCell.disablePadding ? 'none' : 'default'}
-            padding="none"
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-          <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </span>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-EnhancedTableHead.propTypes = {
-  classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
-};
-
-const useToolbarStyles = makeStyles((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1),
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark,
-        },
-  title: {
-    flex: '1 1 100%',
-  },
-  button: {
-    margin: theme.spacing(0, 1, 0),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
-
-const EnhancedTableToolbar = (props) => {
-  const classes = useToolbarStyles();
-  const { numSelected } = props;
-
-  return (
-    <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
-    >
-      {numSelected > 0 ? (
-        <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Nutrition
-        </Typography>
-      )}
-
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton aria-label="delete">
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton aria-label="filter list">
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-};
-
-EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -302,36 +132,31 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
+export default function Nifty() {
+  const classes = useStyles();
 
-const [masterData, setmasterData] = React.useState([]);
-const [originalData, setOriginalData] = React.useState([]);
-// const [rows, setStationTableData] = React.useState([]);
-const [rows, setNiftyDataArray] = React.useState([]);
-const [filterString, setfilterString] = React.useState("");
-const [page, setPage] = React.useState(0);
-const [dense, setDense] = React.useState(true);
-const [rowsPerPage, setRowsPerPage] = React.useState(50);
-const [errorMessage, setErrorMessage ] = React.useState("");
-const [backDropOpen, setBackDropOpen] = React.useState(false);
-const [userMessage, setUserMessage] = React.useState("");
-const [nseNameList, setNseNameList] = React.useState([]);
-const [selectedNseName, setselectedNseName] = React.useState("");
-const [expiryDateList, setExpiryDateList] = React.useState([]);
-const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("");
-const [displayString, setDisplayString] = React.useState("");
-const [underlyingValue, setUnderlyingValue] = React.useState(0);
-const [margin, setMargin] = React.useState(2000);
-const [nextSP, setNextSP] = React.useState(0);
-const [callPut, setCallPut] = React.useState("CALL");
+  const [masterData, setmasterData] = React.useState([]);
+  const [originalData, setOriginalData] = React.useState([]);
+  const [rows, setNiftyDataArray] = React.useState([]);
+  const [errorMessage, setErrorMessage ] = React.useState("");
+  const [userMessage, setUserMessage] = React.useState("");
+  const [nseNameList, setNseNameList] = React.useState([]);
+  const [selectedNseName, setselectedNseName] = React.useState("");
+  const [expiryDateList, setExpiryDateList] = React.useState([]);
+  const [selectedExpiryDate, setSelectedExpiryDate] = React.useState("");
+  const [displayString, setDisplayString] = React.useState("");
+  const [underlyingValue, setUnderlyingValue] = React.useState(0);
+  const [margin, setMargin] = React.useState(2000);
+  const [callPut, setCallPut] = React.useState("CALL");
 
-var sendMessage = {page: "NSEDATA", csuid: sessionStorage.getItem("csuid")};
+  var sendMessage = {page: "NSEDATA", csuid: sessionStorage.getItem("csuid")};
 
-function getSessionStorage(id) {
-  return (sessionStorage.getItem(id)) ? sessionStorage.getItem(id) : "";
-}
+  function getSessionStorage(id) {
+    return (sessionStorage.getItem(id)) ? sessionStorage.getItem(id) : "";
+  }
 
 
-useEffect(() => {       
+  useEffect(() => {       
 
     const makeconnection = async () => {
       await sockConn.connect();
@@ -366,32 +191,7 @@ useEffect(() => {
 
       });
 
-      sockConn.on("NSEDISPLAYSTRING", (dispStr) => {
-        // console.log("In DISPLAY STRING");
-        // setNiftyDataArray(mynsedata);
-        // setmasterData(mynsedata);
-        // console.log(dispStr);
-        // setDisplayString(dispStr);
-      });
-
-      sockConn.on("NSEUNDERLYINGVALUE", (ulvalue) => {
-        // console.log("In uderlying value");
-        // setNiftyDataArray(mynsedata);
-        // setmasterData(mynsedata);
-        // setUnderlyingValue(ulvalue);
-        //setNextSP(getNextSP(masterData, ulvalue));
-      });
-
     });
-
-    function getNextSP(myTable, ulValue) {
-      let i = 0;
-      for(i=0; i<myTable.length; ++i) {
-        if (myTable.sp > unValue)
-          return(myTable.sp);
-      }
-      return myTable[myTable.length - 1].sp;
-    }
 
 
     const fetchnifty = async () => {
@@ -441,10 +241,6 @@ useEffect(() => {
   }
 }, []);
 
-  const classes = useStyles();
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('StationName');
-  const [selected, setSelected] = React.useState([]);
 
   async function getExiryDates(niftyName) {
     let myDates = [];
@@ -498,237 +294,47 @@ useEffect(() => {
     }
   }
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.SubstationName);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-
-const handleClick = (event, myUid) => {
-    event.preventDefault();
-    // console.log(myUid);
-    // cannot remove admin from the member list
-    if (sessionStorage.getItem("uid") == myUid) return;
-
-    // take care of non admin member to add/remove
-    let tmp = [].concat(masterData);
-    let i;
-    for(i=0; i<tmp.length; ++i) {
-        if (tmp[i].uid == myUid) {
-            if (tmp[i].isMember) {
-                tmp[i].isMember = false;
-                // console.log("it was true")
-            } else {
-                tmp[i].isMember = true;
-                // console.log("it was false")
-            }
-        }
-    }
-    setmasterData(tmp);
-  };
-
-
-  const handleChangePage = (event, newPage) => {
-    event.preventDefault();
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
-
-
-  function SetFilter() { 
-    const chkstr = document.getElementById("filterstring").value.toLowerCase();
-    setfilterString(chkstr);
-    // console.log(chkstr);
-    var tmp = masterData.filter(x => x.displayName.toLowerCase().includes(chkstr));
-    setNiftyDataArray(tmp);
-    setPage(0);
-  }
-
-  function ShowFilters() {
-    return (
-      <div className={classes.filter} align="right">
-        <TextField className={classes.filter} id="filterstring" margin="none" size="small" defaultValue={filterString}/>        
-        <Button key="filterbtn" variant="contained" color="primary" size="small"
-          className={classes.button} onClick={SetFilter}>Filter
-        </Button>
-      </div>
-    );
-  }
-
- 
-
-function DisplayNse() {
-  return (
-    <Grid container 
-      direction="row"
-      alignItems="center"
-      justify="flex-end"
-      spacing={3}>
-      <Grid item xs 
-      
-      // display="flex" alignItems="center" flexDirection="column"
-      >
-        <Typography className={classes.dispString} >NSE Name</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='nsename' id='nsename' variant="outlined" required 
-        // fullWidth
-        size="small"
-        label="NSE Name"
-        name="nsename"
-        id="nsenameList"
-        value={selectedNseName}
-        onChange={handleSelectedNseName}>
-        {nseNameList.map(x =><MenuItem key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
-      </Select>
-    </Grid>
-    <Grid item xs></Grid>
-  </Grid>
-  )
-}
-
-
-function DisplaySelection() {
-  return(
-    <Grid container direction="row" alignItems="center" justify="flex-end" >
-      {/* <Grid item xs="1"/> */}
-      <Grid item xs={2} sm={2} md={1} lg={1} >
-        <Typography align="right" className={classes.dispString} >NSE Name</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='nsename' id='nsename' variant="outlined" required 
-        style={ {padding: "0px"} }
-        size="small"
-        // label="NSE Name"
-        // name="nsename"
-        // id="nsenameList"
-        value={selectedNseName}
-        onChange={handleSelectedNseName}>
-        {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
-      </Select>
-      </Grid>
-      <Grid item xs={2} sm={2} md={2} lg={2}>
-        <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
-      </Grid>
-      <Grid item xs>
-        <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
-        style={ {padding: "0px"} }
-        // fullWidth
-        size="small"
-        label="Expiry Date"
-        name="expirydate"
-        id="expirydateList"
-        value={selectedExpiryDate}
-        onChange={handleSelectedExpiryDate}>
-        {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
+  function DisplaySelection() {
+    return(
+      <Grid container direction="row" alignItems="center" justify="flex-end" >
+        {/* <Grid item xs="1"/> */}
+        <Grid item xs={2} sm={2} md={1} lg={1} >
+          <Typography align="right" className={classes.dispString} >NSE Name</Typography>
+        </Grid>
+        <Grid item xs>
+          <Select labelId='nsename' id='nsename' variant="outlined" required 
+          style={ {padding: "0px"} }
+          size="small"
+          // label="NSE Name"
+          // name="nsename"
+          // id="nsenameList"
+          value={selectedNseName}
+          onChange={handleSelectedNseName}>
+          {nseNameList.map(x =><MenuItem dense={true} disableGutters={true}  key={x.niftyName} value={x.niftyName}>{x.niftyName}</MenuItem>)}
         </Select>
+        </Grid>
+        <Grid item xs={2} sm={2} md={2} lg={2}>
+          <Typography align="right" className={classes.dispString} >Expiry Date</Typography>
+        </Grid>
+        <Grid item xs>
+          <Select labelId='expirydateList' id='expirydateList' variant="outlined" required 
+          style={ {padding: "0px"} }
+          // fullWidth
+          size="small"
+          label="Expiry Date"
+          name="expirydate"
+          id="expirydateList"
+          value={selectedExpiryDate}
+          onChange={handleSelectedExpiryDate}>
+          {expiryDateList.map(x =><MenuItem dense={true} disableGutters={true} key={x.expiryDate} value={x.expiryDate}>{x.expiryDate}</MenuItem>)}
+          </Select>
+        </Grid>
+        <Grid  item>
+            <Typography align="center" className={classes.dispString} >{displayString}</Typography>
+        </Grid>
+        {/* <Grid  item xs></Grid> */}
       </Grid>
-      <Grid  item>
-          <Typography align="center" className={classes.dispString} >{displayString}</Typography>
-      </Grid>
-      {/* <Grid  item xs></Grid> */}
-    </Grid>
-  );
-}
-
-const PEColumnStyle= { backgroundColor: '#FFB6C1' };
-const CEColumnStyle= { backgroundColor: '#ADFF2F' };
-const SPLowColumnStyle= { backgroundColor: '#EEEEEE', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
-const SPHighColumnStyle= { backgroundColor: '#FFFF00', border: "1px solid black", color: "#6a00ff", fontWeight: 600};
-const PinkColumnStyle= { backgroundColor: '#FFF3E0', border: "1px solid black", margin: "0px"};
-const WhiteColumnStyle= { backgroundColor: '#FFFFFF', border: "1px solid black", margin: "0px"};
-
-
-function DisplayTableCell(props) {
-  let myStyle;
-  if (props.dataType === "CE") {
-    myStyle = (props.sp < underlyingValue) ? PinkColumnStyle : WhiteColumnStyle;
-  } else if (props.dataType === "PE") {
-    myStyle = (props.sp < underlyingValue) ? WhiteColumnStyle : PinkColumnStyle;
-  } else
-    myStyle = (props.sp < underlyingValue) ? SPLowColumnStyle : SPHighColumnStyle;
-  return (
-    <TableCell style={myStyle} component="th" scope="row"  padding="none" align="center" >
-      {props.data}
-    </TableCell>
-  );
-}
-
-  function OrgDisplayNiftyData() {
-    return (
-      <div className={classes.root}>
-          <TableContainer>
-            <Table
-              className={classes.table}
-              aria-labelledby="tableTitle"
-              size={dense ? 'small' : 'medium'}
-              aria-label="enhanced table"
-            >
-              <EnhancedTableHead
-                classes={classes}
-                numSelected={selected.length} 
-                order={order}
-                orderBy={orderBy}
-                // onSelectAllClick={handleSelectAllClick}
-                onRequestSort={handleRequestSort}
-                rowCount={rows.length}
-              />
-              <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
-                  //console.log(`${row.ce_openInterest}`)
-                  return (
-                    <TableRow
-                      tabIndex={-1}
-                      key={row.strikePrice}>
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_openInterest)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_changeinOpenInterest)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={noncurrency(row.ce_totalTradedVolume)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_impliedVolatility)} />
-                    <DisplayTableCell dataType="CE" sp={row.strikePrice} data={currency(row.ce_lastPrice)} />
-                    <DisplayTableCell dataType="SP" sp={row.strikePrice} data={row.strikePrice} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_lastPrice)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={currency(row.pe_impliedVolatility)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_totalTradedVolume)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_changeinOpenInterest)} />
-                    <DisplayTableCell dataType="PE" sp={row.strikePrice} data={noncurrency(row.pe_openInterest)} />
-                    </TableRow>
-                  );
-                  })
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[50, 75, 100, 150, 200]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
-      </div> 
     );
   }
 
@@ -829,9 +435,6 @@ function DisplayTableCell(props) {
       <CallPutButton />
       <DisplayNiftyData />
       <Typography className={classes.error} align="left">{errorMessage}</Typography>
-      <br/>
-      {/* <ShowGmButtons/> */}
-      {/* <MessageToUser mtuOpen={backDropOpen} mtuClose={setBackDropOpen} mtuMessage={userMessage} /> */}
     </Paper>
   );
 }

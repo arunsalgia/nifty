@@ -345,8 +345,6 @@ export default function Greek() {
     }
   }
 
-
-  
   function DisplaySelection() {
     return(
       <Grid container direction="row" alignItems="center" justify="flex-end" >
@@ -405,114 +403,13 @@ export default function Greek() {
     )
   }
 
-  function DisplayHeading() {
-    return(
-      <Table>
-        <TableHead>
-          <TableRow align="center">
-            <TableCell className={classes.th} colSpan="5" align="center">{callPut} Data</TableCell>
-          </TableRow> 
-          <TableRow align="center">
-            <TableCell className={classes.th} align="center">Strike Price</TableCell>
-            <TableCell className={classes.th} align="center">IV</TableCell>      
-            <TableCell className={classes.th} align="center">LTP</TableCell>      
-            <TableCell className={classes.th} align="center">Greek Delta</TableCell>      
-            <TableCell className={classes.th} align="center">Greek Price</TableCell>      
-          </TableRow>
-        </TableHead>
-      </Table>
-    )
-  }
-
+  
   function selectData(record) {
     // console.log(callPut, record.strikePrice);
     alert(`${callPut} with SP ${record.strikePrice}`);
   }
 
-  function ShowAddButton(props) {
-    return (
-      <IconButton key={props.sp} id={props.sp} aria-label="add" className={classes.add}
-      onClick={ () => selectData(props.sp) }
-      >
-        <AddCircleOutlineRoundedIcon />
-      </IconButton>
-
-    )
-  }
-
-  function Org_DisplayGreekData() {
-    if (callPut === "CALL") {
-      let myData = greekData.filter(x => x.ce_impliedVolatility !== 0)
-      return (
-        <Table>
-          <TableHead>
-            <TableRow align="center">
-              <TableCell className={classes.th} colSpan="6" align="center">{callPut} Data</TableCell>
-            </TableRow> 
-            <TableRow align="center">
-              <TableCell className={classes.th} align="center">{callPut} LTP</TableCell>      
-              <TableCell className={classes.th} align="center">Strike Price</TableCell>
-              <TableCell className={classes.th} align="center">IV</TableCell>      
-              <TableCell className={classes.th} align="center">Call Delta</TableCell>      
-              <TableCell className={classes.th} align="center">Call Price</TableCell>      
-              {/* <TableCell className={classes.th} align="center"></TableCell>       */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {myData.map(item => {
-            return(
-            <TableRow onClick={() => selectData(item)} key={item.strikePrice} align="center">
-            <TableCell className={classes.td} align="center">{currency(item.ce_lastPrice)}</TableCell>      
-            <TableCell className={classes.td} align="center">{item.strikePrice}</TableCell>
-            <TableCell className={classes.td} align="center">{currency(item.ce_impliedVolatility)}</TableCell>      
-            <TableCell className={classes.td} align="center">{currency(item.ce_greekDelta)}</TableCell>      
-            <TableCell className={classes.td} align="center">{currency(item.ce_greekPrice)}</TableCell>      
-            {/* <TableCell className={classes.td} align="center">
-              <ShowAddButton sp={item.strikePrice} />
-            </TableCell>       */}
-            </TableRow>
-            )})}
-          </TableBody>
-        </Table>
-      );
-    } else {
-      let myData = greekData.filter(x => x.pe_impliedVolatility !== 0)
-      return (
-        <Table>
-          <TableHead>
-            <TableRow align="center">
-              <TableCell className={classes.th} colSpan="6" align="center">{callPut} Data</TableCell>
-            </TableRow> 
-            <TableRow align="center">
-              <TableCell className={classes.th} align="center">{callPut} LTP</TableCell>      
-              <TableCell className={classes.th} align="center">Strike Price</TableCell>
-              <TableCell className={classes.th} align="center">IV</TableCell>      
-              <TableCell className={classes.th} align="center">Put Delta</TableCell>      
-              <TableCell className={classes.th} align="center">Put Price</TableCell>      
-              {/* <TableCell className={classes.th} align="center"></TableCell>       */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {myData.map(item => {
-            return(
-            <TableRow onClick={() => selectData(item)} key={item.strikePrice} align="center">
-            <TableCell className={classes.td} align="center">{currency(item.pe_lastPrice)}</TableCell>      
-            <TableCell className={classes.td} align="center">{item.strikePrice}</TableCell>
-            <TableCell className={classes.td} align="center">{currency(item.pe_impliedVolatility)}</TableCell>      
-            <TableCell className={classes.td} align="center">{currency(item.pe_greekDelta)}</TableCell>      
-            <TableCell className={classes.td} align="center">{currency(item.pe_greekPrice)}</TableCell>      
-            {/* <TableCell className={classes.td} align="center">
-              <ShowAddButton sp={item.strikePrice} />
-            </TableCell>       */}
-            </TableRow>
-            )})}
-          </TableBody>
-        </Table>
-      );
-    }
-  }
-
-
+  
   function DisplayGreekData() {
     let myData = (callPut === "CALL") ?
       greekData.filter(x => x.ce_impliedVolatility !== 0) :
@@ -527,8 +424,8 @@ export default function Greek() {
           <TableCell className={classes.th} align="center">Strike Price</TableCell>
             <TableCell className={classes.th} align="center">{callPut} LTP</TableCell>      
             <TableCell className={classes.th} align="center">IV</TableCell>      
-            <TableCell className={classes.th} align="center">Call Delta</TableCell>      
-            <TableCell className={classes.th} align="center">Call Price</TableCell>      
+            <TableCell className={classes.th} align="center">{callPut} Delta</TableCell>      
+            <TableCell className={classes.th} align="center">{callPut} Price</TableCell>      
             {/* <TableCell className={classes.th} align="center"></TableCell>       */}
           </TableRow>
         </TableHead>
